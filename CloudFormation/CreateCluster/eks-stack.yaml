@@ -82,7 +82,7 @@ Resources:
     Properties:
       ClusterName: !Ref ClusterName
       NodeRole: !GetAtt EksNodeRole.Arn
-      ScallingConfig: 
+      ScalingConfig: 
         MinSize:
           Ref: NumberOfWorkersNodes
         DesiredSize:

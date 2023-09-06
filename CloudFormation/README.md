@@ -19,7 +19,8 @@
             "Effect": "Allow",
             "Action": [
                 "iam:*",
-                "eks:CreateCluster"
+                "eks:*",
+                "ec2:*"
             ],
             "Resource": "*"
         }
