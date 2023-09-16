@@ -8,7 +8,15 @@ import boto3
 import yaml
 from botocore.exceptions import ClientError
 
-DYNAMODB = boto3.resource('dynamodb')
+DYNAMODB = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+# DYNAMODB = boto3.session('dynamodb',
+#                           aws_access_key_id="anything",
+#                           aws_secret_access_key="anything",
+#                           region_name="us-west-2",
+#                           endpoint_url="http://localhost:8000")
+
+# response = DYNAMODB.list_tables()
+print(list(DYNAMODB.tables.all()))
 TABLE = DYNAMODB.Table(os.getenv('TABLE_NAME'))
 MANAGEMENT = boto3.client('apigatewaymanagementapi', endpoint_url=os.getenv('APIGW_ENDPOINT'))
 STEPFUNCTIONS = boto3.client('stepfunctions')
