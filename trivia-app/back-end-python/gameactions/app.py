@@ -15,9 +15,9 @@ DYNAMODB = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
 #                           region_name="us-west-2",
 #                           endpoint_url="http://localhost:8000")
 
-# response = DYNAMODB.list_tables()
 print(list(DYNAMODB.tables.all()))
-TABLE = DYNAMODB.Table(os.getenv('TABLE_NAME'))
+# TABLE = DYNAMODB.Table(os.getenv('TABLE_NAME'))
+TABLE = DYNAMODB.Table("mock-table")
 MANAGEMENT = boto3.client('apigatewaymanagementapi', endpoint_url=os.getenv('APIGW_ENDPOINT'))
 STEPFUNCTIONS = boto3.client('stepfunctions')
 COLORS = ("AliceBlue,AntiqueWhite,Aqua,Aquamarine,Azure,Beige,Bisque,Black,BlanchedAlmond,Blue,"
