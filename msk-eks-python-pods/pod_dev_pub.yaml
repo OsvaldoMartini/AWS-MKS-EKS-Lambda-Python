@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    youtube-demo:"True"
-  name: kafka-test-sub
+    youtube-demo: "True"
+  name: kafka-test-pub
   namespace: anum-dev
 spec:
   containers:
