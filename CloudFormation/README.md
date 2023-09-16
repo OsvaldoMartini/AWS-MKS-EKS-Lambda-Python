@@ -71,3 +71,56 @@ aws eks create-cluster --region region-code --name my-cluster --kubernetes-versi
    --resources-vpc-config subnetIds=subnet-ExampleID1,subnet-ExampleID2,securityGroupIds=sg-ExampleID1
 ```
 
+## Accessing EKS 
+```bash
+  aws eks --region us-west-2 update-kubeconfig --name lotto-audit-eks-cluster
+```
+
+## Communicate wit my cluster
+```bash
+  aws eks update-kubeconfig --region us-west-2 --name lotto-audit-eks-cluster
+```
+
+
+## Get Nodes from my cluster
+```bash
+  kubectl get nodes
+    ip-192-168-151-129.us-west-2.compute.internal   Ready    <none>   90m   v1.27.4-eks-8ccc7ba
+    ip-192-168-248-42.us-west-2.compute.internal    Ready    <none>   90m   v1.27.4-eks-8ccc7ba
+
+  kubectl get nodes -o wide
+
+```
+
+## Creating PODs in Imperative Way
+```bash
+
+//Imperative
+kubectl run pod_dev --image python:3.8-slim
+
+
+ //Declarative
+ kubectl create -f pod_dev.yaml
+
+ kubectl apply -f pod_dev_pub.yaml
+
+
+
+```
+
+
+
+
+
+
+
+
+Throuleshooting
+Any Authentication error
+```bash
+aws eks update-kubeconfig \
+    --region us-west-2 \
+    --name lotto-audit-eks-cluster \
+    --role-arn arn:aws:eks:eu-west-2:287449617086:cluster/lotto-audit-eks-Cluster
+    
+```

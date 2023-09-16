@@ -15,18 +15,28 @@ Parameters:
 
   PublicSubnet02Block:
     Type: String
-    Default: 192.168.64.0/18
+    Default: 192.168.32.0/18
     Description: CidrBlock for public subnet 02 within the VPC
+
+  PublicSubnet03Block:
+    Type: String
+    Default: 192.168.64.0/18
+    Description: CidrBlock for public subnet 03 within the VPC
 
   PrivateSubnet01Block:
     Type: String
-    Default: 192.168.128.0/18
+    Default: 192.168.96.0/18
     Description: CidrBlock for private subnet 01 within the VPC
 
   PrivateSubnet02Block:
     Type: String
-    Default: 192.168.192.0/18
+    Default: 192.168.128.0/18
     Description: CidrBlock for private subnet 02 within the VPC
+
+  PrivateSubnet03Block:
+    Type: String
+    Default: 192.168.160.0/18
+    Description: CidrBlock for private subnet 03 within the VPC
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -37,8 +47,10 @@ Metadata:
           - VpcBlock
           - PublicSubnet01Block
           - PublicSubnet02Block
+          - PublicSubnet03Block
           - PrivateSubnet01Block
           - PrivateSubnet02Block
+          - PrivateSubnet03Block
 
 Resources:
   VPC:
@@ -200,6 +212,27 @@ Resources:
         - Key: kubernetes.io/role/elb
           Value: 1
 
+  PublicSubnet03:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: Subnet 03
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - "1"
+          - Fn::GetAZs:
+              Ref: AWS::Region
+      CidrBlock:
+        Ref: PublicSubnet03Block
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-PublicSubnet03"
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
   PrivateSubnet01:
     Type: AWS::EC2::Subnet
     Metadata:
@@ -240,6 +273,26 @@ Resources:
         - Key: kubernetes.io/role/internal-elb
           Value: 1
 
+  PrivateSubnet03:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: Private Subnet 03
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - "1"
+          - Fn::GetAZs:
+              Ref: AWS::Region
+      CidrBlock:
+        Ref: PrivateSubnet03Block
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-PrivateSubnet03"
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+
   PublicSubnet01RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -250,6 +303,12 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet02
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet03RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet03
       RouteTableId: !Ref PublicRouteTable
 
   PrivateSubnet01RouteTableAssociation:
@@ -264,6 +323,12 @@ Resources:
       SubnetId: !Ref PrivateSubnet02
       RouteTableId: !Ref PrivateRouteTable02
 
+  PrivateSubnet03RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet03
+      RouteTableId: !Ref PrivateRouteTable03
+
   ControlPlaneSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -273,13 +338,13 @@ Resources:
 Outputs:
   PublicSubnetIds:
     Description: Public Subnets IDs in the VPC
-    Value: !Join [",", [!Ref PublicSubnet01, !Ref PublicSubnet02]]
+    Value: !Join [",", [!Ref PublicSubnet01, !Ref PublicSubnet02, !Ref PublicSubnet03]]
     Export:
       Name: PublicSubnetIds
 
   PrivateSubnetIds:
     Description: Private Subnets IDs in the VPC
-    Value: !Join [",", [!Ref PrivateSubnet01, !Ref PrivateSubnet02]]
+    Value: !Join [",", [!Ref PrivateSubnet01, !Ref PrivateSubnet02, !Ref PrivateSubnet03]]
     Export:
       Name: PrivateSubnetIds
 
