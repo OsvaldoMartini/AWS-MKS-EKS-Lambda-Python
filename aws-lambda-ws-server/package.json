@@ -1,0 +1,16 @@
+{
+  "name": "aws-lambda-ws-server-monorepo",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jameskyburz/aws-lambda-http-server.git"
+  },
+  "author": {
+    "name": "james kyburz",
+    "email": "james.kyburz@gmail.com"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "npx macleod exec npm t"
+  },
+  "private": true
+}
