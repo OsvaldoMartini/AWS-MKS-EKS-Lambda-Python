@@ -40,6 +40,37 @@
 
 ```
 
+## Use Tap
+```bash
+	npm install -g tap 
+
+```
+
+## Use wscat to connect to a WebSocket API and send messages to it
+```bash
+	npm install -g wscat
+
+  wscat -c wss://aabbccddee.execute-api.us-east-1.amazonaws.com/test/
+
+  wscat -c http://localhost:3000
+
+```
+
+## Translate Servelles Application Model into (SAM) tempate to CloudFormation
+[1] https://stackoverflow.com/questions/56226935/get-cloudformation-script-from-sam
+```bash
+	pip install aws-sam-translator docopt
+
+	wget https://raw.githubusercontent.com/aws/serverless-application-model/develop/bin/sam-translate.py
+
+ # Rename File
+	wget -O sam-translate.py https://raw.githubusercontent.com/aws/serverless-application-model/develop/bin/sam-translate.py
+
+	python sam-translate.py --template-file=serverless-example.yml --output-template=serverless-cloudformation.yml
+
+  python sam-translate.py --template-file=template.yaml --output-template=template-cloudformation.yml
+```
+
 ## Test locally
 ```bash
 
