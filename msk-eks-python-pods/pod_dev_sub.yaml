@@ -3,12 +3,12 @@ kind: Pod
 metadata:
   labels:
     youtube-demo: "True"
-  name: kafka-test-sub
-  namespace: anum-dev
+  name: kafka-subscriber
+  namespace: shift-hunter
 spec:
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent
       name:  base
       command: ["/bin/bash", "-c",]
-      args: ["while true; do sleep 3; echo hello world; done;"]
+      args: ["while true; do sleep 3; echo hello Pod for kafka-subscriber; done;"]
