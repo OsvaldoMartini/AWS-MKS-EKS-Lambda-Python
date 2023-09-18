@@ -1,0 +1,4 @@
+dataDir=/usr/local/kafka_2.12-3.4.1/zookeeper-logs
+clientPort=2181
+maxClientCnxns=0
+admin.enableServer=false

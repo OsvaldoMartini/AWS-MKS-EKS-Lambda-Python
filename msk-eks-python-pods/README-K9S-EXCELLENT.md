@@ -33,6 +33,17 @@
   // Pode for dev_pub
   kubectl create -f .dev/pod_dev_pub.yaml
 
+
+  //Create a namespace
+  kubectl create namespace first-cluster
+
+ //CDRs Install first
+ curl -L http://strimzi.io/install/latest sed 's/namespace: .*/namespace: kafka/' | kubectl apply -f - -n kafka
+
+curl -L http://strimzi.io/install/latest sed 's/namespace: .*/namespace: first-cluster/' | kubectl apply -f - -n kafka
+
+  kubectl create -f kafka-deployment-metric.yaml	
+
 ```
 
 ## Communicate wit my cluster
@@ -45,6 +56,20 @@
 
   kubectl run pod_dev --image python:3.8-slim
 
+```
+
+## Install Kubernete zinside a pod
+```bash
+	sudo apt-get update && sudo apt-get install -y apt-transport-https
+	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /usr/share/keyrings/kubernetes.gpg
+	echo "deb [arch=amd64 signed-by=/usr/share/keyrings/kubernetes.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+	sudo apt-get update
+	sudo apt-get install -y kubectl
+```
+
+## Describe pod
+```bash
+	kubectl exec -it kafka-publisher -- /bin/bash -c "cat /etc/os-release;uname -r"
 ```
 
 ## K9S interaction and instalations
@@ -67,7 +92,27 @@
   //remove zip file
   rm -rf kafka_2.12-3.4.1.tgz
 
-  // Get the AWS IAM Connector
+  //Kafka Brokers
+  nano kafka_2.12-3.4.1/client.properties 
+
+  nano /kafka_2.12-3.4.1/config/zookeeper.properties
+  
+	printf 'dataDir=/usr/local/kafka_2.12-3.4.1/zookeeper-logs \n
+		clientPort=2181 \n
+		maxClientCnxns=0 \n
+		admin.enableServer=false \n' >> kafka_2.12-3.4.1/config/zookeeper.properties
+	
+	
+	dataDir=/usr/local/kafka_2.12-3.4.1/zookeeper-logs
+	clientPort=2181
+	maxClientCnxns=0
+	admin.enableServer=false
+	
+	//Start zookeeper
+  ./kafka_2.12-3.4.1/bin/zookeeper-server-start.sh kafka_2.12-3.4.1/config/zookeeper.properties
+
+
+ Get the AWS IAM Connector
   // Kafka can connects via IAM
   wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.6/aws-msk-iam-auth-1.1.6-all.jar
   
@@ -87,15 +132,26 @@
 	printf 'security.protocol=SASL_SSL  \n
 	sasl.mechanism=AWS_MSK_IAM              \n
 	sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;    \n
-	
 	sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler' >> kafka_2.12-3.4.1/client.properties
 
 
 export AWS_ACCESS_KEY_ID=AKIAUF3KVCK7PFGQR23Y
 export AWS_SECRET_ACCESS_KEY=nl94vmC2mEfCcdbFxNylg18bQRvk7WThetK5q8S0
 
+# If Not on AWS
+# Run Kafak in your Local Kubernetes Pod
+./kafka_2.12-3.4.1/bin/kafka-server-start.sh --create --
+kafka_2.12-2.5.0\bin\windows\kafka-server-start.bat C:\Martini\kafka_2.12-2.5.0\config\server-0.properties
+
 //Create topic
-./kafka_2.12-3.4.1/bin/kafka-topics.sh create --bootstrap-server <bootstrap-servers> --replication-factor 2 --partition 1 --topic <topic-name> --command-config ./kafka_2.12-3.4.1/client.properties
+./kafka_2.12-3.4.1/bin/kafka-topics.sh --create --bootstrap-server <bootstrap-servers> --replication-factor 2 --partitions 1 --topic <topic-name> --command-config ./kafka_2.12-3.4.1/client.properties
+
+
+./kafka_2.12-3.4.1/bin/kafka-server-start.sh kafka_2.12-3.4.1/config/server-0.properties
+
+
+./kafka_2.12-3.4.1/bin/kafka-topics.sh --create --bootstrap-server http://localhost:9093 --replication-factor 2 --partitions 1 --topic test-topic --command-config ./kafka_2.12-3.4.1/client.properties
+
 
 ```
 
