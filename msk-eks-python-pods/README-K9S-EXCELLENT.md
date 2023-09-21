@@ -1,3 +1,16 @@
+## Docker ubernetes Extension HOT Load
+> Check the video -> Gefyra Docker Desktop Extension Update
+> https://www.youtube.com/watch?v=4xmaOVul5Ww&ab_channel=BLUESHOE
+```
+  # cmd Hot deploy
+  Command: poetry run flask --app app --debug run --port 5003 --host 0.0.0.0
+  
+  
+``  
+
+## JMeter Pepper Box Kafka Load Generatos
+> https://github.com/GSLabDev/pepper-box/
+> https://itnext.io/how-to-setup-kafka-cluster-for-15k-events-per-second-on-aws-using-docker-d34539873589
 
 
 ## Choco install kubernetes-cli
@@ -25,14 +38,13 @@
   set AWS_PROFILE=eks-admin
 
   //Create a namespace
-  kubectl create namespace shifthunter
+  kubectl create namespace shift-hunter
 
   // Pode for dev_sub
   kubectl create -f .dev/pod_dev.yaml
 
   // Pode for dev_pub
   kubectl create -f .dev/pod_dev_pub.yaml
-
 
   //Create a namespace
   kubectl create namespace first-cluster
@@ -44,6 +56,10 @@ curl -L http://strimzi.io/install/latest sed 's/namespace: .*/namespace: first-c
 
   kubectl create -f kafka-deployment-metric.yaml	
 
+```
+##Grep search
+```bash
+	grep -rl "kafka" /
 ```
 
 ## Communicate wit my cluster
