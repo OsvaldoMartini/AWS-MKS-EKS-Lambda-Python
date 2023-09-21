@@ -9,15 +9,29 @@
 ``  
 
 ## JMeter Pepper Box Kafka Load Generatos
-> https://github.com/GSLabDev/pepper-box/
-> https://itnext.io/how-to-setup-kafka-cluster-for-15k-events-per-second-on-aws-using-docker-d34539873589
-
-
+[JMeter Plugin](https://github.com/GSLabDev/pepper-box/)
+[15K Kafka](https://itnext.io/how-to-setup-kafka-cluster-for-15k-events-per-second-on-aws-using-docker-d34539873589)
+[Strimzi Operator](https://strimzi.io/quickstarts/)
+[Strimzi Deploying](https://strimzi.io/docs/operators/in-development/deploying)
 ## Choco install kubernetes-cli
 ```bash
 	choco install kubernetes-cli --force
 ```
 
+## Delete Pods
+```bash
+  kubectl -n kafka delete $(kubectl get strimzi -o name -n kafka)
+```
+
+## Calling Producer from same Image
+```bash
+kubectl -n kafka run kafka-producer -ti --image=quay.io/strimzi/kafka:0.37.0-kafka-3.5.1 --rm=true --restart=Never -- bin/kafka-console-producer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic
+```
+## Calling Consumer from same Image
+```bash
+
+kubectl -n kafka run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.37.0-kafka-3.5.1 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic --from-beginning
+```
 
 ## K9s Install
 ```bash
