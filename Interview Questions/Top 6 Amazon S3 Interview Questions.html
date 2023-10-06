@@ -1,0 +1,292 @@
+<html>
+<header>
+
+</header>
+
+<body>
+
+<main class="w-100 float-left">
+
+<div class="page-header">
+<div class="reading-progress-container">
+<div class="progress-bar" style="width: 9%;"></div>
+</div>
+<div class="container">
+<div class="row">
+<div class="col-md-9 pl-0">
+<h1>Top 6 Amazon S3 Interview Questions</h1>
+</div>
+<div class="display-content"></div>
+<div class="col-md-3">
+<div id="SocialShare">
+<button type="button">
+<img src="https://www.analyticsvidhya.com/wp-content/themes/analytics-vidhya/icon/pdf.svg" alt="download" class="download-pdf" title="Download PDF">
+</button>
+<button type="button" class="bookmark bookmark-circle-title"><i class="far fa-bookmark" id="bookmark-article"></i></button>
+<div class="dropdown">
+<button type="button" data-toggle="dropdown" class="dropdown-toggle share" id="socialDropdownMenu" aria-haspopup="true" aria-expanded="false">
+<img src="https://www.analyticsvidhya.com/wp-content/themes/analytics-vidhya/icon/Share.svg" alt="Share">
+</button>
+<ul class="dropdown-menu dropdown-menu-right border-0" aria-labelledby="socialDropdownMenu">
+<li>
+<a target="_blank" data-original-title="Facebook" rel="tooltip" href="http://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.analyticsvidhya.com%2Fblog%2F2023%2F03%2Ftop-6-amazon-s3-interview-questions%2F" class="btn" data-placement="left">
+<i class="fab fa-facebook-f btn btn-facebook"></i>
+<span>Facebook</span>
+</a>
+</li>
+<li>
+<a target="_blank" data-original-title="Twitter" rel="tooltip" href="http://twitter.com/share?text=Top 6 Amazon S3 Interview Questions&amp;url=https%3A%2F%2Fwww.analyticsvidhya.com%2Fblog%2F2023%2F03%2Ftop-6-amazon-s3-interview-questions%2F" class="btn" data-placement="left">
+<i class="fab fa-twitter btn btn-twitter"></i>
+<span>Twitter</span>
+</a>
+</li>
+<li>
+<a target="_blank" data-original-title="LinkedIn" rel="tooltip" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fwww.analyticsvidhya.com%2Fblog%2F2023%2F03%2Ftop-6-amazon-s3-interview-questions%2F" class="btn" data-placement="left">
+<i class="fab fa-linkedin-in btn btn-linkedin"></i>
+<span>Linkedin</span>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="publish-info w-100">
+<div class="av-crown">
+<a href="https://www.analyticsvidhya.com/creators-club/" data-toggle="tooltip" data-placement="bottom" title="" target="_blank" data-original-title="Analytics Vidhya Creators' Club Member">
+<img src="https://av-public-assets.s3.ap-south-1.amazonaws.com/others/av-crown.svg" alt="crown icon">
+</a>
+</div>
+<a href="https://www.analyticsvidhya.com/blog/author/hari5607844/">Hari Bhutanadhu</a> —
+Published On March 5, 2023 and Last Modified On March 6th, 2023 </div>
+<div class="article-categories">
+<a href="https://www.analyticsvidhya.com/blog/category/aws/">AWS</a>
+<a href="https://www.analyticsvidhya.com/blog/category/data-engineering/">Data Engineering</a>
+<a href="https://www.analyticsvidhya.com/blog/category/database/">Database</a>
+<a href="https://www.analyticsvidhya.com/blog/category/intermediate/">Intermediate</a>
+<a href="https://www.analyticsvidhya.com/blog/category/interview-questions/">Interview Questions</a>
+<a href="https://www.analyticsvidhya.com/blog/category/web-analytics-2/">Web Analytics</a>
+</div>
+<div class="col-lg-9 col-md-12 col-sm-12 pl-0 pr-0" id="article-start">
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5229672700622157" crossorigin="anonymous"></script>
+
+<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-5229672700622157" data-ad-slot="9793167291"></ins>
+<script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+           </script>
+<section class="av-details-page target w-100" id="1">
+<h2 id="Introduction">Introduction</h2>
+<p>S3 is Amazon<a href="https://www.analyticsvidhya.com/blog/2022/06/getting-started-with-aws-s3/" target="_blank" rel="noopener">&nbsp;Web Services</a> cloud-based object storage service (AWS). It stores and retrieves large amounts of data, including photos, movies, documents, and other files, in a durable, accessible, and scalable manner. S3 provides a simple web interface for uploading and downloading data and a powerful set of APIs for developers to integrate S3. S3 storage is dispersed across various locations and availability zones, providing the data’s high availability and durability.</p>
+<p>S3 has several storage classes, including Standard, Infrequent Access (IA), and Glacier, each with a different price and durability. Based on preset rules, S3 lifecycle policies allow you to transfer or destroy items across storage classes automatically. Businesses of various sizes rely on S3 for several functions, including data backup and recovery, online and mobile apps, content distribution, and big data analytics. S3 is a cost-effective option for storing and retrieving significant volumes of data since you only pay for the storage and transport you use.</p>
+<figure><img decoding="async" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_iaukE8B-thumbnail_webp-600x300.png" alt=" Source : www.freecodecamp.org"><figcaption>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Source: www.freecodecamp.org</figcaption></figure>
+<p><strong>Learning Objectives</strong></p>
+<ol>
+<li>You will be introduced to the fundamentals of Amazon S3, including its capabilities, advantages, and use cases.</li>
+<li>Understanding the distinctions between S3 and other Amazon storage services.</li>
+<li>Knowing the various S3 storage classes and when to use them.</li>
+<li>Knowing optimal practices for S3 data security.</li>
+<li>Then you’ll understand how to maximize S3 performance for various applications.</li>
+</ol>
+<p>This article was published as a part of the <a href="https://datahack.analyticsvidhya.com/blogathon/" target="_blank" rel="noopener">Data Science Blogathon.</a></p>
+<h2>Table of Contents</h2>
+<ol id="topOffsetLinks" class="nav navbar-nav">
+<li><a href="#Q1._What_exactly_is_Amazon_S3,_and_what_are_its_main_features?">What exactly is Amazon S3, and what are its main features?</a></li>
+<li><a href="#Q2._What_is_the_distinction_between_S3_and_EBS?">What is the distinction between S3 and EBS?</a></li>
+<li><a href="#Q3._What_are_the_different_S3_Storage_Classes,_and_When_would_you_utilize_them?">What are the different S3 Storage Classes, and When would you utilize them?</a></li>
+<li><a href="#Q4._What_exactly_are_S3_lifecycle_policies,_and_how_do_they_function?">What exactly are S3 lifecycle policies, and how do they function?</a></li>
+<li><a href="#Q5._How_can_you_keep_data_stored_in_S3_safe?">How can you keep data stored in S3 safe?</a></li>
+<li><a href="#Q6._How_can_you_improve_the_performance_of_S3_for_your_application?">How can you improve the performance of S3 for your application?</a></li>
+<li><a href="#Conclusion">Conclusion</a></li>
+</ol>
+<h2 id="Q1._What_exactly_is_Amazon_S3,_and_what_are_its_main_features?">Q1.&nbsp; What Exactly is Amazon S3, and What are its Main Features?</h2>
+<p>Amazon S3 (Simple Storage Service) is an Amazon Web Services cloud-based object storage service (AWS). It is intended to store and retrieve vast volumes of data, such as photographs, videos, documents, and other sorts of files, in a durable, available, and scalable manner.</p>
+<p>The main features of S3 include the following:</p><div class="banner-section-for-display"><div class="display-for-right mb-3"><div class="display-img"><img width="260" height="130" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png 260w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1-150x75.png 150w" sizes="(max-width: 260px) 100vw, 260px"></div><div class="display-content"><h5>ML Hackathon: The Sledge Hack is live now!</h5><p><strong>Predict no. of runs Virat and Rohit will score in Ind vs Aus Upcoming World Cup Clash</strong></p><a href="https://bit.ly/3PA3CaH" class="utm_image_link btn btn-info" onclick="return utm_image_link();" target="_blank">Participate now</a></div></div></div>
+<ol>
+<li>Scalability: S3 can accommodate nearly infinite quantities of data and requests.</li>
+<li>Durability: S3 replicates data across various availability zones automatically, ensuring that data is always available.</li>
+<li>Availability: S3 provides high availability, with a service level agreement (SLA) of 99.99% uptime.</li>
+<li>Security: S3 offers numerous choices for data security, including encryption, bucket rules, and IAM roles.</li>
+<li>Integration: S3 interfaces with many other AWS services, including Amazon EC2, Amazon RDS, and Amazon EMR, making it simple to use S3 as part of your comprehensive cloud architecture.</li>
+<li>Cost-effectiveness: S3 has a low-cost pricing plan based on the quantity of storage used and the amount of data sent.</li>
+</ol>
+<p>Overall, S3 is a highly scalable and cost-effective storage system built for reliably and securely storing and retrieving massive volumes of data.</p>
+<figure><img decoding="async" fetchpriority="high" class="alignnone" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_fgp6cr2-thumbnail_webp-600x300.png" alt="Features of Amazon S3" width="516" height="300"></figure>
+<h2 id="Q2._What_is_the_distinction_between_S3_and_EBS?">Q2.&nbsp; What is the Distinction between Amazon S3 and EBS?</h2>
+<p>Amazon S3 and Amazon EBS (Elastic Block Store) are Amazon Web Services (AWS) storage systems. However, they have different roles and features. S3 stores and retrieves massive volumes of unstructured data, including photographs, videos, documents, etc. S3 is scalable and durable for storing seldom accessed data like backups, archives, and logs.</p>
+<p>EBS is a block-level storage solution for databases and applications that need high-performance, low-latency access.</p>
+<p>A few key differences between S3 and EBS are:</p>
+<ul>
+<li>S3 offers data access at the object level, whereas EBS allows access at the block level.</li>
+</ul>
+<ul>
+<li>In the case of studies, S3 is usually used to store unstructured data that is seldom accessed, whereas EBS is frequently used to store structured data that requires high-performance access.</li>
+</ul>
+<ul>
+<li>S3 pricing is decided by the amount of storage utilized, and the amount of data moved. In contrast, EBS pricing is determined by the amount of storage used and the number of I/O requests executed.</li>
+</ul>
+<ul>
+<li>In terms of endurance, S3 exceeds EBS with an SLA of 99.999999999%.</li>
+</ul>
+<p>S3 and EBS are designed for separate use cases and offer various functionality. S3 is optimal for storing massive amounts of unstructured data, whereas EBS is optimal for storing structured data needing high-performance access.</p>
+<figure><img decoding="async" class="alignnone" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_S17UPmk-thumbnail_webp-600x300.png" alt="Distinction between Amazon S3 and EBS" width="400" height="300"><figcaption>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Source: enlear. academy</figcaption></figure>
+<h2 id="Q3._What_are_the_different_S3_Storage_Classes,_and_When_would_you_utilize_them?">Q3.&nbsp; What are the Different Amazon S3 Storage Classes, and When would you Utilize them?</h2>
+<div class="interview-answers">
+<p>Amazon S3 provides many storage classes with varying durability, availability, performance, and pricing. S3 has the following storage classes:</p>
+<ol>
+<li>S3 Standard: This is the S3 storage class by default, and it is intended for regularly accessed data that requires excellent durability, availability, and performance. The S3 Standard service is appropriate for storing frequently requested data, such as website content, mobile applications, and gaming assets.</li>
+<li>S3 Standard-Infrequent Access (S3 Standard-IA): This storage class is designed for infrequently accessed data requiring rapid access. It is ideal for storing backups, disaster recovery, and other data accessed less frequently. S3 Standard-IA offers lower storage costs than S3 Standard but with slightly higher retrieval costs.</li>
+<li>S3 One Zone-Infrequent Access (S3 One Zone-IA): This storage class is similar to S3 Standard-IA but stores data in a single availability zone rather than multiple availability zones. It is ideal for data that can be recreated easily, such as thumbnails, transcoded media files, and other temporary data.</li>
+<li>S3 Glacier: This storage class is designed for data archival and long-term backup. It offers the lowest storage costs of all S3 storage classes but has a longer retrieval time than other storage classes.</li>
+<li>S3 Glacier Deep Archive: This storage class is designed for long-term archival and retention of rarely accessed data. It offers the lowest storage costs of all S3 storage classes but has a longer retrieval time than other storage classes, which can take up to 12 hours.</li>
+</ol>
+<p>Selecting a particular storage class depends on the stored data’s use case and access patterns. S3 Standard is ideal for frequently accessed data that requires high performance and availability, while S3 Glacier is ideal for rarely accessed data and is intended for archival purposes. The other storage classes offer a balance between cost and performance, with varying levels of durability and availability.</p>
+<figure><img decoding="async" class="alignnone" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_KXj4pl5-thumbnail_webp-600x300.png" alt="Different Amazon S3 Storage Classes" width="530" height="300"><figcaption>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Source: zesty.co</figcaption></figure>
+</div>
+<h2 id="Q4._What_exactly_are_S3_lifecycle_policies,_and_how_do_they_function?">Q4.&nbsp; What Exactly are Amazon S3 Lifecycle Policies, and How do they Function?</h2>
+<div class="interview-answers">
+<p>S3 lifecycle policies are an Amazon S3 feature that allows you to automatically transfer things between storage classes or destroy objects depending on your established rules or criteria. You may minimize your storage expenses and eliminate the need for manual intervention in data management by utilizing S3 lifecycle policies. A lifecycle policy comprises one or more rules describing when objects should be moved to a new storage class or removed. Each direction is made up of the following components:<b>Prefix</b>:&nbsp;A prefix that indicates which objects the rule applies to.</p>
+<p><b>Transitions: </b>A collection of one or more changes that describe the destination storage class and the time after which objects should be migrated.</p>
+<p><b>Expiration:</b>&nbsp;An expiry action determining when objects should be removed after a specific period.</p>
+<p>The rule’s state specifies whether it is activated or disabled.</p>
+<p>When an S3 lifecycle policy is applied to a bucket, it affects all items that meet the rule’s prefix. S3 examines the regulations in the order they are defined and executes the actions indicated on the objects that match the rule. You may, for example, write a rule that moves all things with the “logs/” prefix to the S3 Glacier storage class after 30 days and deletes them after 365 days. You can also write a rule that moves items with the prefix “archive/” to the S3 Standard-IA storage class after 60 days and deletes them after 365 days.</p>
+<p>You may save storage costs and automate data management activities using S3 lifecycle policies to guarantee that your data is kept in the most suitable storage class based on access patterns and retention needs.</p><div class="banner-section-for-display"><div class="display-for-right mb-3"><div class="display-img"><img width="260" height="130" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png 260w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1-150x75.png 150w" sizes="(max-width: 260px) 100vw, 260px"></div><div class="display-content"><h5>ML Hackathon: The Sledge Hack is live now!</h5><p><strong>Predict no. of runs Virat and Rohit will score in Ind vs Aus Upcoming World Cup Clash</strong></p><a href="https://bit.ly/3PA3CaH" class="utm_image_link btn btn-info" onclick="return utm_image_link();" target="_blank">Participate now</a></div></div></div>
+<figure><img decoding="async" loading="lazy" class="alignnone" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_siAXbeF-thumbnail_webp-600x300.png" alt="Amazon S3 Lifecycle Policies" width="533" height="300"></figure>
+</div>
+<h2 id="Q5._How_can_you_keep_data_stored_in_S3_safe?">Q5.&nbsp; How can you Keep Data Stored in Amazon S3 Safe?</h2>
+<div class="interview-answers">
+<p>S3 data security methods include:</p>
+<ol>
+<li>Bucket Policies: Define rights for one or more buckets using bucket policies. Bucket rules can restrict access and actions.</li>
+<li>Access Control Lists (ACLs): Define bucket object permissions with ACLs. ACLs can restrict object access and activities.</li>
+<li>Encryption: You can encrypt data stored in S3 using server-side or client-side encryption. Server-side encryption encrypts data at rest in S3 using encryption keys managed by AWS. Client-side encryption encrypts data before it is uploaded to S3 and requires you to manage the encryption keys.</li>
+<li>Cross-Origin Resource Sharing (CORS): CORS lets you restrict S3 resource access from non-S3 websites. CORS lets you specify domains and actions for S3 resource access.</li>
+<li>MFA Delete: S3 buckets can need MFA devices to remove items. This prevents unintended data destruction.</li>
+<li>Logging and Monitoring: Amazon CloudTrail logs all S3 API calls, and AWS CloudWatch monitors S3 access logs and bucket metrics. This lets you monitor S3 data access and identify unusual activities.</li>
+</ol>
+<p>S3 supports server-side and client-side encryption. Amazon keys secure S3 data at rest via server-side encryption. Client-side encryption encrypts data before uploading to S3 and needs key management. Client-side encryption encrypts data before uploading to S3 and needs key management.</p>
+<p>By using these security measures and best practices, you can ensure that your data stored in S3 is protected from unauthorized access, theft, or accidental deletion.</p>
+<figure><img decoding="async" loading="lazy" class="alignnone" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_du637bM-thumbnail_webp-600x300.png" alt="Data stored in Amazon S3 " width="538" height="212"></figure>
+</div>
+<h2 id="Q6._How_can_you_improve_the_performance_of_S3_for_your_application?">Q6.&nbsp; How can you Improve the Performance of Amazon S3 for your Application?</h2>
+<div class="interview-answers" style="text-align: center;">
+<p style="text-align: left;">There are various approaches you may take to improve S3 speed for your application, including Region Selection: To reduce latency and increase performance, select the S3 area nearest to your application’s users.</p>
+<p style="text-align: left;"><strong>Object Key Naming</strong>: Using unique and random object key names to distribute things uniformly across various partitions in S3. This can aid in the prevention of hotspots and increase performance.</p>
+<p style="text-align: left;"><strong>Object Size</strong>: To minimize the number of queries and enhance performance, use bigger object sizes (e.g., 128 MB or more). S3 now allows multipart uploads, which allow you to split up huge files and parallelize the upload process.</p>
+<p style="text-align: left;"><strong>Caching</strong>: Employ Amazon CloudFront to cache frequently requested assets closer to your users at edge locations. CloudFront can help your application minimize latency and enhance performance.</p>
+<p style="text-align: left;"><strong>Transfer Acceleration</strong>: Using Amazon CloudFront’s globally spread edge locations, you may use Amazon S3 Transfer Acceleration to expedite data transfers to and from S3.</p>
+<p style="text-align: left;">Employ parallelized downloads or uploads to increase throughput and decrease transfer time. This may be accomplished through the use of technologies like S3DistCp or by parallelizing transfers at the application level.</p><div class="banner-section-for-display"><div class="display-for-right mb-3"><div class="display-img"><img width="260" height="130" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1.png 260w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/02/small-article-1-150x75.png 150w" sizes="(max-width: 260px) 100vw, 260px"></div><div class="display-content"><h5>ML Hackathon: The Sledge Hack is live now!</h5><p><strong>Predict no. of runs Virat and Rohit will score in Ind vs Aus Upcoming World Cup Clash</strong></p><a href="https://bit.ly/3PA3CaH" class="utm_image_link btn btn-info" onclick="return utm_image_link();" target="_blank">Participate now</a></div></div></div>
+<p style="text-align: left;"><strong>S3 Select</strong>: Use S3 Select to obtain only a subset of data from S3 objects, minimizing network traffic and boosting query efficiency.</p>
+<p style="text-align: left;">Applying these improvements and recommended practices may enhance your application’s speed and scalability while accessing data stored in S3.</p>
+<figure><img decoding="async" src="https://av-eks-blogoptimized.s3.amazonaws.com/image_WaA5nRh-thumbnail_webp-600x300.png" alt=" Source: YouTube.com"><figcaption>Source: YouTube.com</figcaption></figure>
+</div>
+<h2 id="Conclusion">Conclusion</h2>
+<p>In conclusion, Amazon S3 is a highly scalable and durable object storage service that Amazon Web Services (AWS) offers. It provides a simple and cost-effective way to store and retrieve any amount of data from anywhere on the web. In this discussion, we have covered six important questions related to Amazon S3, which can be helpful for understanding the service and preparing for an interview.</p>
+<p><b>Key takeaways of this article:</b></p>
+<ol>
+<li>Amazon S3 is an object storage service provided by AWS, which is highly scalable and durable.</li>
+<li>We discussed some different S3 storage classes to cater to different use cases and cost requirements. We also discussed S3 lifecycle policies that help you automate your data management by defining rules for transitioning objects to different storage classes or deleting them after a specific period.</li>
+<li>To secure data stored in S3, you can use bucket policies, access control lists (ACLs), encryption, cross-origin resource sharing (CORS), MFA deletion, logging, and monitoring.</li>
+<li>Finally, we discussed&nbsp;to optimize S3 performance for your application, you can choose the closest S3 region, use unique object key names, upload larger object sizes, use caching, transfer acceleration, parallelization, and S3 Select.</li>
+</ol>
+<p><b>The media shown in this article is not owned by Analytics Vidhya and is used at the Author’s discretion.&nbsp;</b></p>
+<div id="jp-relatedposts" class="jp-relatedposts" style="display: block;">
+<h3 class="jp-relatedposts-headline"><em>Related</em></h3>
+<div class="jp-relatedposts-items jp-relatedposts-items-visual jp-relatedposts-grid "><div class="jp-relatedposts-post jp-relatedposts-post0 jp-relatedposts-post-thumbs" data-post-id="99030" data-post-format="false"><a class="jp-relatedposts-post-a" href="/blog/2022/11/amazon-s3-everything-you-need-to-know/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0" title="Amazon S3: Everything You Need to Know" data-origin="105645" data-position="0"><img class="jp-relatedposts-post-img" loading="lazy" src="https://i0.wp.com/cdn.analyticsvidhya.com/wp-content/uploads/2020/09/Amazon-Web-Services.png?resize=350%2C200&amp;ssl=1" width="350" height="200" alt="Amazon Web Services"></a><h4 class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="/blog/2022/11/amazon-s3-everything-you-need-to-know/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=0" title="Amazon S3: Everything You Need to Know" data-origin="105645" data-position="0">Amazon S3: Everything You Need to Know</a></h4><p class="jp-relatedposts-post-excerpt">This article was published as a part of the Data Science Blogathon. Source: https://www.stratospherix.com/ &nbsp; Introduction Amazon Web Services (AWS) is a cloud computing platform offering a wide range of services coming under domains like networking, storage, computing, security, databases, machine learning, etc. AWS has seven types of storage services…</p></div><div class="jp-relatedposts-post jp-relatedposts-post1 jp-relatedposts-post-thumbs" data-post-id="98821" data-post-format="false"><a class="jp-relatedposts-post-a" href="/blog/2022/10/aws-storage-cost-optimization-principles/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1" title="AWS Storage: Cost Optimization Principles" data-origin="105645" data-position="1"><img class="jp-relatedposts-post-img" loading="lazy" src="https://i0.wp.com/www.analyticsvidhya.com/wp-content/uploads/2016/05/big-data.jpg?resize=350%2C200&amp;ssl=1" width="350" height="200" alt="JUPYTER NOTEBOOK"></a><h4 class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="/blog/2022/10/aws-storage-cost-optimization-principles/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=1" title="AWS Storage: Cost Optimization Principles" data-origin="105645" data-position="1">AWS Storage: Cost Optimization Principles</a></h4><p class="jp-relatedposts-post-excerpt">This article was published as a part of the Data Science Blogathon. Introduction Data is the most crucial aspect contributing to the business's success. Organizations are collecting data at an alarming pace to analyze and derive insights for business enhancements. The abundant requirement for data collection made cloud data storage…</p></div><div class="jp-relatedposts-post jp-relatedposts-post2 jp-relatedposts-post-thumbs" data-post-id="96826" data-post-format="false"><a class="jp-relatedposts-post-a" href="/blog/2022/09/how-do-aws-s3-buckets-and-security-work/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2" title="How do AWS S3 Buckets and Security Work?" data-origin="105645" data-position="2"><img class="jp-relatedposts-post-img" loading="lazy" src="https://i0.wp.com/cdn.analyticsvidhya.com/wp-content/uploads/2019/05/deep-learning-cyber-security.jpg?resize=350%2C200&amp;ssl=1" width="350" height="200" alt="fool_deep_learning_model"></a><h4 class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="/blog/2022/09/how-do-aws-s3-buckets-and-security-work/?relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2&amp;relatedposts_hit=1&amp;relatedposts_origin=105645&amp;relatedposts_position=2" title="How do AWS S3 Buckets and Security Work?" data-origin="105645" data-position="2">How do AWS S3 Buckets and Security Work?</a></h4><p class="jp-relatedposts-post-excerpt">This article was published as a part of the&nbsp;Data Science Blogathon. Introduction AWS provides cloud services such as storage, analytics, blockchain, enterprise machine learning, applications, and security; within this cloud environment is Amazon S3, a cloud storage solution that brings scalability, data availability, security, and performance to companies of any…</p></div></div></div> </section>
+
+<div class="blog-tag-row">
+<a href="https://www.analyticsvidhya.com/blog/tag/amazon/">Amazon</a><a href="https://www.analyticsvidhya.com/blog/tag/amazon-s3/">Amazon S3</a><a href="https://www.analyticsvidhya.com/blog/tag/amazon-web-services/">amazon web services</a><a href="https://www.analyticsvidhya.com/blog/tag/applications/">Applications</a><a href="https://www.analyticsvidhya.com/blog/tag/aws/">AWS</a><a href="https://www.analyticsvidhya.com/blog/tag/blogathon/">blogathon</a><a href="https://www.analyticsvidhya.com/blog/tag/interview-questions/">interview questions</a> </div>
+</div>
+<div class="col-lg-3 col-md-12 col-sm-12">
+<div id="side-upper-banner" class="display-for-right mb-3 right-sidebar-1 d-none">
+<a class="utm_image_link" target="_blank" rel="noopener" href="https://bit.ly/3RzttCo?utm_campaign=https%3A%2F%2Fwww.analyticsvidhya.com%2Fblog%2F2023%2F03%2Ftop-6-amazon-s3-interview-questions%2F"><img width="250" height="400" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus.png 250w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus-188x300.png 188w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus-150x240.png 150w" sizes="(max-width: 250px) 100vw, 250px"></a>
+</div>
+<div id="side-upper-banner" class="display-for-right mb-3 right-sidebar-2">
+<a class="utm_image_link" target="_blank" rel="noopener" href="https://bit.ly/46wmxKG?utm_campaign=https%3A%2F%2Fwww.analyticsvidhya.com%2Fblog%2F2023%2F03%2Ftop-6-amazon-s3-interview-questions%2F"><img width="250" height="400" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus.png 250w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus-188x300.png 188w, https://cdn.analyticsvidhya.com/wp-content/uploads/2023/04/side-ind-aus-150x240.png 150w" sizes="(max-width: 250px) 100vw, 250px"></a>
+</div>
+<script>
+$(document).ready(function(){
+  $.get("https://www.analyticsvidhya.com/back-channel/check-country.php", function(data){
+    if (data == "1")
+      $(".right-sidebar-1").removeClass("d-none");
+    else if (data == "0")
+      $(".right-sidebar-2").removeClass("d-none");
+  });
+});
+
+
+function notify_rl_ra_event(eventname)
+{
+  $.ajax({
+  method: "GET",
+  url: "https://www.analyticsvidhya.com//back-channel/notify-reading-list-related-article.php?eventname="+eventname+"&utm_source="+url.searchParams.get("utm_source")+"&utm_medium="+url.searchParams.get("utm_medium")+"&utm_campaign="+url.searchParams.get("utm_campaign")+"&url=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/"
+})
+  .done(function( msg ) {
+    console.log ("Notified "+eventname+msg);
+  });
+}
+</script>
+<div class="detail-page-side-bar change-to-sticky" id="related-articles-sidebar">
+<aside id="relatedTarget" data-gtm-vis-recent-on-screen11243201_1834="20633" data-gtm-vis-first-on-screen11243201_1834="20633" data-gtm-vis-total-visible-time11243201_1834="100" data-gtm-vis-has-fired11243201_1834="1">
+<h6>Recommended For You</h6>
+<ul class="nav navbar-nav">
+<li class="position-relative"><a href="https://blackbelt.analyticsvidhya.com/plus?utm_source=RelatedArticles&amp;utm_medium=blog" target="_blank" class="text-primary" aria-label="Become a data scientist">Become a full stack data scientist</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/11/amazon-s3-everything-you-need-to-know/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">Amazon S3: Everything You Need to Know</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/10/aws-storage-cost-optimization-principles/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">AWS Storage: Cost Optimization Principles</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/09/how-do-aws-s3-buckets-and-security-work/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">How do AWS S3 Buckets and Security Work?</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/12/using-aws-s3-with-python-boto3/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">Using AWS S3 with Python boto3</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/06/getting-started-with-aws-s3/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">Getting Started With AWS S3</a></li>
+<li><a class="text-primary" href="https://www.analyticsvidhya.com/blog/2022/07/how-is-aws-athena-different-from-other-databases/?utm_source=related_WP&amp;utm_medium=https://www.analyticsvidhya.com/blog/2023/03/top-6-amazon-s3-interview-questions/">How is AWS Athena different from other databases?</a></li>
+</ul>
+</aside>
+</div>
+<script>
+var is_reading_list_enabled = 0;
+if ($('#reading-list-sidebar').data("is-reading-list-enabled")=="1")
+{
+ is_reading_list_enabled = 1;
+}
+const url = new URL(window.location.href);
+utm_source = url.searchParams.get("utm_source");
+if (utm_source == "reading_list")
+{
+  $("#reading-list-sidebar").removeClass("d-none");
+  notify_rl_ra_event('reading_list');
+  //dataLayer.push({event:'reading_list'});
+}
+else if (utm_source == "related_WP")
+{
+  $("#related-articles-sidebar").removeClass("d-none");
+  notify_rl_ra_event('related_article');
+  //dataLayer.push({event:'related_article'});
+}
+else if (is_reading_list_enabled == 1) {
+ var article_exists_in_topic = 0;
+ var rand = (Math.floor(Math.random() * (2 - 1 + 1)) + 1);
+ if ((rand == 2) || (article_exists_in_topic==1))
+ {
+  $("#reading-list-sidebar").removeClass("d-none");
+  notify_rl_ra_event('reading_list');
+  //dataLayer.push({event:'reading_list'});
+ }
+ else if (rand == 1)
+ {
+   $("#related-articles-sidebar").removeClass("d-none");
+   notify_rl_ra_event('related_article');
+   //dataLayer.push({event:'related_article'});
+ }
+}
+else {
+  notify_rl_ra_event('related_article');
+  //dataLayer.push({event:'related_article'});
+}
+</script>
+</div>
+</div>
+</div>
+</main>
+</body>
+</html>
