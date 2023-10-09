@@ -2,7 +2,6 @@
 [Kafka AWS Setup](https://itnext.io/how-to-setup-kafka-cluster-for-15k-events-per-second-on-aws-using-docker-d34539873589)
 
 ## Docker How To Tail Logs
- 
 ## You can tail the logs of a docker container like this:
 ```bash
   docker logs zookeeper
