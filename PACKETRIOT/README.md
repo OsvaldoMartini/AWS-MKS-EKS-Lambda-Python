@@ -143,6 +143,8 @@ sudo systemctl restart apache2.service
  
   # With https
   # Fom Video 1
+ sudo pktriot tunnel http add --domain summer-wildflower-77076.pktriot.net --destination /var/www/html/source --http 15050 --letsencrypt
+
 
   sudo pktriot tunnel http add --domain throbbing-sea-82929.pktriot.net --destination /var/www/shifthunter --http 15050 --webroot /var/www/shifthunter --letsencrypt
 
