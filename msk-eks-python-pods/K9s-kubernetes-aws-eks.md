@@ -18,5 +18,9 @@
 
 ## K9s Install
 ```bash
+  # Windows
 	choco install k9s
+
+	# Linux
+	sudo snap install k9s
 ```
