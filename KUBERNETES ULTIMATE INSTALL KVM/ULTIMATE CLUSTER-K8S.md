@@ -107,7 +107,7 @@ sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/c
 ```
 * Start and enable containerd service
 ```bash
-sudo systemctl restart containerd && sudo systemctl enable containerd
+sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
 ```
 * Verify containerd service, run
 ```bash
@@ -126,7 +126,7 @@ sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
 
 sudo apt update && sudo apt install -y kubelet kubeadm kubectl
 ```
-## Note : At time of writing this article, <span style="color: lightblue;">Ubuntu 16.04 (Xenial Xerus )</span> Kubernetes repository was available but in future, when the kubernetes repository is available for <span style="color: yellow;">Ubuntu 20.04</span> then replace <span style="color: yellow;">xenial</span> with <span style="color: yellow;">focal</span> word in above <span style="color: yellow;">"apt-add-repository"</span> command.
+## Note : At time of writing this article, <span style="color: #99ccff;">Ubuntu 16.04 (Xenial Xerus )</span> Kubernetes repository was available but in future, when the kubernetes repository is available for <span style="color: yellow;">Ubuntu 20.04</span> then replace <span style="color: yellow;">xenial</span> with <span style="color: yellow;">focal</span> word in above <span style="color: yellow;">"apt-add-repository"</span> command.
 
 ## 5) Install Kubernetes Cluster using kubeadm
 # VERY IMPORTANTE
@@ -135,7 +135,8 @@ sudo apt update && sudo apt install -y kubelet kubeadm kubectl
  
  sudo kubeadm init --control-plane-endpoint=master-node #(192.168.1.50)
  
- sudo kubeadm init --control-plane-endpoint=k8s-master
+ # Your Node Machine 
+ # sudo kubeadm init --control-plane-endpoint=k8s-master
 ```
 * Once the cluster is initialized successfully, we will get the following output
 
@@ -155,20 +156,20 @@ In order to interact with cluster as a regular user, let’s execute the followi
 ## 6) Add Worker Nodes to Kubernetes Cluster
 * If you want to add worker nodes to your Kubernetes cluster, log in to each worker node and run the ‘kubeadm join’ command you saved from Step 5.
 
-* Copy <span style="color: lightblue;">*"kubeadm join"*</span> command and paste it on both nodes (worker nodes).
+* Copy <span style="color: #99ccff;">*"kubeadm join"*</span> command and paste it on both nodes (worker nodes).
 ```bash
 sudo kubeadm join k8s-master:6443 --token zpjp2j.c0l59zbh4yw9dwfz \
 --discovery-token-ca-cert-hash sha256:523b10a16d5d283f45dad330d7b8ede5b628f0e070278c03ead80683fa1b6061
 ```
 ![Join Worker](images/Join-Worker-Nodes-K8s-Cluster-Ubuntu-1024x306.webp)
 
-* Now, verify the nodes status from the master node,  run <span style="color: lightblue;">*"kubectl get nodes"*</span>
+* Now, verify the nodes status from the master node,  run <span style="color: #99ccff;">*"kubectl get nodes"*</span>
 ```bash
  kubectl get nodes
 ```
 ![Get Nodes](images/Kubectl-get-nodes-k8s-ubuntu-20-04.webp)
 
-## As we can see both worker nodes and master node have joined the cluster, but status of each node is <span style="color: lightblue;">*"NotReady"*</span>. To make the status <span style="color: lightblue;">*"Ready"*</span> we must deploy Container Network Interface (CNI) based Pod network add-ons like calico, kube-router and weave-net. As the name suggests, pod network add-ons allow pods to communicate each other.
+## As we can see both worker nodes and master node have joined the cluster, but status of each node is <span style="color: #99ccff;">*"NotReady"*</span>. To make the status <span style="color: #99ccff;">*"Ready"*</span> we must deploy Container Network Interface (CNI) based Pod network add-ons like calico, kube-router and weave-net. As the name suggests, pod network add-ons allow pods to communicate each other.
 
 ## 7) Deploy Calico Pod Network Add-on
 * From the master node, run the following command to install Calico pod network add-on,
@@ -271,9 +272,20 @@ http-web   1/1     Running   0          59m   172.16.11.196   k8s-node-0   <none
 
 $ curl http://k8s-node-0:31098
 <html><body><h1>It works!</h1></body></html>
-
 ```
+## Docker on Ubuntu 22.04 Step-by-Step With Docker-compose
+* Also Read : [How to Install Docker on Ubuntu 22.04 Step-by-Step](https://www.linuxtechi.com/install-use-docker-on-ubuntu/)
+
+* Also Read : [How to Install Kubernetes Cluster on Ubuntu 20.04](https://www.linuxtechi.com/install-kubernetes-k8s-on-ubuntu-20-04/)
+
 * Also Read : [How to Setup NGINX Ingress Controller in Kubernetes](https://www.linuxtechi.com/setup-nginx-ingress-controller-in-kubernetes/)
 * Also Read : [How to Setup Private Docker Registry in Kubernetes (k8s)](https://www.linuxtechi.com/setup-private-docker-registry-kubernetes/)
 * Also Read : [How to Setup Kubernetes Cluster on Google Cloud Platform (GCP)](https://www.linuxtechi.com/setup-kubernetes-cluster-google-cloud-platform-gcp/)
 
+* Also Read : [How to Install MiniKube on RHEL 8/Rocky Linux 8/AlmaLinux 8](https://www.linuxtechi.com/install-minikube-on-rhel-rockylinux-almalinux/)
+
+* Also Read : [How to Configure NFS based Persistent Volume in Kubernetes](https://www.linuxtechi.com/configure-nfs-persistent-volume-kubernetes/)
+
+* Also Read : [How to Setup Local APT Repository Server on Ubuntu 20.04](https://www.linuxtechi.com/setup-local-apt-repository-server-ubuntu/docker)
+
+* Also Read : [How to Configure Static IP Address on Ubuntu 22.04 LTS](https://www.linuxtechi.com/configure-static-ip-address-ubuntu-22-04-lts/)
