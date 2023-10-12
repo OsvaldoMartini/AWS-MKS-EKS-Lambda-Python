@@ -194,7 +194,7 @@ k8s-node-1   Ready    <none>   19m   v1.27.4
 ## Note: To enable bash completion feature on your master node, execute the followings
 ```bash
 $ echo 'source <(kubectl completion bash)' >>~/.bashrc
-$ source .bashrc
+$ source ~/.bashrc
 
 ```
 <span style="color: yellow;">Read Also :</span> [How to Setup Kubernetes Cluster on Google Cloud Platform (GCP)](https://www.linuxtechi.com/setup-kubernetes-cluster-google-cloud-platform-gcp/)
