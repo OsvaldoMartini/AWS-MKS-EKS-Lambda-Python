@@ -20,6 +20,14 @@ $ kubectl config set-context <context-name> --namespace=<namespace-name> --user=
 # last context configured
 kubectl config set-context kubernetes-admin@kubernetes 
 
+kubectl config set-context --current --namespace=kube-system
+
+kubectl config set-context --current --namespace=python-pods
+
+kubectl get pods --namespace=python-pods 
+
+kubectl get pods --current --namespace=kube-public 
+
 
 ```
 

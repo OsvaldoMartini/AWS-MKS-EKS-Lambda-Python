@@ -54,11 +54,14 @@ kubectl -n kafka run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.37.0-kaf
   //Create a namespace
   kubectl create namespace shift-hunter
 
+  kubectl create namespace python-pods
+
+
   // Pode for dev_sub
-  kubectl create -f .dev/pod_dev.yaml
+  kubectl create -f pod_dev_sub.yaml
 
   // Pode for dev_pub
-  kubectl create -f .dev/pod_dev_pub.yaml
+  kubectl create -f pod_dev_pub.yaml
 
   //Create a namespace
   kubectl create namespace first-cluster

@@ -273,6 +273,7 @@ http-web   1/1     Running   0          59m   172.16.11.196   k8s-node-0   <none
 $ curl http://k8s-node-0:31098
 <html><body><h1>It works!</h1></body></html>
 ```
+
 ## Docker on Ubuntu 22.04 Step-by-Step With Docker-compose
 * Also Read : [How to Install Docker on Ubuntu 22.04 Step-by-Step](https://www.linuxtechi.com/install-use-docker-on-ubuntu/)
 
