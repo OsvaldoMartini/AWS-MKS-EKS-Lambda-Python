@@ -224,6 +224,9 @@ sudo umount --force /dev/sda1
   # In this example, search $HOME for all hidden files and dirs:
   find $HOME -name ".*" -ls
 
+  # Find Grep
+  systemctl list-unit-files | grep enabled | grep ssh
+
   # Find Files
   find /dir/to/search/ -name ".*" -print
 
@@ -354,6 +357,18 @@ kubectl version --client
 
 ## K9s Install
 ```bash
+
+  # Homebrew install
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  # Add Homebrew to your PATH
+  (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/$USER/.bashrc
+
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+  # k9s install
+  brew install derailed/k9s/k9s
+
   # Windows
 	choco install k9s
 

@@ -1,4 +1,10 @@
 # Get Create Set Context on Kubernetes
+
+## Alias
+```bash
+  alias k='kubectl'
+```
+
 ## Viewing the Kubernetes Configuration
 ```bash
 $ kubectl config view
@@ -48,5 +54,19 @@ alias k8s-prod='kubectl config use-context production'
 $ kubectl config delete-context <context-name>
 
 ```
+
+----------------------------------------------------------------
+ # Monitoring Events
+ ```bash
+ kubectl create namespace python-pods
+
+ kubectl get events
+
+# optionally with -n namespace_name
+ kubectl logs kafka-subscriber -n python-pods
+
+ kubectl delete pods --all --all-namespaces
+
+ ```
 
 

@@ -212,6 +212,7 @@ $
 $ kubectl get deployments.apps
 NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-web   1/1     1            1           41s
+
 $ kubectl get deployments.apps  -o wide
 NAME        READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES   SELECTOR
 nginx-web   1/1     1            1           56s   nginx        nginx    app=nginx-web
