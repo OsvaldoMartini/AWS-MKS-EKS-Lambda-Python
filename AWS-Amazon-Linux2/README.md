@@ -8,6 +8,18 @@
   PWD: amazon
 ```
 
+## Network Setting
+```bash
+sudo nano /etc/sysconfig/network-scripts/ifcfg-eth0
+```
+Updating DNS1, DNS2, GATEWAY
+```bash
+$ sudo cat <<EOF | sudo tee /etc/sysconfig/network-scripts/ifcfg-eth0
+GATEWAY=192.168.1.1
+EOF
+```
+
+
 
 ## Updates and installs and Start httpd
 ```bash

@@ -227,7 +227,10 @@ sudo umount --force /dev/sda1
   # Find Grep
   systemctl list-unit-files | grep enabled | grep ssh
 
+
   # Find Files
+  sudo find / -name "VBoxManage" -print
+
   find /dir/to/search/ -name ".*" -print
 
   find /dir/to/search/ -name ".bash_profile" -print
@@ -245,6 +248,17 @@ sudo umount --force /dev/sda1
 
   # Find packages
   sudo dpkg-query -L firefox
+
+  sudo dpkg-query -l | grep package_name_to_search
+
+  sudo dpkg-query -l | grep openresolv
+
+  sudo dpkg-query -l | grep resolvconf
+  
+  sudo apt list --installed | grep openresolv
+
+  sudo apt list --installed | grep resolvconf 
+ 
 
 ```
 
