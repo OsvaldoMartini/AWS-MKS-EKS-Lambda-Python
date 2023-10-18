@@ -6,6 +6,8 @@ metadata:
   name: kafka-subscriber
   namespace: python-pods
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: "master-node"
   tolerations:
     - effect: NoSchedule
       key: app
