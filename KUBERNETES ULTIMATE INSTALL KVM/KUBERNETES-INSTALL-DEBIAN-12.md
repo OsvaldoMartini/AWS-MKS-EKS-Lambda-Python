@@ -34,13 +34,13 @@ On Master node, run
  sudo ufw allow 10251/tcp
  sudo ufw allow 10252/tcp
  sudo ufw allow 10255/tcp
- sudo ufw reload
+ 
 ```
 On Worker Nodes,
 ```bash
-$ sudo ufw allow 10250/tcp
-$ sudo ufw allow 30000:32767/tcp
-$ sudo ufw reload
+ sudo ufw allow 10250/tcp
+ sudo ufw allow 30000:32767/tcp
+ sudo ufw reload
 ```
 Note: If firewall is disabled on your Debian 12/11 systems, then you can skip this step.
 
@@ -54,6 +54,7 @@ Containerd is the industry standard container run time and supported by Kubernet
 Before installing containerd, set the following kernel parameters on all the nodes.
 
 ```bash
+
 $ cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf 
 overlay 
 br_netfilter
@@ -90,8 +91,13 @@ $ containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>
 Edit the file ‘/etc/containerd/config.toml’ and look for the section 
 
 ‘[plugins.”io.containerd.grpc.v1.cri”.containerd.runtimes.runc.options]’ and change ‘SystemdCgroup = false’ to ‘SystemdCgroup = true‘
+
 ```bash
 $ sudo nano /etc/containerd/config.toml
+
+ # Alter SystemdCgroup = true
+
+ SystemdCgroup = true
 ```
 ![SystemdCgroup = true](images/Enable-SystemCgroup-Containerd-Debain12.webp)
 
@@ -108,7 +114,7 @@ $ sudo systemctl enable containerd
 5) Add Kubernetes Apt Repository
 In Debian 12/11, Kubernetes related packages are not available in the default package repositories. We have to add additional Kubernetes apt repository on all the nodes, run
 ```bash
-$ sudo apt install gnupg gnupg2 curl software-properties-common -y
+$ sudo systemctl enable containerd
 
 $ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
 
@@ -129,7 +135,12 @@ Now, we are all set to initialize Kubernetes cluster, run following command only
 <span style="color: #ff474c;">IT SHOULD CONNECT REMOTELY TO YOUR Virtual Machine MASTER-NODE os k8s-master</span>
 
 ```bash
+# IMPORTANTE  ADMIN-NODE
 $ sudo kubeadm init --control-plane-endpoint=admin-node
+
+# IMPORTANTE  MASTER-NODE
+$ sudo kubeadm init --control-plane-endpoint=master-node # (KAFKA STREAM)
+
 ```
 ![kubeadm init](images/Install-Kubernetes-Cluster-Debian12-Kubeadm-Output-1024x557.webp)
 
