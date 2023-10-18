@@ -1,8 +1,20 @@
 # Get Create Set Context on Kubernetes
 
+[Kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/#kubectl-autocomplete)
+
+# Kubectl autocomplete
+```bash
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+```
+* You can also use a shorthand alias for kubectl that also works with completion:
+
 ## Alias
 ```bash
   alias k='kubectl'
+  alias k=kubectl
+
+  complete -o default -F __start_kubectl k
 ```
 
 ## Viewing the Kubernetes Configuration
@@ -62,11 +74,27 @@ $ kubectl config delete-context <context-name>
 
  kubectl get events
 
+
+kubectl get namespaces
+
+
+
 # optionally with -n namespace_name
  kubectl logs kafka-subscriber -n python-pods
 
  kubectl delete pods --all --all-namespaces
 
+# All Nodes
+kubectl get pod -o=custom-columns=NODE:.spec.nodeName,NAME:.metadata.name --all-namespaces
+
+kubectl get pod -o=custom-columns=NODE:.spec.nodeName,NAME:.metadata.name --all-namespaces
+
  ```
 
+
+# Get all worker nodes (use a selector to exclude results that have a label
+# named 'node-role.kubernetes.io/control-plane')
+```bash
+kubectl get node --selector='!node-role.kubernetes.io/control-plane'
+```
 
