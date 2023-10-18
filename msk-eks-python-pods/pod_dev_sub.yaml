@@ -6,18 +6,11 @@ metadata:
   name: kafka-subscriber
   namespace: python-pods
 spec:
-  nodeSelector:
-    kubernetes.io/hostname: "master-node"
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - kafka
-            - antarctica-west1
+  tolerations:
+    - effect: NoSchedule
+      key: app
+      operator: Equal
+      value: kafka
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent
