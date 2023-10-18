@@ -147,6 +147,38 @@ Now, we are all set to initialize Kubernetes cluster, run following command only
   kubeadm reset
 ```
 
+# Alternative
+```bash
+$ sudo kubeadm reset
+$ sudo swapoff -a 
+```
+##  kubeadm init 
+```bash
+$ sudo kubeadm init --pod-network-cidr=192.168.1.55/24 --kubernetes-version "1.28.2"
+or
+
+$ sudo kubeadm init --control-plane-endpoint=master-node
+```
+## $HOME/.kube
+```bash
+$ sudo rm -rf $HOME/.kube
+
+$ mkdir -p $HOME/.kube
+$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+$ sudo systemctl enable docker.service
+$ sudo service kubelet restart
+
+$ kubectl get nodes
+Notes:
+
+If the port refuses to be connected, please add the following command.
+
+$ export KUBECONFIG=$HOME/admin.conf
+
+```
+
 # IMPORTANTE <span style="color: yellow;">kubeadm init (ONLY PRIMARY NODE)</span> IN CASE YOU WANT TO USE <span style="color: yellow;">JOIN</span> FOR WORKERS NODES
 ```bash
 # IMPORTANT  ADMIN-NODE  OR PRIMARY NODE 
@@ -167,6 +199,9 @@ $ mkdir -p $HOME/.kube
 $ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 
 $ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+systemctl restart kubelet
 ```
 Run following kubectl command to get nodes and cluster information,
 
@@ -185,7 +220,15 @@ $ kubectl cluster-info
 kubeadm token create --print-join-command
 
 # Expected
-kubeadm join admin-node:6443 --token xikgtc.kuffwz9f2urjqhar --discovery-token-ca-cert-hash sha256:d21168649713bc26b61cddd2358e52f10d3d5bddd9d696b2f2e8ba9eeb7d9f9f
+kubeadm join admin-node:6443 --token ghhiar.8a20wq9i5p9u2qai --discovery-token-ca-cert-hash sha256:6eafd2ee10c75a0f758fbf39993488cb0d67f27f36d808471305946a257b617b
+
+# Remove a Node from Cluster
+kubectl drain node <node-name>
+
+kubectl drain <node-name> --ignore-daemonsets
+
+kubectl delete node <node-name>
+
 ```
 
 
@@ -307,9 +350,83 @@ Note : In the curl command we can use either of worker node’s hostname.
 ```
 
 
-# THROUBLESHOOTING TAINTS
+# THROUBLESHOOTING TAINTS & TOLERANTS
+(Taints Good Sample)[https://www.densify.com/kubernetes-autoscaling/kubernetes-taints/]
+
+* From the output above, we noticed that the master nodes are already tainted by the Kubernetes installation so that no user pods land on them until intentionally configured by the user to be placed on master nodes by adding tolerations for those taints. 
+* The output also shows a worker node that has no taints. We will now taint the worker so that only front-end pods can land on it. We can do this by using the kubectl taint command.
+
+## Creating a Taint for app Kafka apps for master-node
 ```bash
-    
+# Create Taint
+kubectl taint nodes master-node app=kafka:NoSchedule
+  node/master-node tainted
+```
+## Apply on Yaml File
+```bash
+  ...
+      tolerations:
+        - effect: NoSchedule
+          key: app
+          operator: Equal
+          value: kafka
+  ...
+```
+
+
+## Creating a Taint for app frontend for worke-02
+```bash
+kubectl taint nodes cluster01-worker-1 app=frontend:NoSchedule
+  node/cluster01-worker-1 tainted
+
+kubectl taint nodes master-node app2=frontend:NoSchedule
+  node/cluster01-worker-1 tainted
+
+kubectl create ns frontend
+
+kubectl run nginx --image=nginx --namespace frontend
+
+kubectl get events --all-namespaces  | grep -i $podname
+
+kubectl get events --all-namespaces  | grep -i kafka-subscriber
+
+kubectl get event --namespace python-pods --field-selector involvedObject.name=kafka-subscriber
+
+kubectl get node --selector='!node-role.kubernetes.io/control-plane'
+
+kubectl get pods --field-selector="spec.nodeName=master-node" -n python-pods
+
+kubectl get volumeattachment --field-selector="spec.nodeName=mynode"
+
+kubectl get pods -n frontend
+
+kubectl get events -n frontend
+
+kubectl get deploy nginx -o yaml > nginx.yaml
+
+# Syntax for downloading yaml's from kubernetes
+kubectl get [resource type] -n [namespace] [resource Name] -o yaml > [New file name]
+
+kubectl get [resource type] -n [namespace] [resource Name] -o yaml > [New file name]
+
+
+kubectl get deploy --all-namespaces -o yaml --export
+
+kubectl api-resources
+```
+
+* Cmds to read tains
+
+```bash
+kubectl get nodes -o=custom-columns=NodeName:.metadata.name,TaintKey:.spec.taints[*].key,TaintValue:.spec.taints[*].value,TaintEffect:.spec.taints[*].effect
+
+#Check Node Taints
+kubectl get nodes --show-labels
+
+kubectl describe nodes master-node
+
+kubectl get nodes -o=custom-columns=NodeName:.metadata.name,TaintKey:.spec.taints[*].key,TaintValue:.spec.taints[*].value,TaintEffect:.spec.taints[*].effect
+
   
   kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints --no-headers 
   # Expected:
@@ -318,18 +435,16 @@ Note : In the curl command we can use either of worker node’s hostname.
   kubectl describe node node_name | grep 'Taints'
   Taints:             node-role.kubernetes.io/control-plane:NoSchedule
 
-
-
   kubectl get nodes -o go-template='{{printf "%-50s %-12s\n" "Node" "Taint"}}{{- range .items}}{{- if $taint := (index .spec "taints") }}{{- .metadata.name }}{{ "\t" }}{{- range $taint }}{{- .key }}={{ .value }}:{{ .effect }}{{ "\t" }}{{- end }}{{- "\n" }}{{- end}}{{- end}}'
   # Expected:
   Node                                               Taint
   admin-node      node-role.kubernetes.io/control-plane=<no value>:NoSchedule
 
-  Find Taints of noce:
+  // Find Taints of noce:
+  kubectl describe nodes master-node
+
   kubectl describe nodes your-node-name
 
-#Check Node Taints
-kubectl get nodes -o=custom-columns=NodeName:.metadata.name,TaintKey:.spec.taints[*].key,TaintValue:.spec.taints[*].value,TaintEffect:.spec.taints[*].effect
 # Expected:
 NodeName     TaintKey                                TaintValue   TaintEffect
 admin-node   node-role.kubernetes.io/control-plane   <none>       NoSchedule
@@ -352,13 +467,96 @@ kubectl taint -h
 # Remove use "-" hifen at the final 
 kubectl taint nodes < node name > < taint rule >-
 
-# Admin-Node
+# Admin-Node Remove taints
 kubectl taint nodes admin-node node-role.kubernetes.io/control-plane:NoSchedule-
 
-# Master-Node
+# Master-Node Remove taints
 kubectl taint nodes master-node node-role.kubernetes.io/control-plane:NoSchedule-
+
+kubectl taint nodes master-node app2-
 
 
 # Add Taint (Tolerance) WITHOUT Hifen
 kubectl taint nodes admin-node node-role.kubernetes.io/control-plane:NoSchedule
+```
+
+# Apply Tolerants
+```bash
+...
+tolerations:
+- key: "node-role.kubernetes.io/control-plane"
+  operator: "Exists"
+  effect: "NoExecute"
+  tolerationSeconds: 600
+...
+```
+# THROUBLESHOOTING PODS
+[troubleshooting PODs: 6 ways to find and fix issues](https://www.redhat.com/sysadmin/kubernetes-troubleshooting)
+
+
+# 1. You get an OOMKilled error
+```bash
+  kubectl describe pod kafka-subscriber  -n python-pods
+```
+# 2. You see sudden jumps in load and scale
+```bash
+kubectl scale deployment myDeployment –replicas=5
+```
+#  3. Roll back a faulty deployment
+```bash
+  kubectl rollout history deployment myDeployment
+ deployment.extensions/myDeployment
+
+ kubectl rollout history deployment myDeployment
+
+ kubectl rollout undo deployment myDeployment –-to-revision=3
+```
+
+4. Access a specific log
+ ```bash
+  kubectl logs kafka-subscriber  -n python-pods
+
+  # Previous logs
+  kubectl logs myPodName –previous
+```
+5. SSH into your pod
+ ```bash
+  # SSH into a POD
+  kubectl exec -it kafka-subscriber sh -n python-pods
+```
+
+# 6. Troubleshoot CrashloopBackoff and ImagePullBackoff errors
+```bash
+kubectl get pods
+NAME                   READY  STATUS            RESTARTS   AGE
+myDeployment1-89234... 1/1    Running           1          17m
+myDeployment1-46964... 0/1    CrashLoopBackOff  2          1m
+```
+
+# Remote Cluster
+You need to edit ~/.kube/config file as below :
+
+```bash
+...
+
+apiVersion: v1 
+clusters:    
+- cluster:
+    server: http://<master-ip>:<port>
+  name: test 
+contexts:
+- context:
+    cluster: test
+    user: test
+  name: test
+...   
+```
+* Then set context by executing:
+```bash
+kubectl config use-context test
+```
+* Alternately, you can also try following command
+```bash
+kubectl config set-cluster test-cluster --server=http://<master-ip>:<port> --api-version=v1
+kubectl config use-context test-cluster
 ```

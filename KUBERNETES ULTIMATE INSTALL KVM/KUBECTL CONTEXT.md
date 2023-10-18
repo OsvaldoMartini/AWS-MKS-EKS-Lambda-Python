@@ -95,6 +95,13 @@ kubectl get pod -o=custom-columns=NODE:.spec.nodeName,NAME:.metadata.name --all-
 # named 'node-role.kubernetes.io/control-plane')
 ```bash
 kubectl get node --selector='!node-role.kubernetes.io/control-plane'
+
+kubectl get pods --field-selector="spec.nodename=master-node"
+
+kubectl get volumeattachment --field-selector="spec.nodename=mynode"
+
+
+
 ```
 
 ## Delete Pods

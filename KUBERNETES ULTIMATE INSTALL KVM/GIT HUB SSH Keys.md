@@ -32,15 +32,15 @@ git remote -v
 
 git remote add origin https://github.com/OsvaldoMartini/AWS-MKS-EKS-Lambda-Python.git
 
-
 // HTTPS
 git remote set-url origin https://github.com/OsvaldoMartini/AWS-MKS-EKS-Lambda-Python.git
 
 // SSH
 git remote set-url origin git@github.com:OsvaldoMartini/AWS-MKS-EKS-Lambda-Python.git
 
+
 user: osvaldo.martini
-AccessToken: 
+Accss Token: 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
 
 sudo ufw allow from 140.82.121.3 to any port 22 proto tcp
 
