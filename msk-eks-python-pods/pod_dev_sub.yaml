@@ -16,7 +16,7 @@ spec:
           - key: node-role.kubernetes.io/control-plane
             operator: In
             values:
-            - NoSchedule
+            - 
             - antarctica-west1
   containers:
     - image:  python:3.8-slim
