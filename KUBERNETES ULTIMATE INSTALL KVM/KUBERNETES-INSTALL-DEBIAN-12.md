@@ -134,13 +134,26 @@ Now, we are all set to initialize Kubernetes cluster, run following command only
 
 <span style="color: #ff474c;">IT SHOULD CONNECT REMOTELY TO YOUR Virtual Machine MASTER-NODE os k8s-master</span>
 
+# Do not run if you ment to Use JOIN
+<span style="color: #ff474c;">kubeadm init (do not do this)</span>
+# on a worker node before joining. 
+
+* This is only run on your primary node. 
+<span style="color: yellow;">kubeadm init (ONLY PRIMARY NODE)</span>
+
+* Doing this can be why you already have these files, when you should not. 
+## Clean UP Reset Kubernetes files
 ```bash
-# IMPORTANTE  ADMIN-NODE
-$ sudo kubeadm init --control-plane-endpoint=admin-node
+  kubeadm reset
+```
 
-# IMPORTANTE  MASTER-NODE
-$ sudo kubeadm init --control-plane-endpoint=master-node # (KAFKA STREAM)
+# IMPORTANTE <span style="color: yellow;">kubeadm init (ONLY PRIMARY NODE)</span> IN CASE YOU WANT TO USE <span style="color: yellow;">JOIN</span> FOR WORKERS NODES
+```bash
+# IMPORTANT  ADMIN-NODE  OR PRIMARY NODE 
+$ sudo kubeadm init --control-plane-endpoint=admin-node 
 
+# IMPORTANT  KAFKA-NODE  OR WORKER01-NODE IF YOU ARE NOT USING JOIN
+$ sudo kubeadm init --control-plane-endpoint=kafka-node # (KAFKA STREAM)
 ```
 ![kubeadm init](images/Install-Kubernetes-Cluster-Debian12-Kubeadm-Output-1024x557.webp)
 
@@ -167,6 +180,15 @@ $ kubectl cluster-info
 
 * Note: Copy the exact command from the output of ‘kubeadm init’ command. In my case, following is the command
 
+# <span style="color: yellow;">Create a Token Join</span>
+```bash
+kubeadm token create --print-join-command
+
+# Expected
+kubeadm join admin-node:6443 --token xikgtc.kuffwz9f2urjqhar --discovery-token-ca-cert-hash sha256:d21168649713bc26b61cddd2358e52f10d3d5bddd9d696b2f2e8ba9eeb7d9f9f
+```
+
+
 ```bash
 Alternatively, if you are the root user, you can run:
 
@@ -185,8 +207,17 @@ and service account keys on each node and then running the following as root:
 
 Then you can join any number of worker nodes by running the following on each as root:
 
-kubeadm join admin-node:6443 --token punhtw.0z9lp6a83d5otkrq \
-        --discovery-token-ca-cert-hash sha256:d21168649713bc26b61cddd2358e52f10d3d5bddd9d696b2f2e8ba9eeb7d9f9f
+# TOKEN CREATE
+
+kubeadm token create --print-join-command
+
+# admin-node
+sudo kubeadm join admin-node:6443 --token w5hcpq.7lne1j366ih0sf98 --discovery-token-ca-cert-hash sha256:60b5d246a904db0eca0918efd522adbaece1de66c6f4e0bc204edc729981a34a
+
+
+# master-node
+kubeadm join master-node:6443 --token d6mofk.fkybpq3raqeq4yty --discovery-token-ca-cert-hash sha256:1376eb0d83b2ba39f666ca1b0a5e26a10d60ab2219eb2b61b2662e2ea025e097
+
 
 ```
 8) Setup Pod Network Using Calico
@@ -212,9 +243,46 @@ Verify the status of Calico pods, run
 # Perfect, now check nodes status again,
 ![Nodes Ready](images/Nodes-Status-Post-Calico-Installation-K8s-Debian12-768x123.webp)
 
+
+## Deploying pods to specific worker nodes in a multi-node cluster
+
+* Apply labels
+```bash
+
+# Type: <key> <vallue> 
+kubectl label node master-node stream=kafka
+kubectl get nodes --show-labels
+# Usage:
+...
+spec
+  nodeSelector:
+    stream: "kafka"
+...  
+
+
+# Remove
+kubectl label node master-node stream-kafka-
+
+kubectl label nodes worker-1.ibm.com node-apim=apim
+
+# Add
+kubectl label nodes master-node.intranet.com node-kafka=stream-app
+
+kubectl label nodes master-node node-kafka=stream-app
+
+# Remove
+kubectl label nodes master-node.intranet.com node-kafka-
+
+kubectl label nodes master-node node-kafka-
+
+kubectl label nodes worker-1.ibm.com node-apim=apim
+
+```
 9) Test Kubernetes Cluster Installation
 In order validate and test Kubernetes cluster installation, let’s try to deploy nginx based application via deployment. Run beneath commands,
 ```bash
+$ kubectl get nodes --show-labels
+
 $ kubectl create deployment nginx-app --image=nginx --replicas 2
 
 $ kubectl expose deployment nginx-app --name=nginx-web-svc --type NodePort --port 80 --target-port 80
@@ -263,6 +331,9 @@ admin-node   node-role.kubernetes.io/control-plane   <none>       NoSchedule
 
  # Get the Tainst names:
  kubectl describe node admin-node
+
+ kubectl describe node master-node
+
  # Expected:
  Taints:             node-role.kubernetes.io/control-plane:NoSchedule
  Unschedulable:      false
@@ -273,7 +344,12 @@ kubectl taint -h
 # Remove use "-" hifen at the final 
 kubectl taint nodes < node name > < taint rule >-
 
+# Admin-Node
 kubectl taint nodes admin-node node-role.kubernetes.io/control-plane:NoSchedule-
+
+# Master-Node
+kubectl taint nodes master-node node-role.kubernetes.io/control-plane:NoSchedule-
+
 
 # Add Taint (Tolerance) WITHOUT Hifen
 kubectl taint nodes admin-node node-role.kubernetes.io/control-plane:NoSchedule
