@@ -8,6 +8,16 @@ metadata:
 spec:
   nodeSelector:
     kubernetes.io/hostname: "master-node"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: In
+            values:
+            - NoSchedule
+            - antarctica-west1
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent
