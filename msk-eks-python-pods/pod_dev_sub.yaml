@@ -7,8 +7,12 @@ metadata:
   namespace: python-pods
 spec:
   tolerations:
-    - effect: NoSchedule
-      key: app
+    - key: node-role.kubernetes.io 
+      effect: NoSchedule
+      operator: Equal
+      value: control-plane    
+    - key: app 
+      effect: NoSchedule
       operator: Equal
       value: kafka
   containers:
