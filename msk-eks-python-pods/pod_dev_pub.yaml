@@ -4,8 +4,10 @@ metadata:
   labels:
     youtube-demo: "True"
   name: kafka-publisher
-  namespace: shift-hunter
+  namespace: python-pods
 spec:
+  nodeSelector:
+    stream: kafka
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent

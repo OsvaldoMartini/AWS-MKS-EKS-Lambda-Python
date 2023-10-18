@@ -4,7 +4,7 @@ metadata:
   labels:
     youtube-demo: "True"
   name: kafka-subscriber
-  namespace: shift-hunter
+  namespace: python-pods
 spec:
   containers:
     - image:  python:3.8-slim
