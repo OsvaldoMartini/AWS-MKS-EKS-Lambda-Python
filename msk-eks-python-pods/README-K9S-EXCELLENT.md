@@ -20,7 +20,13 @@
 
 ## Delete Pods
 ```bash
+  kubectl delete pod <pod name>
+
+  // Delete All Pods 
   kubectl -n kafka delete $(kubectl get strimzi -o name -n kafka)
+
+  kubectl delete pod nginx
+
 ```
 
 ## Calling Producer from same Image

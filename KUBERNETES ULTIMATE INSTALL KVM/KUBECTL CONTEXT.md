@@ -74,13 +74,12 @@ $ kubectl config delete-context <context-name>
 
  kubectl get events
 
-
-kubectl get namespaces
-
-
+ kubectl get namespaces
 
 # optionally with -n namespace_name
  kubectl logs kafka-subscriber -n python-pods
+
+ kubectl delete pod -n python-pods kafka-subscriber
 
  kubectl delete pods --all --all-namespaces
 
@@ -96,5 +95,58 @@ kubectl get pod -o=custom-columns=NODE:.spec.nodeName,NAME:.metadata.name --all-
 # named 'node-role.kubernetes.io/control-plane')
 ```bash
 kubectl get node --selector='!node-role.kubernetes.io/control-plane'
+```
+
+## Delete Pods
+```bash
+  kubectl delete pod <pod name>
+
+  // Delete All Pods 
+  kubectl -n kafka delete $(kubectl get strimzi -o name -n kafka)
+
+  kubectl delete pod nginx
+
+```
+
+
+## Deploying pods to specific worker nodes in a multi-node cluster
+
+* Apply labels
+```bash
+
+# Type: <key> <vallue> 
+kubectl get nodes --show-labels
+
+kubectl label node master-node stream=kafka
+
+# Usage:
+...
+spec
+  nodeSelector:
+    stream: "kafka"
+
+...
+spec
+  nodeSelector:
+    kubernetes.io/hostname: "master-node"
+...  
+
+
+# Remove
+kubectl label node master-node stream-kafka-
+
+kubectl label nodes worker-1.ibm.com node-apim=apim
+
+# Add
+kubectl label nodes master-node.intranet.com node-kafka=stream-app
+
+kubectl label nodes master-node node-kafka=stream-app
+
+# Remove
+kubectl label nodes master-node.intranet.com node-kafka-
+
+kubectl label nodes master-node node-kafka-
+
+kubectl label nodes worker-1.ibm.com node-apim=apim
 ```
 

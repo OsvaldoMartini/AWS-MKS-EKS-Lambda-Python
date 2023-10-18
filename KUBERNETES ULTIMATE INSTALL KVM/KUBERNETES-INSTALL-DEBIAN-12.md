@@ -250,13 +250,20 @@ Verify the status of Calico pods, run
 ```bash
 
 # Type: <key> <vallue> 
-kubectl label node master-node stream=kafka
 kubectl get nodes --show-labels
+
+kubectl label node master-node stream=kafka
+
 # Usage:
 ...
 spec
   nodeSelector:
     stream: "kafka"
+
+...
+spec
+  nodeSelector:
+    kubernetes.io/hostname: "master-node"
 ...  
 
 
@@ -276,14 +283,15 @@ kubectl label nodes master-node.intranet.com node-kafka-
 kubectl label nodes master-node node-kafka-
 
 kubectl label nodes worker-1.ibm.com node-apim=apim
-
 ```
+
+
 9) Test Kubernetes Cluster Installation
 In order validate and test Kubernetes cluster installation, let’s try to deploy nginx based application via deployment. Run beneath commands,
 ```bash
 $ kubectl get nodes --show-labels
 
-$ kubectl create deployment nginx-app --image=nginx --replicas 2
+$ kubectl create deployment nginx-app --image=nginx --replicas 2 
 
 $ kubectl expose deployment nginx-app --name=nginx-web-svc --type NodePort --port 80 --target-port 80
 
