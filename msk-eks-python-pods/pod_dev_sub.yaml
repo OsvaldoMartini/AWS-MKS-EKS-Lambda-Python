@@ -13,10 +13,10 @@ spec:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
         - matchExpressions:
-          - key: node-role.kubernetes.io/control-plane
+          - key: app
             operator: In
             values:
-            - 
+            - kafka
             - antarctica-west1
   containers:
     - image:  python:3.8-slim
