@@ -6,6 +6,8 @@ metadata:
   name: kafka-subscriber
   namespace: python-pods
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: "master-node"
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent

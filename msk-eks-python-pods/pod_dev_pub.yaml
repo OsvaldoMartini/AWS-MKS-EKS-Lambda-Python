@@ -7,7 +7,7 @@ metadata:
   namespace: python-pods
 spec:
   nodeSelector:
-    stream: kafka
+    kubernetes.io/hostname: "master-node"
   containers:
     - image:  python:3.8-slim
       imagePullPolicy: IfNotPresent
