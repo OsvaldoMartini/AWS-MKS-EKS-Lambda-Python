@@ -199,13 +199,22 @@ $ sudo mount /dev/sdc1 /home/user/usb
 $ cd /home/user/usb
 $ ls -l
 
+$ mkdir -p /home/omartini/usb
+$ sudo mount /dev/sda1 /home/omartini/usb
+$ cd /home/omartini/usb
+
+$ ls -l
+
 
 # Unmount
 sudo umount <device|directory>
 sudo umount /dev/sda1
+sudo umount /dev/sdb1
 
 # Check if is mounted -> It shoul be empty
 findmnt /dev/sda1
+
+findmnt /dev/sdb1
 <empty>
 
 # Unmounting drives lazily

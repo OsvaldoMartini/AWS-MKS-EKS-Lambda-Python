@@ -1,0 +1,31 @@
+Senior Python Developer (Software Engineer Developer Programmer Python Pandas TypeScript AWS protobuf gRPC Airflow Ignite Ag-grid Trading Front Office Equities Fixed 
+Income FX Commodities JavaScript React ESG Environmental Social Governance Buy Side Investment Manager Asset Management) required by our asset management client in London.
+
+You MUST have the following:
+
+Advanced experience as a Python Developer/Software Engineer/Programmer
+Pandas
+Python 3.10+
+TypeScript
+An understanding of equities, Fixed Income, FX or commodity asset classes (cash or derivatives)
+Cloud: AWS, Azure or GCP
+The following is DESIRABLE, not essential:
+
+React
+ESG
+Buy-side
+Role: Senior Python Developer (Software Engineer Developer Programmer Python Pandas TypeScript AWS protobuf gRPC Airflow Ignite Ag-grid Trading Front Office Equities 
+Fixed Income FX Commodities JavaScript React ESG Environmental Social Governance Buy Side Investment Manager Asset Management) required by our asset management client in London. 
+You will be joining a UK based team of 14 that has built an ESG analytics and reporting application to assess the environmental, social and ethical attributes of stocks 
+and portfolios. This product now needs to be extended to incorporate and assess more specific asset classes and derivatives such as money markets, MBS, municipals and 
+rate derivatives. The stack will be Python, including Pandas, React and AWS. The focus will be on candidates with excellent Python, excellent TypeScript 
+(Vue, React or Angular doesn't matter) and some form of cloud. Any exposure to the following is advantageous but not essential: protobuf, gRPC, Airflow, Ignite, Ag-Grid, 
+MaterialUI.
+
+Knowledge of ESG is beneficial but you MUST have some understanding of equities, FX, Fixed Income or commodities products and trading.
+
+The company has a 2 day/week hybrid working model, working from the City of London.
+
+Duration: 12-24 months
+
+Rate: £600-800/day

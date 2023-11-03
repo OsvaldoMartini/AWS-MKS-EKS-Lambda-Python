@@ -154,6 +154,9 @@ $ sudo swapoff -a
 ```
 ##  kubeadm init 
 ```bash
+
+$ sudo kubeadm init --control-plane-endpoint=admin-node
+
 $ sudo kubeadm init --pod-network-cidr=192.168.1.55/24 --kubernetes-version "1.28.2"
 or
 

@@ -1,0 +1,32 @@
+Java Developer (Software Engineer Java 17 Data Enterprise Engineering Developer Programmer AWS GCP Python Athena Glue Airflow Ignite JavaScript Agile Pandas NumPy 
+SciPy Spark Dremio Apache Iceburg Arro DBT gRPC protobuf TypeScript Manager Finance Trading Front Office Investment Banking Asset Manager Financial Services) required by 
+my asset management client in London.
+
+You MUST have the following:
+
+Advanced ability as a Java Developer/Software Engineer/Programmer
+Experience building systems that work with vast number of data sets
+Good AWS or GCP
+Apache Airflow or equivalent
+A foundation in Python as a minimum
+Agile
+A strong desire to be up to date with technology
+The following is DESIRABLE, not essential:
+
+Spark, Dremio, Apache Iceberg, Arrow, DBT
+gRPC
+protobuf
+TypeScript
+Finance
+Role: Java Developer (Software Engineer Java 17 Data Enterprise Engineering Developer Programmer AWS GCP Python Athena Glue Airflow Ignite JavaScript Agile Pandas 
+NumPy SciPy Spark Dremio Apache Iceburg Arro DBT gRPC protobuf TypeScript Manager Finance Trading Front Office Investment Banking Asset Manager Financial Services) 
+required by my asset management client in London. You will join a team that works in the Front Office data space for the whole 12k-person company. The team/department, 
+in the last 3-4 years has built a range of products such as a search engine for quant tools, a quant library, a complex analytics tool that generates reports using data extracted 
+from existing quant models and an application that aggregates positions from around the company. The team over the next 12 months is looking to expand and improve the underlying 
+fundamental data architecture to allow for improved and expanded analytics and performance of the Front End applications.
+
+The core technology is Java, Python, Apache Airflow and AWS Glue. Any exposure to Spark, Dremio, Apache Iceburg, Arrow or DBT would also be highly desirable.
+
+They have a very flexible hybrid working set up.
+
+Salary: £140k - £160k + 20% Guaranteed Bonus + 10% Pension
