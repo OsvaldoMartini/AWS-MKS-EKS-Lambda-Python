@@ -146,7 +146,7 @@ Last login: Sat Sep 30 11:31:15 2023
 ```
 
 
-## Linux Version
+## Linux Version Version Installed Linux
 ```bash
   cat /etc/os-release
   lsb_release -a
