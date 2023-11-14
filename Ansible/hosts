@@ -1,0 +1,21 @@
+[Admin]
+admin-node ansible_ssh_user=omartini ansible_ssh_pass=martini
+
+[Master]
+master-node ansible_ssh_pass=martini ansible_ssh_user=omartini
+
+[Web]
+#192.168.1.15
+
+[DB]
+#192.168.1.17
+
+[Servers]
+#server1 ansible_host=203.0.113.111
+#server2 ansible_host=203.0.113.112
+#server3 ansible_host=203.0.113.113
+server1 ansible_host=admin-node ansible_ssh_user=omartini ansible_ssh_pass=martini
+server2 ansible_host=master-node ansible_ssh_user=omartini ansible_ssh_pass=martini
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

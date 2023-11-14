@@ -1,0 +1,9 @@
+---
+- hosts: Servers
+  tasks:
+    - name: Install latest version of nginx on Debian 12 Server
+      apt: name=nginx state=latest
+    - name: start nginx
+      service:
+          name: nginx
+          state: started
