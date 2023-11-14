@@ -227,6 +227,14 @@ sudo umount --force /dev/sda1
 
 ```
 
+## Replace Text in Files
+```bash
+  sudo sed -i 's/firefox-esr.desktop/google-chrome-stable/g' ~/.config/mimeapps.list
+
+
+  sudo sed -i 's/old_text/new_text/g' text.txt
+```
+
 
 ## Find Programs
 ```bash
