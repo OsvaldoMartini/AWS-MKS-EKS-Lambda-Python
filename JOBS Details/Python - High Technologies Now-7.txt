@@ -1,0 +1,56 @@
+YourExpertise & Dedication make the difference. we drive growth for our clients’ businesses and accelerate digital transformation. 
+For the same reason we are looking for a Senior Java and Big Data developer Role to join us in . This is an exciting opportunity for someone 
+interested in working in an international environment, while being able to interact with various stakeholders You'll be joining the organization as 
+it's transforming its architecture, pushing forward with innovative solutions in various technologies Work with the latest technologies and share your 
+technical expertise in a collaborative, agile and forward thinking team environment Ready over all Developemnt / Production support activity which run 24*5 
+and need to be attended. Your Responsibilities Includes: Treasury Domain: You are familiar working with applications in bank's treasury area supporting 
+Liquidity and Funding as well as Asset and Liability Management lines of business. You have good understanding of control, regulatory requirements and 
+optimize the capital, liquidity, funding and inter-group engagements across the bank and its legal entities. You define and execute transformation strategy 
+with business team. You coordinate and consult with different teams such as business analysts, change management and IT to execute programs effectively. 
+Coordinate with Business Stakeholders and Requirement Engineers to understand requirements and define the architectural model and high-level solution design. 
+Implementation of required software components according to design specifications. Digital and Data engineering:
+
+You will create innovative digital and data engineering solutions and familiar using distributed processing engine frameworks.
+Analyze and understand business and technical stories, writing code, implementing automated tests, contributing to release and iteration planning and developing 
+the working practices of the team.
+Capture detailed requirements based upon user interviews and system/data analysis and collaborate to refine user requirements though test-driven development (TDD).
+Complete the unit testing of components for integration into larger subsystems.
+Support the business in resolving high-priority defects and deploying fixes to production systems.
+Perform code reviews and provide guidance/mentorship to junior developers.
+Adopt DevOps principles with CI & CD implementation, Cloud Integration and Scaling.
+Be part of an Agile Team involving cycle based development and delivery approach.
+REQUIRED SKILLS AND EXPERTISE
+
+Extensive Knowledge & working experience in bank's treasury area supporting Liquidity and Funding as well as Asset and Liability Management lines of business.
+Experience working with understanding of control and optimize the capital, liquidity, funding and inter-group engagements across the bank and its legal entities.
+Deep Banking & financial service expertise with an intimate working knowledge of financial service customers specific application requirements, KPI’s (key performance indicator), 
+and quality assurance goals.
+10+ years of professional experience in financial services, driving design strategies, standardizing development tools, automation frameworks, and test processes to increase cost 
+savings.
+10+ years of Technical Expertise including Core Java, J2EE, REST API, Microservices, Spring framework, Spring boot, relational DBs, Hibernate, JPA, EJB.
+Deep expertise in distributed processing frameworks/engines like Apache Hadoop, Apache Spark, Hive, impala.
+You have worked with at least one Object Oriented language(as Java(Preferred), Scala , Python)
+Ability to write complex SQLs for Data Base Validations and fine tuning complex queries.
+Experience in Performance Optimization Techniques used in Spark.
+Experience in using and debugging issues in reporting tool like OBIEE, Qlik.
+Experience in Behavior-driven development (BDD) and Test-driven development (TDD) frameworks. Proven transformation journey and perform setup of automation tool environment 
+with Machine learning capabilities Knowledge about the ITPA, RPA and Chat bot solution , Eyeshare UI Path , Chat bot expertise Experience in using and debugging issues 
+in reporting tool like OBIEE, Qlik.
+Hands-on experience delivering automation with a focus on continues integration/continuous deployment. (Git, Jenkins)
+Provisioning of Automated Scripts in Docker Containers using OpenShift.
+Skilled in designing high performance and high available applications, stepping into and turning around failing high risk projects, defining design strategies and project 
+delivery plans, and managing system design and execution.
+Hands-on development experience, familiar with a wide range of technologies, and managing and/or working directly with industry leading and open source languages 
+and frameworks (e.g. Spark , python, scala etc.)
+Proven experience with Agile methodologies and Exposure to tools like JIRA, Confluence, Odyssey.
+Good communication skills on all levels & Fluency in English
+100% flexibility to work in different cities in Switzerland , ready over all Production support activity which run 24*5
+Ready to work over weekend as per requirement
+Proven experience in working with global teams
+Co-Ordination expertise with Onshore Offshore model
+We offer
+
+A work culture focused on innovation and creating lasting value for our clients and employees
+Ongoing learning and training opportunities to help you acquire new skills or deepen existing expertise
+A flat, non-hierarchical structure that will enable you to work directly with senior partners and clients
+A diverse, inclusive, meritocratic culture"

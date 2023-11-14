@@ -147,6 +147,13 @@ Now, we are all set to initialize Kubernetes cluster, run following command only
   kubeadm reset
 ```
 
+#  [ERROR CRI]: container runtime is not running: 
+```bash
+  sudo rm /etc/containerd/config.toml
+  sudo systemctl restart containerd
+  sudo kubeadm init
+```
+
 # Alternative
 ```bash
 $ sudo kubeadm reset
@@ -177,7 +184,6 @@ $ kubectl get nodes
 Notes:
 
 If the port refuses to be connected, please add the following command.
-
 $ export KUBECONFIG=$HOME/admin.conf
 
 ```
@@ -233,6 +239,9 @@ kubectl drain <node-name> --ignore-daemonsets
 kubectl delete node <node-name>
 
 ```
+
+
+
 
 
 ```bash
@@ -352,8 +361,36 @@ Note : In the curl command we can use either of worker node’s hostname.
  curl http://admin-node:31880
 ```
 
+# THROUBLESHOOTING  certificate  x509 
+[Certificate  x509](https://medium.com/@guilospanck/kubernetes-x509-certificate-has-expired-or-is-not-yet-valid-error-cb9ca581d38b)
+* Error Certificate  x509
+```bash
+
+sudo kubeadm certs check-expiration
+
+sudo kubeadm certs renew all
+```
+
 
 # THROUBLESHOOTING TAINTS & TOLERANTS
+```bash
+
+# Admin-Node Describe nodes
+sudo kubectl describe nodes admin-node
+
+# Admin-Node Remove taints
+sudo kubectl taint nodes admin-node node-role.kubernetes.io/control-plane:NoSchedule-
+
+
+# Master-Node Describe nodes
+sudo  kubectl describe nodes master-node
+
+# Master-Node Remove taints
+sudo kubectl taint nodes master-node node-role.kubernetes.io/control-plane:NoSchedule-
+
+```
+
+
 (Taints Good Sample)[https://www.densify.com/kubernetes-autoscaling/kubernetes-taints/]
 
 * From the output above, we noticed that the master nodes are already tainted by the Kubernetes installation so that no user pods land on them until intentionally configured by the user to be placed on master nodes by adding tolerations for those taints. 

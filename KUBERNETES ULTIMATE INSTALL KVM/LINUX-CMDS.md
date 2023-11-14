@@ -99,7 +99,7 @@ sudo systemctl status vbox-dns2.service
 (WiFi Debian 12)[https://wiki.debian.org/WiFi]
 
 
-1. Update: ```sudo apt-get update && apt-get upgrade && && apt-get dist-upgrade ``` and reboot if you updated the kernel
+1. Update: ```sudo apt-get update && apt-get upgrade && apt-get dist-upgrade ``` and reboot if you updated the kernel
 
 2. Connect the device. ```lsusb``` should show 2357:0107
 
