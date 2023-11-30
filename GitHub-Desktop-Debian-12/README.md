@@ -2,6 +2,30 @@
 [GitHub Desktop](https://linux.how2shout.com/2-ways-to-install-github-desktop-on-debian-12-11-10/)
 
 
+### Create Private Access Token on Github Developers
+To use the “store” option, create a credentials file at <span style="color: yellow;">~/.git-credentials</span>. Enter a single line:
+```bash
+sudo nano ~/.git-credentials
+```
+Include the token  login here
+```bash
+https://{username}:{personal_access_token}@github.com
+
+
+https://osvaldo.martini:{personal_access_token}@github.com
+```
+
+Then run to set up the git confog global
+```bash
+git config --global credential.helper store
+```
+
+If you would like to store the credentials file elsewhere, run
+```bash
+git config --global credential.helper 'store --file /path/to/credentials/file'
+```
+
+
 ### 1. Update your Debian Linux
 
 ```bash

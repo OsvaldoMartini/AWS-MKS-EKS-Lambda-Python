@@ -72,3 +72,17 @@ $ sudo rm -rf /var/lib/docker
 
 $ sudo rm -rf /var/lib/containerd
 ```
+
+
+# Docker Compose  - docker-compose Debian 12 / Ubuntu
+[Docker-compose](https://wiki.crowncloud.net/?How_to_Install_and_use_Docker_Compose_on_Debian_12)
+
+```bash
+
+curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+chmod +x /usr/local/bin/docker-compose
+
+
+docker-compose --version
+```
