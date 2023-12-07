@@ -234,7 +234,38 @@ sudo umount --force /dev/sda1
 
   sudo sed -i 's/old_text/new_text/g' text.txt
 ```
+## TAR Commands
+```bash
+  # Unzip Create folder
+  tar -xvf bash.html_node.tar.gz --one-top-level
+```
 
+## CGMiner
+```bash
+
+sudo apt install build-essential autoconf automake libtool pkg-config libudev-dev libcurl4-openssl-dev git
+
+# ThroubleShooting for  "libcurl4-openssl-dev"
+# curl : Depends: libcurl4 (= 7.88.1-10+deb12u4) but 8.4.0-2~bpo12+1 is to be installed
+sudo apt-get install libcurl4=7.88.1-10+deb12u4
+sudo apt-get install libcurl4-openssl-dev
+
+# sudo apt-get build-dep libcurl4-openssl-dev
+sudo apt-get install libcurl4-openssl-dev
+
+
+git clone https://github.com/dmaxl/cgminer
+ 
+ or 
+
+git clone https://github.com/ckolivas/cgminer
+
+./autogen.sh
+
+
+./configure --enable-scrypt --enable-gridseed
+
+```
 
 ## Find Programs
 ```bash
@@ -244,6 +275,11 @@ sudo umount --force /dev/sda1
   # Find Grep
   systemctl list-unit-files | grep enabled | grep ssh
 
+ # Find Files IN CURRENT FOLDER  AND DELETE
+ 
+  find . -maxdepth 1 -name "*.sh" -type f
+
+  find . -maxdepth 1 -name "*.sh" -type f -delete
 
   # Find Files
   sudo find / -name "VBoxManage" -print

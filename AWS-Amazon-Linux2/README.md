@@ -151,5 +151,163 @@ Last login: Sat Sep 30 11:31:15 2023
   cat /etc/os-release
   lsb_release -a
   hostnamectl
+
+
+NIPOGI Mini PC
+Operating System: Debian GNU/Linux 12 (bookworm)  
+Kernel: Linux 6.5.0-0.deb12.1-amd64
 ```
+
+# Instal CMake Debian
+Step 1: Download CMake
+[CMake Debian 11](https://linuxhint.com/install-cmake-on-debian/)
+```bash
+wget https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0.tar.gz
+
+tar -zxvf cmake-3.28.0.tar.gz
+```
+Step 2: Extract CMake and Run the Bootstrap
+```bash
+cd cmake-3.28.0 
+##Run de bootstrap
+sudo ./bootstrap
+```
+Step 3.1: Install CMake
+```bash
+sudo make
+```
+Step 3.2: Install CMake
+```bash
+# And After
+sudo make install
+```
+
+
+## Find file  or Locate GCC
+```bash
+whereis gcc
+
+which gcc
+
+gcc --version
+```
+
+## Throubleshooting libcurl.so.4
+## Find file  or locate libcurl.so.4 
+```bash
+apt --installed list | grep 'curl'
+
+lsb_release -a
+
+ls -hal
+
+stat libcurl.so.4
+
+# Instal apt-get install apt-file
+sudo apt install apt-file
+sudo apt-file update
+
+apt-file search libcurl.so.4
+
+ldd libcurl.so.4
+
+sudo ln -fs /usr/lib/libcurl.so.4 /usr/local/lib/
+
+sudo ldconfig -v 
+sudo ldconfig -p 
+
+
+whereis libcurl.so.4
+## Or 
+locate libcurl.so.4
+
+## Result
+libcurl.so.4: /usr/lib/x86_64-linux-gnu/libcurl.so.4
+
+## Find out the Type
+ls -l /usr/lib/x86_64-linux-gnu/libcurl.so.4
+## Result
+lrwxrwxrwx 1 root root 16 Oct  5 22:31 /usr/lib/x86_64-linux-gnu/libcurl.so.4 -> libcurl.so.4.8.0
+```
+
+Third, remove it and rebuild the link to libcurl.so.4.3.0:
+```bash
+sudo rm /usr/lib/x86_64-linux-gnu/libcurl.so.4
+sudo ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4
+```
+Next, check it:
+```bash
+ ls -l /usr/lib/x86_64-linux-gnu/libcurl.so.4
+```
+Type CMake version
+```bash
+cmake -version
+```
+## Compile C Getting the return from  main()
+```bash
+$ cc -I. -I./subfolder main.cpp   -o main
+$ ./main
+$ echo $?
+```
+## Compile C++ Getting the return from  main()
+```bash
+$ g++ -I. -I./subfolder main.cpp   -o main
+$ ./main
+$ echo $?
+
+
+g++ -g3 -Wall -I. -I./ccan cgminer.c -o cgminer
+```
+
+
+## Compile Build
+How do I compile the program on Linux?
+Use any one of the following syntax to compile the program called demo.c:
+```bash
+cc program-source-code.c -o executable-file-name
+## OR ##
+gcc program-source-code.c -o executable-file-name
+## OR, assuming that executable-file-name.c exists ##
+make executable-file-name
+```
+
+In this example, compile demo.c, enter:
+```bash
+cc demo.c -o demo
+OR
+## assuming 'demo.c' exists in the current directory ##
+make demo
+```
+
+If there is no error in your code or C program then the compiler will successfully create an executable file called demo in the current directory, otherwise you need fix the code. To verify this, type:
+```bash
+ls -l demo*
+```
+
+### GCC Version
+```bash
+gcc -version
+
+g++ --version
+
+- hread model: posix
+- Supported LTO compression algorithms: zlib zstd
+- gcc version 12.2.0 (Debian 12.2.0-14) 
+
+# Next install the GNU compiler tools and the GDB debugger with this command:
+
+sudo apt-get install build-essential gdb
+
+- GNU gdb (Debian 13.1-3) 13.1
+
+```
+
+## Add Syubdirectories to be found by GCC
+```bash
+sudo echo 'export PATH="$PATH:/home/omartini/projects/cgminer/ccan"' >> ~/.bashrc
+
+sudo source ~/.bashrc
+
+```
+
 
