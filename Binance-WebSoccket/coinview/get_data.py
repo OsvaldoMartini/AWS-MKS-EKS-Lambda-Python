@@ -1,4 +1,4 @@
-import config  # , csv
+import config, csv
 from binance.client import Client
 
 client = Client(config.API_KEY, config.API_SECRET)
