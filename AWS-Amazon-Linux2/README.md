@@ -284,6 +284,22 @@ If there is no error in your code or C program then the compiler will successful
 ls -l demo*
 ```
 
+## NVIDIA or Video Vard Versionadn Model and Name
+```bash
+wmic path win32_VideoController get name
+    Trigger 6 External Graphics
+    Trigger 6 External Graphics
+    Intel(R) Iris(R) Xe Graphics
+
+wmic path win32_VideoController get DriverVersion
+    DriverVersion
+    1.5.2201.426
+    1.5.2201.426
+    30.0.101.1003
+
+```
+
+
 ### GCC Version
 ```bash
 gcc -version
@@ -311,3 +327,66 @@ sudo source ~/.bashrc
 ```
 
 
+## Binance WW Socket
+```bash
+
+$ npm install -g wscat
+
+
+$ wscat -c wss://stream.binance.com:9443
+
+$ wscat -c wss://stream.binance.com:9443/ws/btcusdt@trade
+
+{"e":"trade","E":1702304816463,"s":"BTCUSDT","t":3316196691,"p":"41881.11000000","q":"0.00161000","b":23681621827,"a":23681621462,"T":1702304816462,"m":false,"M":true}
+
+[Unix TimeStamp](https://www.unixtimestamp.com/)
+{
+    "e": "trade",           //Event
+    "E": 1702304816463,     //Time Stamp
+    "s": "BTCUSDT",         //Symbol / Instrument 
+    "t": 3316196691,        // Trace ID
+    "p": "41881.11000000",  // Price
+    "q": "0.00161000",      //Quantity
+    "b": 23681621827,       // Buyer order ID
+    "a": 23681621462,       // Seller order ID
+    "T": 1702304816462,     // Trade Time
+    "m": false,             // Is the buyer the market maker?
+    "M": true               // Ignore
+}
+KLine/Candlestick Stream
+$ wscat -c wss://stream.binance.com:9443/ws/btcusdt@kline_5m
+{
+    "e": "kline",
+    "E": 1702305606684,
+    "s": "BTCUSDT",
+    "k": {
+        "t": 1702305600000,
+        "T": 1702305899999,
+        "s": "BTCUSDT",
+        "i": "5m",
+        "f": 3316221692,
+        "L": 3316221810,
+        "o": "41988.88000000",  //open
+        "c": "41977.01000000",  //close
+        "h": "41990.00000000",  // high
+        "l": "41977.00000000",  // low
+        "v": "3.15230000",
+        "n": 119,
+        "x": false,
+        "q": "132356.57522880",
+        "V": "1.77565000",
+        "Q": "74555.95547580",
+        "B": "0"
+    }
+}
+
+ Saving as file
+$ wscat -c wss://stream.binance.com:9443/ws/btcusdt@kline_5m | tee btcusdt-binance.txt
+
+
+
+
+{"e":"kline","E":1702305634480,"s":"BTCUSDT","k":{"t":1702305600000,"T":1702305899999,"s":"BTCUSDT","i":"5m","f":3316221692,"L":3316222441,"o":"41988.88000000","c":"41997.16000000","h":"42020.00000000","l":"41977.00000000","v":"33.94432000","n":750,"x":false,"q":"1425724.82791720","V":"20.99923000","Q":"881899.63820630","B":"0"}}
+
+
+```
