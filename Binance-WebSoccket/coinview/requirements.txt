@@ -1,5 +1,5 @@
 python-binance
-#TA-Lib
+TA-Lib
 numpy
 backtrader
 flask
