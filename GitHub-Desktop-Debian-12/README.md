@@ -15,7 +15,7 @@ https://{username}:{personal_access_token}@github.com
 https://osvaldo.martini:{personal_access_token}@github.com
 ```
 
-Then run to set up the git confog global
+Then run to set up the git config global
 ```bash
 git config --global credential.helper store
 ```
