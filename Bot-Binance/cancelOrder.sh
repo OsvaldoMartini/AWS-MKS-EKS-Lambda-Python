@@ -13,3 +13,4 @@ SIGNATURE="signature=$SIGNATURE"
 
 curl  -H "X-MBX-APIKEY: $APIKEY" -X POST "https://api.binance.com/api/v3/order?$URLPART2&$RECVWINDOW&$TIMESTAMP&$SIGNATURE"
 echo
+
