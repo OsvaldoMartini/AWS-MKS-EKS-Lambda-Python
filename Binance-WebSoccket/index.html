@@ -20,19 +20,28 @@
   </body>
 
   <script>
-    var binanceSocket = new WebSocket(
-      "wss://stream.binance.com:9443/ws/btcusdt@trade"
-    );
+    // var binanceSocket = new WebSocket(
+    //   "wss://stream.binance.com:9443/ws/btcusdt@trade"
+    // );
 
+    var binanceSocket = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1s");
     var tradesDiv = document.getElementById("trades");
 
-    // binanceSocket.onmessage = function (event) {
-    //   console.log(event.data);
+    binanceSocket.onmessage = function (event) {
+      var message = JSON.parse(event.data);
 
-    //   var messageObject = JSON.parse(event.data);
+      var candlestick = message.k;
 
-    //   tradesDiv.append(messageObject.p);
-    // };
+      console.log(candlestick)
+
+      candleSeries.update({
+        time: candlestick.t / 1000,
+        open: candlestick.o,
+        high: candlestick.h,
+        low: candlestick.l,
+        close: candlestick.c
+      })
+    };
   </script>
   <script src="chart.js"></script>
 </htm>
