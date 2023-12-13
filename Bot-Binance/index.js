@@ -55,8 +55,8 @@ const run = () => {
   const config = {
     asset: "BTC",
     base: "USDT",
-    allocation: 0.02, //Percentage of our  portfolio to allocate for each trade
-    spred: 0.05, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
+    allocation: 0.1, //Percentage of our  portfolio to allocate for each trade
+    spred: 0.2, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
     tickInterval: 2000, // every 2 seconds evaluate  goig to sell or buy the limit order of the preious ticket  and create new one
   };
 
@@ -68,8 +68,8 @@ const run = () => {
       "X-MBX-APIKEY": process.env.API_KEY,
     },
     options: {
-      // defaultType: "spot",
-      defaultType: "future",
+      defaultType: "spot",
+      //defaultType: "future",
     },
   });
 
