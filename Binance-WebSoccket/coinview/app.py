@@ -2,22 +2,46 @@ from flask import Flask, render_template, request, flash, redirect, jsonify
 import config, csv, datetime
 from binance.client import Client
 from binance.enums import *
+import ccxt
+from pprint import pprint
 
 app = Flask(__name__)
 app.secret_key = b'NzU4udKNZ1bl3VM5VpYlEG2S9FstbmeYwv5ZTnWOcZxfS4cQf4dQmhSJRpRwihar'
 
-client = Client(config.API_KEY, config.API_SECRET, tld='us')
+#client = Client(config.API_KEY, config.API_SECRET, tld='us')
+#client.options = {'defaultType': 'future'}
+
+
+binanceClient = ccxt.binance({
+    'apiKey': config.API_KEY,
+    'secret': config.API_SECRET,
+    'verbose': 'true',
+    'headers': {
+      'X-MBX-APIKEY': config.API_KEY,
+    },
+    'options': {
+      'defaultType': 'spot',
+      # defaultType: 'future',
+    },
+  });
+
 
 
 @app.route('/')
 def index():
     title = 'CoinView'
 
-    account = client.get_account()
+    # account = binanceClient.fetchOpenOrders("BTC/USDT")
+    account = binanceClient.fetchBalance()
+
+   # print(len([coin for coin, balance in binanceClient.fetch_balance()
+   #    ['total'].items() if balance > 0]))
+
+    pprint(account)
 
     balances = account['balances']
 
-    exchange_info = client.get_exchange_info()
+    exchange_info = binanceClient.get_exchange_info()
     symbols = exchange_info['symbols']
 
     return render_template('index.html', title=title, my_balances=balances, symbols=symbols)
