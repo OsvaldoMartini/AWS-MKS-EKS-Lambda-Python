@@ -1,0 +1,158 @@
+[
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/dump.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/dump.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/dump.c",
+  "output": "CMakeFiles/jansson.dir/src/dump.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/error.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/error.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/error.c",
+  "output": "CMakeFiles/jansson.dir/src/error.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/hashtable.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/hashtable.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/hashtable.c",
+  "output": "CMakeFiles/jansson.dir/src/hashtable.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/hashtable_seed.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/hashtable_seed.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/hashtable_seed.c",
+  "output": "CMakeFiles/jansson.dir/src/hashtable_seed.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/load.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/load.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/load.c",
+  "output": "CMakeFiles/jansson.dir/src/load.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/memory.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/memory.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/memory.c",
+  "output": "CMakeFiles/jansson.dir/src/memory.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/pack_unpack.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/pack_unpack.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/pack_unpack.c",
+  "output": "CMakeFiles/jansson.dir/src/pack_unpack.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/strbuffer.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/strbuffer.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/strbuffer.c",
+  "output": "CMakeFiles/jansson.dir/src/strbuffer.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/strconv.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/strconv.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/strconv.c",
+  "output": "CMakeFiles/jansson.dir/src/strconv.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/utf.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/utf.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/utf.c",
+  "output": "CMakeFiles/jansson.dir/src/utf.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/jansson.dir/src/value.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/src/value.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/src/value.c",
+  "output": "CMakeFiles/jansson.dir/src/value.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/simple_parse.dir/examples/simple_parse.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/examples/simple_parse.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/examples/simple_parse.c",
+  "output": "CMakeFiles/simple_parse.dir/examples/simple_parse.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_array.dir/test/suites/api/test_array.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_array.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_array.c",
+  "output": "CMakeFiles/test_array.dir/test/suites/api/test_array.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_copy.dir/test/suites/api/test_copy.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_copy.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_copy.c",
+  "output": "CMakeFiles/test_copy.dir/test/suites/api/test_copy.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_dump.dir/test/suites/api/test_dump.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_dump.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_dump.c",
+  "output": "CMakeFiles/test_dump.dir/test/suites/api/test_dump.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_dump_callback.dir/test/suites/api/test_dump_callback.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_dump_callback.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_dump_callback.c",
+  "output": "CMakeFiles/test_dump_callback.dir/test/suites/api/test_dump_callback.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_equal.dir/test/suites/api/test_equal.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_equal.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_equal.c",
+  "output": "CMakeFiles/test_equal.dir/test/suites/api/test_equal.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_load.dir/test/suites/api/test_load.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_load.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_load.c",
+  "output": "CMakeFiles/test_load.dir/test/suites/api/test_load.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_loadb.dir/test/suites/api/test_loadb.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_loadb.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_loadb.c",
+  "output": "CMakeFiles/test_loadb.dir/test/suites/api/test_loadb.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_number.dir/test/suites/api/test_number.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_number.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_number.c",
+  "output": "CMakeFiles/test_number.dir/test/suites/api/test_number.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_object.dir/test/suites/api/test_object.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_object.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_object.c",
+  "output": "CMakeFiles/test_object.dir/test/suites/api/test_object.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_pack.dir/test/suites/api/test_pack.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_pack.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_pack.c",
+  "output": "CMakeFiles/test_pack.dir/test/suites/api/test_pack.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_simple.dir/test/suites/api/test_simple.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_simple.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_simple.c",
+  "output": "CMakeFiles/test_simple.dir/test/suites/api/test_simple.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_unpack.dir/test/suites/api/test_unpack.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_unpack.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_unpack.c",
+  "output": "CMakeFiles/test_unpack.dir/test/suites/api/test_unpack.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/test_memory_funcs.dir/test/suites/api/test_memory_funcs.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_memory_funcs.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/suites/api/test_memory_funcs.c",
+  "output": "CMakeFiles/test_memory_funcs.dir/test/suites/api/test_memory_funcs.c.o"
+},
+{
+  "directory": "/home/omartini/projects/cgminer/build",
+  "command": "/usr/bin/gcc -DHAVE_CONFIG_H -DJANSSON_USING_CMAKE -I/home/omartini/projects/cgminer/build/include -I/home/omartini/projects/cgminer/build/private_include -g   -fPIC -Wall -Wextra -Wdeclaration-after-statement -o CMakeFiles/json_process.dir/test/bin/json_process.c.o -c /home/omartini/projects/cgminer/compat/jansson-2.9/test/bin/json_process.c",
+  "file": "/home/omartini/projects/cgminer/compat/jansson-2.9/test/bin/json_process.c",
+  "output": "CMakeFiles/json_process.dir/test/bin/json_process.c.o"
+}
+]

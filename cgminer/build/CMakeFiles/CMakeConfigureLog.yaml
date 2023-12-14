@@ -1,0 +1,1464 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:233 (message)"
+      - "CMakeLists.txt:51 (project)"
+    message: |
+      The system is: Linux - 6.5.0-0.deb12.1-amd64 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:51 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/gcc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /home/omartini/projects/cgminer/build/CMakeFiles/3.28.0/CompilerIdC/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:51 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ymCWOq"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ymCWOq"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ymCWOq'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_79ecb
+        [1/2] /usr/bin/gcc   -v -o CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/gcc
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Debian 12.2.0-14' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 12.2.0 (Debian 12.2.0-14) 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/'
+         /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_79ecb.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -o /tmp/cckE9ox8.s
+        GNU C17 (Debian 12.2.0-14) version 12.2.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 12.2.0, GMP version 6.2.1, MPFR version 4.1.1-p1, MPC version 1.3.1, isl version isl-0.25-GMP
+        
+        warning: MPFR header version 4.1.1-p1 differs from library version 4.2.0.
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/lib/gcc/x86_64-linux-gnu/12/include
+         /usr/local/include
+         /usr/include/x86_64-linux-gnu
+         /usr/include
+        End of search list.
+        GNU C17 (Debian 12.2.0-14) version 12.2.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 12.2.0, GMP version 6.2.1, MPFR version 4.1.1-p1, MPC version 1.3.1, isl version isl-0.25-GMP
+        
+        warning: MPFR header version 4.1.1-p1 differs from library version 4.2.0.
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        Compiler executable checksum: cc72d2b9b5048fedc2be9051c917b40b
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/'
+         as -v --64 -o CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o /tmp/cckE9ox8.s
+        GNU assembler version 2.40 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.40
+        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.'
+        [2/2] : && /usr/bin/gcc  -v  -rdynamic CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -o cmTC_79ecb   && :
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/gcc
+        COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Debian 12.2.0-14' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 12.2.0 (Debian 12.2.0-14) 
+        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_79ecb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_79ecb.'
+         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccHTo2lG.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_79ecb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_79ecb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_79ecb.'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:51 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/lib/gcc/x86_64-linux-gnu/12/include]
+          add: [/usr/local/include]
+          add: [/usr/include/x86_64-linux-gnu]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/12/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/12/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/lib/gcc/x86_64-linux-gnu/12/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:51 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ymCWOq']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/ninja -v cmTC_79ecb]
+        ignore line: [[1/2] /usr/bin/gcc   -v -o CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/gcc]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 12.2.0-14' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 12.2.0 (Debian 12.2.0-14) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_79ecb.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -o /tmp/cckE9ox8.s]
+        ignore line: [GNU C17 (Debian 12.2.0-14) version 12.2.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 12.2.0  GMP version 6.2.1  MPFR version 4.1.1-p1  MPC version 1.3.1  isl version isl-0.25-GMP]
+        ignore line: []
+        ignore line: [warning: MPFR header version 4.1.1-p1 differs from library version 4.2.0.]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/12/../../../../x86_64-linux-gnu/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include/x86_64-linux-gnu]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [GNU C17 (Debian 12.2.0-14) version 12.2.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 12.2.0  GMP version 6.2.1  MPFR version 4.1.1-p1  MPC version 1.3.1  isl version isl-0.25-GMP]
+        ignore line: []
+        ignore line: [warning: MPFR header version 4.1.1-p1 differs from library version 4.2.0.]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [Compiler executable checksum: cc72d2b9b5048fedc2be9051c917b40b]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o /tmp/cckE9ox8.s]
+        ignore line: [GNU assembler version 2.40 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.40]
+        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.']
+        ignore line: [[2/2] : && /usr/bin/gcc  -v  -rdynamic CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -o cmTC_79ecb   && :]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/gcc]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 12.2.0-14' --with-bugurl=file:///usr/share/doc/gcc-12/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-12 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-12-bTRWOB/gcc-12-12.2.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 12.2.0 (Debian 12.2.0-14) ]
+        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_79ecb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_79ecb.']
+        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccHTo2lG.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_79ecb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccHTo2lG.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-export-dynamic] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_79ecb] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib]
+          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+          arg [-L/lib/../lib] ==> dir [/lib/../lib]
+          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..]
+          arg [CMakeFiles/cmTC_79ecb.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [-lc] ==> lib [c]
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12] ==> [/usr/lib/gcc/x86_64-linux-gnu/12]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib] ==> [/usr/lib]
+        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+        collapse library dir [/lib/../lib] ==> [/lib]
+        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> [/usr/lib]
+        implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+        implicit objs: [/usr/lib/x86_64-linux-gnu/Scrt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o;/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o;/usr/lib/x86_64-linux-gnu/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/12;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:134 (check_include_files)"
+    checks:
+      - "Looking for include file endian.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mI1MdT"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mI1MdT"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_ENDIAN_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mI1MdT'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_f8fbd
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_f8fbd.dir/HAVE_ENDIAN_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mI1MdT/HAVE_ENDIAN_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_f8fbd.dir/HAVE_ENDIAN_H.c.o -o cmTC_f8fbd   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:135 (check_include_files)"
+    checks:
+      - "Looking for include file fcntl.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-BImtf2"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-BImtf2"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_FCNTL_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-BImtf2'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_089b1
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_089b1.dir/HAVE_FCNTL_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-BImtf2/HAVE_FCNTL_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_089b1.dir/HAVE_FCNTL_H.c.o -o cmTC_089b1   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:136 (check_include_files)"
+    checks:
+      - "Looking for include file sched.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2s79Cl"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2s79Cl"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SCHED_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2s79Cl'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_e8484
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_e8484.dir/HAVE_SCHED_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2s79Cl/HAVE_SCHED_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_e8484.dir/HAVE_SCHED_H.c.o -o cmTC_e8484   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:137 (check_include_files)"
+    checks:
+      - "Looking for include file unistd.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-nNzETF"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-nNzETF"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-nNzETF'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_5dcaf
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_5dcaf.dir/HAVE_UNISTD_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-nNzETF/HAVE_UNISTD_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_5dcaf.dir/HAVE_UNISTD_H.c.o -o cmTC_5dcaf   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:138 (check_include_files)"
+    checks:
+      - "Looking for include file sys/param.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2pya7a"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2pya7a"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SYS_PARAM_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2pya7a'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_63019
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_63019.dir/HAVE_SYS_PARAM_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-2pya7a/HAVE_SYS_PARAM_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_63019.dir/HAVE_SYS_PARAM_H.c.o -o cmTC_63019   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:139 (check_include_files)"
+    checks:
+      - "Looking for include file sys/stat.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ec2Vhs"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ec2Vhs"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SYS_STAT_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ec2Vhs'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_582a4
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_582a4.dir/HAVE_SYS_STAT_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-ec2Vhs/HAVE_SYS_STAT_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_582a4.dir/HAVE_SYS_STAT_H.c.o -o cmTC_582a4   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:140 (check_include_files)"
+    checks:
+      - "Looking for include file sys/time.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LEEW2J"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LEEW2J"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SYS_TIME_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LEEW2J'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_c1bfd
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_c1bfd.dir/HAVE_SYS_TIME_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LEEW2J/HAVE_SYS_TIME_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_c1bfd.dir/HAVE_SYS_TIME_H.c.o -o cmTC_c1bfd   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:141 (check_include_files)"
+    checks:
+      - "Looking for include file sys/time.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-fNvHq4"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-fNvHq4"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-fNvHq4'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_4bd9b
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_4bd9b.dir/HAVE_SYS_TYPES_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-fNvHq4/HAVE_SYS_TYPES_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_4bd9b.dir/HAVE_SYS_TYPES_H.c.o -o cmTC_4bd9b   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:143 (check_function_exists)"
+    checks:
+      - "Looking for close"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-SBupa3"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-SBupa3"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_CLOSE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-SBupa3'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_bc7d6
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=close -o CMakeFiles/cmTC_bc7d6.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-SBupa3/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=close -rdynamic CMakeFiles/cmTC_bc7d6.dir/CheckFunctionExists.c.o -o cmTC_bc7d6   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:144 (check_function_exists)"
+    checks:
+      - "Looking for getpid"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-TDnlH2"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-TDnlH2"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_GETPID"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-TDnlH2'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ddfa7
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=getpid -o CMakeFiles/cmTC_ddfa7.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-TDnlH2/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=getpid -rdynamic CMakeFiles/cmTC_ddfa7.dir/CheckFunctionExists.c.o -o cmTC_ddfa7   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:145 (check_function_exists)"
+    checks:
+      - "Looking for gettimeofday"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-3ILcxb"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-3ILcxb"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_GETTIMEOFDAY"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-3ILcxb'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_20f28
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=gettimeofday -o CMakeFiles/cmTC_20f28.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-3ILcxb/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=gettimeofday -rdynamic CMakeFiles/cmTC_20f28.dir/CheckFunctionExists.c.o -o cmTC_20f28   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:146 (check_function_exists)"
+    checks:
+      - "Looking for open"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-q1JnCE"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-q1JnCE"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_OPEN"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-q1JnCE'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_f76d1
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=open -o CMakeFiles/cmTC_f76d1.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-q1JnCE/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=open -rdynamic CMakeFiles/cmTC_f76d1.dir/CheckFunctionExists.c.o -o cmTC_f76d1   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:147 (check_function_exists)"
+    checks:
+      - "Looking for read"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-6ZLsvE"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-6ZLsvE"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_READ"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-6ZLsvE'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_97c6e
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=read -o CMakeFiles/cmTC_97c6e.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-6ZLsvE/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=read -rdynamic CMakeFiles/cmTC_97c6e.dir/CheckFunctionExists.c.o -o cmTC_97c6e   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:148 (check_function_exists)"
+    checks:
+      - "Looking for sched_yield"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-FPGJR4"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-FPGJR4"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SCHED_YIELD"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-FPGJR4'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_e1079
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=sched_yield -o CMakeFiles/cmTC_e1079.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-FPGJR4/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=sched_yield -rdynamic CMakeFiles/cmTC_e1079.dir/CheckFunctionExists.c.o -o cmTC_e1079   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:151 (check_include_files)"
+    checks:
+      - "Looking for include file stdint.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LQIWN7"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LQIWN7"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LQIWN7'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_12877
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_12877.dir/HAVE_STDINT_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LQIWN7/HAVE_STDINT_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_12877.dir/HAVE_STDINT_H.c.o -o cmTC_12877   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:252 (check_include_file)"
+      - "CMakeLists.txt:154 (check_type_size)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-tsDDil"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-tsDDil"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-tsDDil'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_f8369
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_f8369.dir/CheckIncludeFile.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-tsDDil/CheckIncludeFile.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_f8369.dir/CheckIncludeFile.c.o -o cmTC_f8369   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:154 (check_type_size)"
+    checks:
+      - "Check size of __int64"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___INT64"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_7b52d
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_7b52d.dir/__INT64.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81/__INT64.c
+        FAILED: CMakeFiles/cmTC_7b52d.dir/__INT64.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_7b52d.dir/__INT64.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81/__INT64.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81/__INT64.c:27:22: error: ‘__int64’ undeclared here (not in a function); did you mean ‘__int64_t’?
+           27 | #define SIZE (sizeof(__int64))
+              |                      ^~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9amd81/__INT64.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:155 (check_type_size)"
+    checks:
+      - "Check size of int64_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-r5KDav"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-r5KDav"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_INT64_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-r5KDav'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_92194
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_92194.dir/INT64_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-r5KDav/INT64_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_92194.dir/INT64_T.c.o -o cmTC_92194   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:156 (check_type_size)"
+    checks:
+      - "Check size of long long"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-VOG4lq"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-VOG4lq"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_LONG_LONG_INT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-VOG4lq'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_8aa1a
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_8aa1a.dir/LONG_LONG_INT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-VOG4lq/LONG_LONG_INT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_8aa1a.dir/LONG_LONG_INT.c.o -o cmTC_8aa1a   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:159 (check_type_size)"
+    checks:
+      - "Check size of int32_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9uPXgP"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9uPXgP"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_INT32_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9uPXgP'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_76546
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_76546.dir/INT32_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-9uPXgP/INT32_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_76546.dir/INT32_T.c.o -o cmTC_76546   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:160 (check_type_size)"
+    checks:
+      - "Check size of __int32"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___INT32"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_a7311
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_a7311.dir/__INT32.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS/__INT32.c
+        FAILED: CMakeFiles/cmTC_a7311.dir/__INT32.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_a7311.dir/__INT32.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS/__INT32.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS/__INT32.c:27:22: error: ‘__int32’ undeclared here (not in a function); did you mean ‘__int32_t’?
+           27 | #define SIZE (sizeof(__int32))
+              |                      ^~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-H09XRS/__INT32.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:161 (check_type_size)"
+    checks:
+      - "Check size of long"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7I84s5"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7I84s5"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_LONG_INT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7I84s5'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ef933
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_ef933.dir/LONG_INT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7I84s5/LONG_INT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_ef933.dir/LONG_INT.c.o -o cmTC_ef933   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:162 (check_type_size)"
+    checks:
+      - "Check size of int"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-eM1ZkV"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-eM1ZkV"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_INT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-eM1ZkV'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_d6783
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_d6783.dir/INT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-eM1ZkV/INT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_d6783.dir/INT.c.o -o cmTC_d6783   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:175 (check_type_size)"
+    checks:
+      - "Check size of unsigned long"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-Gnm8bl"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-Gnm8bl"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UNSIGNED_LONG_INT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-Gnm8bl'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_50476
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_50476.dir/UNSIGNED_LONG_INT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-Gnm8bl/UNSIGNED_LONG_INT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_50476.dir/UNSIGNED_LONG_INT.c.o -o cmTC_50476   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:176 (check_type_size)"
+    checks:
+      - "Check size of unsigned int"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-u1cW1M"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-u1cW1M"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UNSIGNED_INT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-u1cW1M'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_d1a62
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_d1a62.dir/UNSIGNED_INT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-u1cW1M/UNSIGNED_INT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_d1a62.dir/UNSIGNED_INT.c.o -o cmTC_d1a62   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:177 (check_type_size)"
+    checks:
+      - "Check size of unsigned short"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-OIVa4W"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-OIVa4W"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UNSIGNED_SHORT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-OIVa4W'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_83de6
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_83de6.dir/UNSIGNED_SHORT.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-OIVa4W/UNSIGNED_SHORT.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_83de6.dir/UNSIGNED_SHORT.c.o -o cmTC_83de6   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:179 (check_type_size)"
+    checks:
+      - "Check size of uint32_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LnOcVP"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LnOcVP"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UINT32_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LnOcVP'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_b4f65
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_b4f65.dir/UINT32_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LnOcVP/UINT32_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_b4f65.dir/UINT32_T.c.o -o cmTC_b4f65   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:180 (check_type_size)"
+    checks:
+      - "Check size of __uint32"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___UINT32"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ad68f
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_ad68f.dir/__UINT32.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK/__UINT32.c
+        FAILED: CMakeFiles/cmTC_ad68f.dir/__UINT32.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_ad68f.dir/__UINT32.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK/__UINT32.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK/__UINT32.c:27:22: error: ‘__uint32’ undeclared here (not in a function); did you mean ‘__uint32_t’?
+           27 | #define SIZE (sizeof(__uint32))
+              |                      ^~~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-JbN7dK/__UINT32.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:193 (check_type_size)"
+    checks:
+      - "Check size of uint16_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-bokNrD"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-bokNrD"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UINT16_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-bokNrD'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ec1a8
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_ec1a8.dir/UINT16_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-bokNrD/UINT16_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_ec1a8.dir/UINT16_T.c.o -o cmTC_ec1a8   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:194 (check_type_size)"
+    checks:
+      - "Check size of __uint16"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___UINT16"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_de33d
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_de33d.dir/__UINT16.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V/__UINT16.c
+        FAILED: CMakeFiles/cmTC_de33d.dir/__UINT16.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_de33d.dir/__UINT16.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V/__UINT16.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V/__UINT16.c:27:22: error: ‘__uint16’ undeclared here (not in a function); did you mean ‘__uint16_t’?
+           27 | #define SIZE (sizeof(__uint16))
+              |                      ^~~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-mNtx7V/__UINT16.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:207 (check_type_size)"
+    checks:
+      - "Check size of uint8_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-piJIIL"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-piJIIL"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UINT8_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-piJIIL'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_dc5b9
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_dc5b9.dir/UINT8_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-piJIIL/UINT8_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_dc5b9.dir/UINT8_T.c.o -o cmTC_dc5b9   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:208 (check_type_size)"
+    checks:
+      - "Check size of __uint8"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___UINT8"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_116b0
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_116b0.dir/__UINT8.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX/__UINT8.c
+        FAILED: CMakeFiles/cmTC_116b0.dir/__UINT8.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_116b0.dir/__UINT8.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX/__UINT8.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX/__UINT8.c:27:22: error: ‘__uint8’ undeclared here (not in a function); did you mean ‘__uint8_t’?
+           27 | #define SIZE (sizeof(__uint8))
+              |                      ^~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-pvducX/__UINT8.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:218 (check_type_size)"
+    checks:
+      - "Check size of ssize_t"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-0HtFW0"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-0HtFW0"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SSIZE_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-0HtFW0'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_8e851
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_8e851.dir/SSIZE_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-0HtFW0/SSIZE_T.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_8e851.dir/SSIZE_T.c.o -o cmTC_8e851   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "CMakeLists.txt:219 (check_type_size)"
+    checks:
+      - "Check size of SSIZE_T"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_UPPERCASE_SSIZE_T"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_fcc53
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_fcc53.dir/UPPERCASE_SSIZE_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj/UPPERCASE_SSIZE_T.c
+        FAILED: CMakeFiles/cmTC_fcc53.dir/UPPERCASE_SSIZE_T.c.o 
+        /usr/bin/gcc    -o CMakeFiles/cmTC_fcc53.dir/UPPERCASE_SSIZE_T.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj/UPPERCASE_SSIZE_T.c
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj/UPPERCASE_SSIZE_T.c:27:22: error: ‘SSIZE_T’ undeclared here (not in a function)
+           27 | #define SIZE (sizeof(SSIZE_T))
+              |                      ^~~~~~~
+        /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-j8KMgj/UPPERCASE_SSIZE_T.c:29:12: note: in expansion of macro ‘SIZE’
+           29 |   ('0' + ((SIZE / 10000)%10)),
+              |            ^~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:230 (check_function_exists)"
+    checks:
+      - "Looking for strtoll"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LTGRi8"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LTGRi8"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_STRTOLL"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LTGRi8'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_fae28
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=strtoll -o CMakeFiles/cmTC_fae28.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-LTGRi8/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=strtoll -rdynamic CMakeFiles/cmTC_fae28.dir/CheckFunctionExists.c.o -o cmTC_fae28   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:231 (check_function_exists)"
+    checks:
+      - "Looking for strtoq"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-t0NkpR"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-t0NkpR"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_STRTOQ"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-t0NkpR'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_2721e
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=strtoq -o CMakeFiles/cmTC_2721e.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-t0NkpR/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=strtoq -rdynamic CMakeFiles/cmTC_2721e.dir/CheckFunctionExists.c.o -o cmTC_2721e   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:232 (check_function_exists)"
+    checks:
+      - "Looking for _strtoi64"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-zPFGWc"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-zPFGWc"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE__STRTOI64"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-zPFGWc'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_da47f
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=_strtoi64 -o CMakeFiles/cmTC_da47f.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-zPFGWc/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=_strtoi64 -rdynamic CMakeFiles/cmTC_da47f.dir/CheckFunctionExists.c.o -o cmTC_da47f   && :
+        FAILED: cmTC_da47f 
+        : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=_strtoi64 -rdynamic CMakeFiles/cmTC_da47f.dir/CheckFunctionExists.c.o -o cmTC_da47f   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        /usr/bin/ld: CMakeFiles/cmTC_da47f.dir/CheckFunctionExists.c.o: in function `main':
+        CheckFunctionExists.c:(.text+0x10): undefined reference to `_strtoi64'
+        collect2: error: ld returned 1 exit status
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFiles.cmake:132 (try_compile)"
+      - "CMakeLists.txt:277 (check_include_files)"
+    checks:
+      - "Looking for include file locale.h"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7aUQp3"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7aUQp3"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_LOCALE_H"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7aUQp3'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_a08e0
+        [1/2] /usr/bin/gcc    -o CMakeFiles/cmTC_a08e0.dir/HAVE_LOCALE_H.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-7aUQp3/HAVE_LOCALE_H.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_a08e0.dir/HAVE_LOCALE_H.c.o -o cmTC_a08e0   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:278 (check_function_exists)"
+    checks:
+      - "Looking for localeconv"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-vj2Rvr"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-vj2Rvr"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_LOCALECONV"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-vj2Rvr'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_0bee8
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=localeconv -o CMakeFiles/cmTC_0bee8.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-vj2Rvr/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=localeconv -rdynamic CMakeFiles/cmTC_0bee8.dir/CheckFunctionExists.c.o -o cmTC_0bee8   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:287 (check_function_exists)"
+    checks:
+      - "Looking for setlocale"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-RvSSfI"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-RvSSfI"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SETLOCALE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-RvSSfI'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_67c49
+        [1/2] /usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=setlocale -o CMakeFiles/cmTC_67c49.dir/CheckFunctionExists.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-RvSSfI/CheckFunctionExists.c
+        [2/2] : && /usr/bin/gcc -DCHECK_FUNCTION_EXISTS=setlocale -rdynamic CMakeFiles/cmTC_67c49.dir/CheckFunctionExists.c.o -o cmTC_67c49   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "cmake/CheckFunctionKeywords.cmake:9 (check_c_source_compiles)"
+      - "CMakeLists.txt:291 (check_function_keywords)"
+    checks:
+      - "Performing Test HAVE_INLINE"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-IIrz0x"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-IIrz0x"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_INLINE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-IIrz0x'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_a575f
+        [1/2] /usr/bin/gcc -DHAVE_INLINE   -o CMakeFiles/cmTC_a575f.dir/src.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-IIrz0x/src.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_a575f.dir/src.c.o -o cmTC_a575f   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "cmake/CheckFunctionKeywords.cmake:9 (check_c_source_compiles)"
+      - "CMakeLists.txt:292 (check_function_keywords)"
+    checks:
+      - "Performing Test HAVE___INLINE"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-gmyc7V"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-gmyc7V"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___INLINE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-gmyc7V'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_3fc15
+        [1/2] /usr/bin/gcc -DHAVE___INLINE   -o CMakeFiles/cmTC_3fc15.dir/src.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-gmyc7V/src.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_3fc15.dir/src.c.o -o cmTC_3fc15   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "cmake/CheckFunctionKeywords.cmake:9 (check_c_source_compiles)"
+      - "CMakeLists.txt:293 (check_function_keywords)"
+    checks:
+      - "Performing Test HAVE___INLINE__"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-PzixbB"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-PzixbB"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE___INLINE__"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-PzixbB'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_dcf27
+        [1/2] /usr/bin/gcc -DHAVE___INLINE__   -o CMakeFiles/cmTC_dcf27.dir/src.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-PzixbB/src.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_dcf27.dir/src.c.o -o cmTC_dcf27   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "CMakeLists.txt:306 (check_c_source_compiles)"
+    checks:
+      - "Performing Test HAVE_SYNC_BUILTINS"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-qkcRKp"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-qkcRKp"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_SYNC_BUILTINS"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-qkcRKp'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_4f5ce
+        [1/2] /usr/bin/gcc -DHAVE_SYNC_BUILTINS   -o CMakeFiles/cmTC_4f5ce.dir/src.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-qkcRKp/src.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_4f5ce.dir/src.c.o -o cmTC_4f5ce   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "CMakeLists.txt:307 (check_c_source_compiles)"
+    checks:
+      - "Performing Test HAVE_ATOMIC_BUILTINS"
+    directories:
+      source: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-e4xqG5"
+      binary: "/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-e4xqG5"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/omartini/projects/cgminer/compat/jansson-2.9/cmake"
+    buildResult:
+      variable: "HAVE_ATOMIC_BUILTINS"
+      cached: true
+      stdout: |
+        Change Dir: '/home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-e4xqG5'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_9c549
+        [1/2] /usr/bin/gcc -DHAVE_ATOMIC_BUILTINS   -o CMakeFiles/cmTC_9c549.dir/src.c.o -c /home/omartini/projects/cgminer/build/CMakeFiles/CMakeScratch/TryCompile-e4xqG5/src.c
+        [2/2] : && /usr/bin/gcc  -rdynamic CMakeFiles/cmTC_9c549.dir/src.c.o -o cmTC_9c549   && :
+        /usr/bin/ld: /usr/local/lib/libjansson.so.4: no version information available (required by /usr/bin/ld)
+        
+      exitCode: 0
+...

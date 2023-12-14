@@ -1,0 +1,113 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 660,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 668,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 673,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 679,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "lib",
+			"destination" : "/usr/local/lib",
+			"paths" : 
+			[
+				"lib/libjansson.a"
+			],
+			"targetId" : "jansson::@6890427a1f51a3e7e1df",
+			"targetIndex" : 1,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 1,
+			"component" : "dev",
+			"destination" : "/usr/local/include",
+			"paths" : 
+			[
+				"/home/omartini/projects/cgminer/build/include/jansson_config.h",
+				"src/jansson.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "dev",
+			"destination" : "/usr/local/lib/pkgconfig",
+			"paths" : 
+			[
+				"/home/omartini/projects/cgminer/build/jansson.pc"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "dev",
+			"destination" : "/usr/local/lib/cmake/jansson",
+			"paths" : 
+			[
+				"/home/omartini/projects/cgminer/build//CMakeFiles/JanssonConfig.cmake",
+				"/home/omartini/projects/cgminer/build/JanssonConfigVersion.cmake"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "dev",
+			"destination" : "/usr/local/lib/cmake/jansson",
+			"exportName" : "JanssonTargets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "jansson::@6890427a1f51a3e7e1df",
+					"index" : 1
+				}
+			],
+			"paths" : 
+			[
+				"CMakeFiles/Export/d5f2e849cb9fdf5a2656cfa8e339edc1/JanssonTargets.cmake"
+			],
+			"type" : "export"
+		}
+	],
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	}
+}

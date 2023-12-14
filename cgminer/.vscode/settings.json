@@ -1,0 +1,7 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "typesafe_cb.h": "c"
+    },
+    "cmake.sourceDirectory": "/home/omartini/projects/cgminer/compat/jansson-2.9"
+}
