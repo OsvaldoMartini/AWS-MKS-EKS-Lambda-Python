@@ -2,49 +2,38 @@ from flask import Flask, render_template, request, flash, redirect, jsonify
 import config, csv, datetime
 from binance.client import Client
 from binance.enums import *
-import ccxt
 from pprint import pprint
+import json
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = b'NzU4udKNZ1bl3VM5VpYlEG2S9FstbmeYwv5ZTnWOcZxfS4cQf4dQmhSJRpRwihar'
 
-#client = Client(config.API_KEY, config.API_SECRET, tld='us')
-#client.options = {'defaultType': 'future'}
-
-
-binanceClient = ccxt.binance({
-    'apiKey': config.API_KEY,
-    'secret': config.API_SECRET,
-    'verbose': 'true',
-    'headers': {
-      'X-MBX-APIKEY': config.API_KEY,
-    },
-    'options': {
-      'defaultType': 'spot',
-      # defaultType: 'future',
-    },
-  });
-
+client = Client(config.API_KEY, config.API_SECRET)
 
 
 @app.route('/')
 def index():
     title = 'CoinView'
 
-    # account = binanceClient.fetchOpenOrders("BTC/USDT")
-    account = binanceClient.fetchBalance()
-
-   # print(len([coin for coin, balance in binanceClient.fetch_balance()
-   #    ['total'].items() if balance > 0]))
-
-    pprint(account)
+    account = client.get_account()
 
     balances = account['balances']
 
-    exchange_info = binanceClient.get_exchange_info()
+    pprint(balances)
+
+    balances = [each for each in balances if float(each.get('free')) > 0]
+
+    # filter(lambda c: c[1] > 300000000, balances)
+    #balances = filter(lambda x: x.get('asset', {}).get('free') > 0, balances)
+    # [{'infos': {'foo': 'bar', 'spam': 'eggs'}, 'name': 'Bob'}]
+    
+    pprint(balances)
+
+    exchange_info = client.get_exchange_info()
     symbols = exchange_info['symbols']
 
-    return render_template('index.html', title=title, my_balances=balances, symbols=symbols)
+    return render_template('index.html', title=title, my_balances=balances, symbols=symbols, balances=balances)
 
 
 @app.route('/buy', methods=['POST'])
