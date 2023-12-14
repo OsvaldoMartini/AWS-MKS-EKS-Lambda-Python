@@ -4,7 +4,7 @@ from binance.client import Client
 from binance.enums import *
 
 app = Flask(__name__)
-app.secret_key = b'somelongrandomstring'
+app.secret_key = b'NzU4udKNZ1bl3VM5VpYlEG2S9FstbmeYwv5ZTnWOcZxfS4cQf4dQmhSJRpRwihar'
 
 client = Client(config.API_KEY, config.API_SECRET, tld='us')
 
