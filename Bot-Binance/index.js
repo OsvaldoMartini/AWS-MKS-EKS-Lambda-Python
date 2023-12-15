@@ -14,15 +14,22 @@ const tick = async (config, binanceClient) => {
 
   const result = await Promise.all([
     axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+      // "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+      // "wss://stream.binance.com:9443/stream?streams=ethusdt@kline_1m/btcusdt@kline_1m/bnbusdt@kline_1m/ethbtc@kline_1m"
+      //"https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT"
+      "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
     ),
-    axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd"
-    ),
+    // axios.get(
+    //   "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd"
+    //   // "wss://stream.binance.com:9443/stream?streams=ethusdt@kline_1m/btcusdt@kline_1m/bnbusdt@kline_1m/ethbtc@kline_1m"
+    // ),
   ]);
 
+  result[1] = "0.999809";
+
   // Give us the Price in the Unit we want
-  const marketPrice = result[0].data.bitcoin.usd / result[1].data.tether.usd;
+  //const marketPrice = result[0].data.bitcoin.usd / result[1].data.tether.usd;
+  const marketPrice = result[0].data.price / result[1];
   // Calulcating the Parameters for the new order
   const sellPrice = marketPrice * (1 + spred);
   const buyPrice = marketPrice * (1 - spred);
@@ -56,7 +63,7 @@ const run = () => {
     asset: "BTC",
     base: "USDT",
     allocation: 0.1, //Percentage of our  portfolio to allocate for each trade
-    spred: 0.2, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
+    spred: 0.005, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
     tickInterval: 2000, // every 2 seconds evaluate  goig to sell or buy the limit order of the preious ticket  and create new one
   };
 
