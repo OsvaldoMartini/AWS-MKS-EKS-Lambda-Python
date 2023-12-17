@@ -35,6 +35,7 @@ app.layout = html.Div([
   Output("price-ticker","children"),
   Input("update", "n_intervals")
 )
+
 def input_data(intervals):
  conn = sqlite3.connect("./data.db")
  cursor = conn.cursor()
