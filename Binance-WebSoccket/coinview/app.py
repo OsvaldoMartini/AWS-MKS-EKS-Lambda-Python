@@ -16,9 +16,9 @@ client = Client(config.API_KEY, config.API_SECRET)
 def index():
     title = 'CoinView'
 
-    account = client.get_account()
+    # account = client.get_account()
 
-    balances = account['balances']
+    balances = [] # account['balances']
 
     pprint(balances)
 

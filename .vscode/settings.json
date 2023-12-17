@@ -6,5 +6,7 @@
   "python.testing.nosetestsEnabled": false,
   "python.testing.pytestEnabled": true,
   "liveServer.settings.port": 5502,
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "cmake.sourceDirectory": "D:/Projects DevOps/AWS MKS EKS Lambda Python/cgminer/compat/jansson-2.9",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

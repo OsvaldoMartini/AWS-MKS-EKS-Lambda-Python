@@ -16,8 +16,8 @@ const tick = async (config, binanceClient) => {
     axios.get(
       // "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
       // "wss://stream.binance.com:9443/stream?streams=ethusdt@kline_1m/btcusdt@kline_1m/bnbusdt@kline_1m/ethbtc@kline_1m"
-      //"https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT"
-      "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
+      "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000BONKUSDT"
+      // "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
     ),
     // axios.get(
     //   "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd"
@@ -60,7 +60,7 @@ const tick = async (config, binanceClient) => {
 
 const run = () => {
   const config = {
-    asset: "BTC",
+    asset: "1000BONK",
     base: "USDT",
     allocation: 0.1, //Percentage of our  portfolio to allocate for each trade
     spred: 0.005, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
@@ -75,8 +75,8 @@ const run = () => {
       "X-MBX-APIKEY": process.env.API_KEY,
     },
     options: {
-      defaultType: "spot",
-      //defaultType: "future",
+      //defaultType: "spot",
+      defaultType: "future",
     },
   });
 
