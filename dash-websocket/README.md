@@ -1,3 +1,23 @@
+
+## Volume of Trades
+```bash
+{
+   "e":"aggTrade",        // Event Type
+   "E":1702830947421,     // Event Time
+   "s":"BTCUSDT",         // Symbol
+   "a":2791963107,        // Aggreagte ID
+   "p":"41964.04000000",  // Price
+   "q":"0.00116000",      // Quantity
+   "f":3325180258,        // First trade ID
+   "l":3325180258,        // Last trade ID
+   "T":1702830947419,     // Trade Time
+   "m":true,              // Is the buyer the market maker?
+   "M":true               // Ignore
+}
+
+```
+
+
 ## Installations
 
 ## Boots Whatch CYBORG
