@@ -1,4 +1,5 @@
 from dash import html, dcc, Output, Input, Dash, State
+import dash_bootstrap_components as dbc
 import sqlite3
 import time
 # import pandas
@@ -11,15 +12,20 @@ default_fig = dict(
   data=[{'x':[],'y':[]}],
   layout=dict(
     xaxis=dict(range=[-1,1]),
-    yaxis=dict(range=[0,8000]),
+    yaxis=dict(range=[0,8000], color="white"),
+    paper_bgcolor="#2D2D2D",
+      plot_bgcolor="#2D2D2D"
     ))
 
 
-app = Dash()
+app = Dash(external_stylesheets=[dbc.themes.CYBORG])
 
 app.layout = html.Div([
   
-  html.H1(id="price-ticker"),
+  html.H1(id="price-ticker",
+          style={"text-align": "center",
+                 "padding-top":"120px",
+                 "padding-bottom":"40px"}),
   dcc.Graph(id="graph",figure=default_fig),
   dcc.Interval(id="update", interval = update_frequency),
 ])
