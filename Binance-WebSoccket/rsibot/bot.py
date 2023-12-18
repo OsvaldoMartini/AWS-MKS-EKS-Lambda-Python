@@ -3,7 +3,7 @@ import config
 from binance.client import Client
 from binance.enums import *
 
-SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
+SOCKET = "wss://stream.binance.com:9443/ws/bonkusdt@kline_1m"
 
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
