@@ -8,7 +8,7 @@ SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'ETHUSD'
+TRADE_SYMBOL = '1000BONKUSDT'
 TRADE_QUANTITY = 0.05
 
 closes = []
