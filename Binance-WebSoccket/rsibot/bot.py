@@ -64,9 +64,10 @@ def on_message(ws, message):
                 if in_position:
                     print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
-                    order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
-                    if order_succeeded:
-                        in_position = False
+                    # order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
+                    # if order_succeeded:
+                    #     in_position = False
+                    in_position = False
                 else:
                     print("It is overbought, but we don't own any. Nothing to do.")
             
@@ -76,9 +77,10 @@ def on_message(ws, message):
                 else:
                     print("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
-                    if order_succeeded:
-                        in_position = True
+                    # order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
+                    # if order_succeeded:
+                    #     in_position = True
+                    in_position = True
 
                 
 ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
