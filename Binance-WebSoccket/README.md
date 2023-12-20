@@ -58,6 +58,34 @@ set FLASK_ENV=development //(for windows)
 $ flask run
 ```
 
+## Trhoubleshooting TA-LIB
+
+
+# INSIDE OF THE VS2015 (OR LATER ) NATIVE TOOLS
+[HOW TO INSTALL TA-LIB ON WINDOWS](https://pypi.org/project/TA-Lib/)
+
+```bash
+Download ta-lib-0.4.0-msvc.zip and unzip to C:\ta-lib.
+
+This is a 32-bit binary release. If you want to use 64-bit Python, you will need to build a 64-bit version of the library. Some unofficial (and unsupported) instructions for building on 64-bit Windows 10, here for reference:
+
+Download and Unzip ta-lib-0.4.0-msvc.zip
+Move the Unzipped Folder ta-lib to C:\
+Download and Install Visual Studio Community (2015 or later)
+Remember to Select [Visual C++] Feature
+Build TA-Lib Library
+From Windows Start Menu, Start [VS2015 x64 Native Tools Command Prompt]
+Move to C:\ta-lib\c\make\cdr\win32\msvc
+Build the Library nmake
+```
+
+# AFTER TRY TO RUN ON WINDOWS AGAIN
+```bash
+pip install -r requirements.txt
+```
+
+
+
 ## TA-LIB
 [TA-LIB](https://ta-lib.github.io/ta-lib-python/install.html)
 ```bash
