@@ -284,8 +284,33 @@ If there is no error in your code or C program then the compiler will successful
 ls -l demo*
 ```
 
-## NVIDIA or Video Vard Versionadn Model and Name
+# Install Linux Distro on Windows
 ```bash
+  wsl --install
+
+
+  GUI
+sudo apt install gnome
+```
+
+## NVIDIA or Cideo Vard Versionadn Model and Name
+```bash
+ubuntu-drivers devices
+
+# Linux Ubuntu 
+$ sudo apt install inxi
+
+$ inxi -Gx
+  Graphics:  Device-1: NVIDIA GP104 [GeForce GTX 1080] vendor: ASUSTeK driver: nvidia v: 435.21 bus ID: 01:00.0 
+            Display: server: X.Org 1.20.5 driver: nvidia resolution: 3440x1440~75Hz 
+            OpenGL: renderer: GeForce GTX 1080/PCIe/SSE2 v: 4.6.0 NVIDIA 435.21 direct render: Yes
+
+
+
+
+lspci | grep VGA
+
+
 wmic path win32_VideoController get name
     Trigger 6 External Graphics
     Trigger 6 External Graphics
