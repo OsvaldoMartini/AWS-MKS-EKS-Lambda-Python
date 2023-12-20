@@ -3,16 +3,17 @@ import config
 from binance.client import Client
 from binance.enums import *
 
-SOCKET = "wss://stream.binance.com:9443/ws/bonkusdt@kline_1m"
+SOCKET_SPOT = "wss://stream.binance.com:9443/ws/bonkusdt@kline_1s"
 
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'BONKUSDT'
+TRADE_SYMBOL = '1000BONKUSDT'
 TRADE_QUANTITY = 0.05
 
 closes = []
 in_position = False
+
 
 client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 
@@ -39,7 +40,7 @@ def on_message(ws, message):
     
     print('received message')
     json_message = json.loads(message)
-    pprint.pprint(json_message)
+    # pprint.pprint(json_message)
 
     candle = json_message['k']
 
@@ -83,5 +84,5 @@ def on_message(ws, message):
                     in_position = True
 
                 
-ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
+ws = websocket.WebSocketApp(SOCKET_SPOT, on_open=on_open, on_close=on_close, on_message=on_message)
 ws.run_forever()
