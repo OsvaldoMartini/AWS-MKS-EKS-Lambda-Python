@@ -4,6 +4,13 @@ const ccxt = require("ccxt");
 require("axios-debug-log");
 const axios = require("axios");
 
+const MARKET_TYPE = "spot";
+// const MARKET_TYPE = "margin";
+//  const  MARKET_TYPE = "future";
+
+const ASSET = "BTC";
+const BASE = "USDT";
+
 const tick = async (config, binanceClient) => {
   const { asset, base, spred, allocation } = config;
   const market = `${asset}/${base}`;
@@ -77,7 +84,7 @@ const tick = async (config, binanceClient) => {
   // Extract Tether
   const baseBalance = balances.free[base]; // Initial balance of Tether
   //Calculates the Sell Volume
-  const sellVolume = (baseBalance * allocation) / marketPrice;
+  const sellVolume = assetBalance / allocation;
 
   //Calculates the Buy Volume
   const buyVolume = (baseBalance * allocation) / marketPrice;
@@ -108,12 +115,16 @@ const tick = async (config, binanceClient) => {
     );
     // user was successfully created
     console.log(`
-  	New tick for ${market}
-  	Created limit sell order for ${sellVolume}@${sellPrice}
-  `);
+      New tick for SELL ${market}
+      Created limit sell order for ${sellVolume}@${sellPrice}
+    `);
 
     // business logic goes here
   } catch (error) {
+    console.log(`
+      New tick for SELL ${market}
+      Created limit sell order for ${sellVolume}@${sellPrice}
+    `);
     console.error(error); // from creation
   }
 
@@ -131,11 +142,15 @@ const tick = async (config, binanceClient) => {
     );
     // user was successfully created
     console.log(`
-  New tick for ${market}
-  Created limit buy order for ${sellVolume}@${buyPrice}
-  `);
+    New tick for BUY ${market}
+    Created limit buy order for ${sellVolume}@${buyPrice}
+    `);
     // business logic goes here
   } catch (error) {
+    console.log(`
+    New tick for BUY ${market}
+    Created limit buy order for ${sellVolume}@${buyPrice}
+    `);
     console.error(error); // from creation
   }
 };
@@ -144,8 +159,8 @@ const run = () => {
   const config = {
     // asset: "1000BONK",
     // asset: "SEI",
-    asset: "BTC",
-    base: "USDT",
+    asset: ASSET,
+    base: BASE,
     allocation: 4.199, //Percentage of our  portfolio to allocate for each trade
     spred: 0.5, //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
     tickInterval: 2000, // every 2 seconds evaluate  goig to sell or buy the limit order of the preious ticket  and create new one
@@ -159,39 +174,13 @@ const run = () => {
       "X-MBX-APIKEY": process.env.API_KEY,
     },
     options: {
-      //defaultType: "spot",
-      // defaultType: "margin",
-      defaultType: "future",
+      defaultType: MARKET_TYPE,
     },
   });
 
   tick(config, binanceClient);
   setInterval(tick, config.tickInterval, config, binanceClient);
 };
-
-// Spot
-// var binanceSocket = new W3CWebSocket(
-//   "wss://stream.binance.com:9443/ws/btcusdt@kline_1s",
-//   "echo-protocol"
-//   // wss://stream.binance.com:9443/ws/1000bonkusdt@kline_1s
-// );
-
-// binanceSocket.onerror = function () {
-//   console.log("Connection Error");
-// };
-
-// bnbbtc
-// wss://stream.binance.com:9443/ws/bnbbtc@depth
-// btcusdt
-// wss://stream.binance.com:9443/ws/btcusdt@depth
-
-// binanceSocket.onmessage = function (event) {
-//   var message = JSON.parse(event.data);
-
-//   var candlestick = message.k;
-
-//   console.log("Real time: ", candlestick);
-// };
 
 // https://api.binance.com/api/v3/openOrders?symbol=BNBUSDT&recvWindow=4000&timestamp={{timestamp}}&signature=95c0a9af68533202da19f7509a08fa8a557da078f87af9d033d0aee017aff79e
 run();
