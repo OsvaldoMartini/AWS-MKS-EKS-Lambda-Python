@@ -192,6 +192,66 @@ which gcc
 gcc --version
 ```
 
+
+## Search Packages
+```bash
+
+  sudo apt list --installed | grep openssl
+
+  dpkg -l | grep ssl
+
+# MANDATORY FO CMAKE AND G++ / GCC
+sudo apt-get update -y
+
+sudo apt-get install -y libcurl4-openssl-dev
+
+sudo apt-get install -y libssl-dev
+
+```
+
+# curl-config is our friend
+Applications (or actually whoever) that want to find out about the libcurl installation on a particular host, will find a friend in the curl-config tool. (Added in the curl 7.7.2 release.)
+
+- What compiler flags do I need to compile libcurl using source code?
+```bash
+ curl-config --cflags
+```
+- What linker options do I need when I link with libcurl?
+```bash
+ curl-config --libs
+```
+- How do I know if libcurl was built with SSL support?
+```bash
+ curl-config --feature | grep SSL
+```
+- What's the installed libcurl version?
+```bash
+ curl-config --version
+```
+
+
+## Throubleshooting INSTALL CURL  libcurl4-openssl-dev
+```bash
+Step 1
+sudo apt-get update -y
+Step 2
+sudo apt-get install -y libcurl4-openssl-dev
+Step 3
+sudo apt-get install -y libssl-dev
+
+
+## DANGEROUS BECAUSE DELETES THE NETWORK
+# sudo apt-get remove libcurl3-gnutls 
+# sudo apt-get remove --auto-remove libcurl3-gnutls 
+# sudo apt-get purge libcurl3-gnutls 
+# sudo apt-get purge --auto-remove libcurl3-gnutls 
+# sudo apt-get remove curl 
+# sudo apt-get remove --auto-remove curl 
+# sudo apt-get purge curl 
+# sudo apt-get purge --auto-remove curl 
+
+```
+
 ## Throubleshooting libcurl.so.4
 ## Find file  or locate libcurl.so.4 
 ```bash
@@ -326,6 +386,12 @@ wmic path win32_VideoController get DriverVersion
 
 
 ### GCC Version
+## Install GCC and G++ and GDB
+Just run
+```bash
+  sudo apt-get install build-essential gdb
+```
+
 ```bash
 gcc -version
 
@@ -439,7 +505,7 @@ w32tm /resync
 - Step 1: Install Timesync Service
 Timesync is the minimalistic service to synchronize local time with NTP servers. The package contains the systemd-timesyncd system service that may be used to synchronize the local system clock with a remote Network Time Protocol server.
 ```bash
-apt install systemd-timesyncd 
+sudo apt install systemd-timesyncd 
 
 sudo systemctl status systemd-timesyncd 
 ```

@@ -153,7 +153,8 @@ sudo nmap -sT -O 192.168.1.0/24
   sudo iwconfig
 ```
 <span style="color: yellow;">NOTE:</span> Replace wlp3s0 for your wireless card displayed when the command iwconfig was executed.
-Scan Networks
+
+- Scan Networks
 ```bash
 sudo iwlist wlp4s0 scan
 ```

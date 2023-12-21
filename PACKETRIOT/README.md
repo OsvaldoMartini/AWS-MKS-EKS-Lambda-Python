@@ -169,6 +169,25 @@ sudo systemctl restart apache2.service
   sudo pktriot route http add --domain stoic-smoke-42450.pktriot.net --webroot $PWD/var/www/html/source
 ```
 
+## ASUS Dual Boot
+[GRUB DUAL BOOT](https://wiki.debian.org/DualBoot/Windows10)
+```bash
+
+  Window Partidion
+  /dev/nvme0n1p1
+
+
+Debian 12
+sudo nano /etc/default/grub
+  
+GRUB_DISABLE_OS_PROBER=false
+
+sudo update-grub
+
+```
+
+
+
 ## Mount Unmount Drives Linux
 ```bash
  # Create a  dir for the driver
