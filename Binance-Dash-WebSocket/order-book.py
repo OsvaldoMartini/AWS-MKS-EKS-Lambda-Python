@@ -33,19 +33,20 @@ app.layout = html.Div(children=[
   
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
-                    default_value = "0.01", _id = "aggregation-level"),
+                    default_value = "0.0001", _id = "aggregation-level"),
     dropdown_option("Pair", options = ["ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
-                    default_value = "BTCUSDT", _id = "pair-select"),
-    dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "6"],
-                    default_value = "5", _id = "quantity-precision"),
+                    default_value = "BAKEUSDT", _id = "pair-select"),
+    dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5"],
+                    default_value = "3", _id = "quantity-precision"),
     dropdown_option("Price Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
-                    default_value = "2", _id = "price-precision"),
+                    default_value = "4", _id = "price-precision"),
   ], style = {"padding-left":"100px"}),
   ], style = {"display": "flex",
               "justify-content": "center",
               "align-items": "center",
               "height":"100vh",}), 
- dcc.Interval(id="timer", interval=3000),
+
+ dcc.Interval(id="timer", interval=2000),
 ])
 
 
@@ -153,7 +154,8 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
 
 def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_intervals):
   
-  url = "https://api.binance.com/api/v3/depth"
+  # url = "https://api.binance.com/api/v3/depth"
+  url = "https://fapi.binance.com/fapi/v1/depth"
   
   levels_to_show = 10
   
@@ -177,7 +179,7 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   
   
   #  Middle Price
-  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2 
+  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[-1])/2 
   # mid_price_precision = inf(quantity_precision) + 2 
   mid_price = f"%.{quantity_precision}f" % mid_price 
   
