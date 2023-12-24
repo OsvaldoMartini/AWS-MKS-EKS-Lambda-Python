@@ -58,9 +58,43 @@ def table_styling(df, side):
     bar_color = "rgba(13, 230, 49, 0.2)"
     font_color = "rgb(13, 230, 49)"
     
+    
+  n_bins = 25 # This could Change
+  bounds = [i * (1.0 / n_bins) for i in range(n_bins + 1)]
+  
+  quantity = df.quantity.astype(float)
+  ranges = [ ((quantity.max() - quantity.min()) * i) + quantity.min() for i in bounds ]
+    
   cell_bg_color = "#060606"
   
   styles = []
+  
+  for i in range(1, len(bounds)):
+    min_bound = ranges[i-1]
+    max_bound = ranges[i]
+    max_bound_percentage = bounds[i] * 100
+    styles.append({
+      
+      "if": {
+        "filter_query": ("{{quantity}} >= {min_bound}" +
+                         (" && {{quantity}} < {max_bound}" if ((i < len(bounds)) -1) else "")
+                         ).format(min_bound = min_bound, max_bound=max_bound),
+        "column_id": "quantity"
+      },
+      "background": (
+        """
+          linear-gradient(270deg,
+          {bar_color} 0%,
+          {bar_color} {max_bound_percentage}%,
+          {cell_bg_color} {max_bound_percentage}%
+          {cell_bg_color} 100%)
+        """.format(bar_color = bar_color, cell_bg_color=cell_bg_color,
+                   max_bound_percentage=max_bound_percentage),
+      ),
+        "paddingBottom":2,
+        "paddingTop":2,
+    })
+  
   
   styles.append({
     "if": {"column_id": "price"},
