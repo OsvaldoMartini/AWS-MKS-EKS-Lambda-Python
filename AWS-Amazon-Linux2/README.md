@@ -192,6 +192,37 @@ which gcc
 gcc --version
 ```
 
+## Install Homebrew
+- Update apt cache and optionally do a full upgrade
+```bash
+ apt update
+ apt full-upgrade # optional, reboot if needed
+```
+- Install build tools
+```bash
+ apt install build-essential procps curl file git
+```
+
+- Install homebrew:
+```bash
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+- Set brew environment variables
+```bash
+
+ [ -d /home/linuxbrew/.linuxbrew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+```
+ # You most likely want to add the above line to your shell startup file as well.
+- Make brew doctor happy
+```bash
+ brew doctor
+``` 
+ # Ignore the warning about config scripts
+Install gcc (as recommended by the installer script)
+
+ brew install gcc
+
+
 
 ## Search Packages
 ```bash
@@ -199,6 +230,36 @@ gcc --version
   sudo apt list --installed | grep openssl
 
   dpkg -l | grep ssl
+```
+
+# INSTALL THIS  MANDATORY TO CGMINER WORK
+[READ THIS CGMINER](https://cgminer.info/documentation/arguments/)
+[OpenCL Enable](sudo apt-get install ocl-icd-opencl-dev)
+
+```bash
+sudo apt-get install build-essential autoconf automake libtool pkg-config \
+                             libcurl4-openssl-dev libudev-dev libusb-1.0-0-dev \
+                             libncurses5-dev
+
+sudo apt-get install ocl-icd-opencl-dev
+
+sudo ./autogen.sh --enable-opencl
+
+```
+
+## NVIDIA  Detect
+[INSTALL DRIVERS](https://unix.stackexchange.com/questions/320384/how-to-install-nvidia-driver-on-debian-and-switch-between-drivers)
+
+[NVIDIA](https://linuxconfig.org/how-to-install-nvidia-driver-on-debian-12-bookworm-linux)
+ - Step 1
+Enable the non-free and contrib repository.As an administrative user open the /etc/apt/sources.list and add the non-free repository. For example change the repository definition:
+```bash
+FROM:
+deb http://ftp.au.debian.org/debian/ buster main
+TO:
+deb-src http://ftp.au.debian.org/debian/ buster main non-free contrib
+```
+
 
 # MANDATORY FO CMAKE AND G++ / GCC
 sudo apt-get update -y
@@ -206,6 +267,14 @@ sudo apt-get update -y
 sudo apt-get install -y libcurl4-openssl-dev
 
 sudo apt-get install -y libssl-dev
+
+#sudo apt-get install -y libgnutls-openssl
+
+apt-get install build-essential libapr1-dev libssl-dev
+
+sudo apt-get install -y libgnutls-openssl27
+
+sudo apt-get install -y libxmlsec1-openssl
 
 ```
 

@@ -46,6 +46,7 @@ fetch("http://localhost:5000/history")
 // Spot
 var binanceSocket = new WebSocket(
   "wss://stream.binance.com:9443/ws/btcusdt@kline_1s"
+  // wss://stream.binance.com:9443/ws/1000bonkusdt@kline_1s
 );
 
 // bnbbtc

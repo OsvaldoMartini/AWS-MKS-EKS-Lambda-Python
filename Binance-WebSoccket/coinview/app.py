@@ -16,9 +16,9 @@ client = Client(config.API_KEY, config.API_SECRET)
 def index():
     title = 'CoinView'
 
-    # account = client.get_account()
+    account = client.get_account()
 
-    balances = [] # account['balances']
+    balances = account['balances']
 
     pprint(balances)
 
@@ -29,6 +29,10 @@ def index():
     # [{'infos': {'foo': 'bar', 'spam': 'eggs'}, 'name': 'Bob'}]
     
     pprint(balances)
+        
+    positions = client.futures_account()['positions']
+    
+    pprint(positions)
 
     exchange_info = client.get_exchange_info()
     symbols = exchange_info['symbols']
