@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import math
 import warnings
-
+from datetime import datetime
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -20,6 +20,9 @@ def dropdown_option(title, options, default_value, _id):
     ])
 
 app.layout = html.Div(children=[
+ 
+ dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
+    html.H1(id='timer_display', children=''),
  
  html.Div(children=[
   html.Div(children=[
@@ -52,6 +55,32 @@ app.layout = html.Div(children=[
 
  dcc.Interval(id="timer", interval=2000),
 ])
+
+@app.callback(
+    # Output('label1', 'children'),
+    # Input('interval1', 'n_intervals')
+    Output("timer_display", "children"),
+    Input("interval-component", "n_intervals"),
+)
+
+def update_interval(n):
+  
+  current_time = datetime.now().time()
+
+  
+  print(current_time.strftime('%H-%M-%S'))
+  
+  # time_interval_s = 120
+  # time_interval_ms = time_interval_s * 1000
+
+  # #calculate remaining time in ms
+  # remaining = time_interval_ms - (n * 100)
+
+  # minute = (remaining // 60000)
+  # second = (remaining % 60000) // 1000
+  # milisecond = (remaining % 1000) // 10
+  # return u'{:02d}:{:02d}.{:02d}'.format(minute, second, milisecond)
+  return current_time.strftime('%H-%M-%S')
 
 
 def table_styling(df, side):
@@ -175,9 +204,9 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   
 #  Middle Price
   mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
-  print(bid_df.price)
+  # print(bid_df.price)
   print("Largest BID: " ,bid_df.price.iloc[0])
-  print(ask_df.price) 
+  # print(ask_df.price) 
   print("Smallest ASK: " ,ask_df.price.iloc[0])
   mid_price_precision = int(quantity_precision) + 2 
   mid_price = f"%.{mid_price_precision}f" % mid_price 
