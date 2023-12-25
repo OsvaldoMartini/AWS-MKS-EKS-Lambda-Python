@@ -8,8 +8,8 @@ SOCKET_SPOT = "wss://stream.binance.com:9443/ws/bonkusdt@kline_1s"
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = '1000BONKUSDT'
-TRADE_QUANTITY = 0.05
+TRADE_SYMBOL = 'BONKUSDT'
+TRADE_QUANTITY = 5000
 
 closes = []
 in_position = False
@@ -19,7 +19,7 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 
 def order(side, quantity, symbol,order_type=ORDER_TYPE_MARKET):
     try:
-        print("sending order")
+        print("sending order  SIDE {} QRT {} ".format( side, quantity ))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
         print(order)
     except Exception as e:
@@ -46,6 +46,11 @@ def on_message(ws, message):
 
     is_candle_closed = candle['x']
     close = candle['c']
+    
+    
+    # info = client.get_symbol_info('BONKUSDT')
+    # print(info)
+    # print(info['filters'][2]['minQty'])
 
     if is_candle_closed:
         print("candle closed at {}".format(close))
@@ -65,10 +70,9 @@ def on_message(ws, message):
                 if in_position:
                     print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
-                    # order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
-                    # if order_succeeded:
-                    #     in_position = False
-                    in_position = False
+                    order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
+                    if order_succeeded:
+                        in_position = False
                 else:
                     print("It is overbought, but we don't own any. Nothing to do.")
             
@@ -78,11 +82,10 @@ def on_message(ws, message):
                 else:
                     print("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    # order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
-                    # if order_succeeded:
-                    #     in_position = True
-                    in_position = True
-
+                    order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
+                    if order_succeeded:
+                        in_position = True
+                    
                 
 ws = websocket.WebSocketApp(SOCKET_SPOT, on_open=on_open, on_close=on_close, on_message=on_message)
 ws.run_forever()

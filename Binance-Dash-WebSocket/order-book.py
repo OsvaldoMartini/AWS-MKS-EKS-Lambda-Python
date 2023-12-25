@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, Input, Output, State, callback, dash_table
+from dash import Dash, dcc, html, Input, Output, State, callback, dash_table, ctx
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
@@ -8,10 +8,71 @@ import requests
 import math
 import warnings
 from datetime import datetime
+import config
+from binance.client import Client
+from binance.enums import *
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 app = Dash(external_stylesheets=[dbc.themes.CYBORG])
+
+TRADE_SYMBOL = ""
+TRADE_QUANTITY = "0.7"
+TYPE_ORDER  = "STOP" #"STOP" #"LIMIT" 
+POSITION_SIDE = "BOTH"
+PRICE ="73.350"
+STOP_PRICE = "73.500"
+TIME_IN_FORCE = "GTC"
+WORKING_TYPE = "MARK_PRICE"
+PRICE_PROTECT = "true"
+REDUCE_ONLY = "false"
+# LIMIT
+# MARKET
+# STOP
+# STOP_MARKET
+# TAKE_PROFIT
+# TAKE_PROFIT_MARKET
+# TRAILING_STOP_MARKET
+
+
+client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
+# client.futures_change_margin_type(symbol='ORDIUSDT', marginType='ISOLATED',leverage=5, recvWindow = 60000)
+# client.futures_change_margin_type(symbol='ORDIUSDT', marginType='CROSSED', leverage=5, recvWindow = 60000)
+# client.change_leverage(symbol="BTCUSDT", leverage=5, recvWindow = 60000)
+def adjust_leverage(symbol, client):
+    client.futures_change_leverage(symbol=symbol, leverage=10)
+
+def adjust_margintype(symbol, client):
+    client.futures_change_margin_type(symbol=symbol, marginType='ISOLATED')
+
+
+# def order(side, quantity, symbol,order_type,reduceOnly,positionSide,workingType,price,stopPrice,priceProtect ):
+def order(symbol, side, typeOrder, timeInForce, quantity, price, stop_price):
+    print("Side {} Symbol {} Price {} Quantity {}".format(side,symbol, price, quantity))
+    
+    try:
+        print("sending order")
+        timestamp = datetime.now().timestamp()
+        #  order = client.new_order(
+        # binance_client.futures_get_open_orders(symbol='BTCUSDT')  
+        order = client.futures_create_order(
+          symbol=symbol, 
+          side=side, 
+          type=typeOrder, 
+          timeInForce=timeInForce, 
+          quantity=quantity, 
+          price=price, 
+          stopPrice=stop_price,
+          timestamp = timestamp,
+          recvWindow = 60000)
+
+        # order = client.create_order(symbol=symbol, side=side, type=typeOrder, timeInForce=timeInForce, quantity=quantity, price=price, stopPrice=stop_price)
+        print(order)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+        return False
+
+    return True
 
 def dropdown_option(title, options, default_value, _id):
   
@@ -28,10 +89,24 @@ app.layout = html.Div(children=[
  dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
     html.H1(id='timer_display', children='', style = {"positon":"relative","top":"0px"}),
     html.Div(children=[
-      html.H4(id='symbol-bet', children=''),
-      html.Div(dcc.Input(id='input-on-submit', type='text'))
+      # html.H4(id='symbol-bet', children=''),
+      html.Div(dcc.Input(id='symbol-bet', type='text'), style={'width':'0.05%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center'}
+            ),
+      html.Div(dcc.Input(id='input-on-submit', type='text'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
+            ),
     ]),
-    html.Button('Submit', id='submit-val', n_clicks=0),
+    html.Button('BUY', id='submit-buy', n_clicks=0, style={
+      "background-color": "#04AA6D", 
+      "border": "none",
+      "color": "white",
+      "width":"100px"
+    }),
+    html.Button('SELL', id='submit-sell', n_clicks=0, style={
+      "background-color": "#f44336", 
+      "border": "none",
+      "color": "white",
+      "width":"100px"
+      }),
     html.Div(id='container-button-basic',
              children='Enter a value and press submit'),
  
@@ -52,7 +127,7 @@ app.layout = html.Div(children=[
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
                     default_value = "0.0001", _id = "aggregation-level"),
-    dropdown_option("Pair", options = ["ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
+    dropdown_option("Pair", options = ["AGLDUSDT", "ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
                     default_value = "ORDIUSDT", _id = "pair-select"),
     dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
                     default_value = "3", _id = "quantity-precision"),
@@ -67,10 +142,43 @@ app.layout = html.Div(children=[
  dcc.Interval(id="timer", interval=2000),
 ])
 
+
+# callback #
+@app.callback(
+  Output("symbol-bet", "value"),
+  Input("pair-select", "value")
+)
+
+def update_control(value):
+  TRADE_SYMBOL = value.upper()
+  
+  url_exchangeInfo =   "https://api.binance.com/api/v3/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
+  data = requests.get(url_exchangeInfo).json()
+  
+  TICK_SIZE = 0.0
+  found = False
+  info = data['symbols']
+  for s in range(len(info)):
+      if info[s]['symbol'] == TRADE_SYMBOL:
+          filters = info[s]['filters']
+          for f in range(len(filters)):
+              if filters[f]['filterType'] == 'PRICE_FILTER':
+                  TICK_SIZE = float(filters[f]['tickSize'])
+                  found = True
+                  break
+          break
+  if found:
+      print("TICK SIZE found", TICK_SIZE)        
+  else:
+      print(f"tick_size not found for {TRADE_SYMBOL}")
+  
+  return value
+
+
 # callback #1
 @app.callback(
   Output("store", "data"),
-  Input("input", "value"),
+  Input("input", "value")
 )
 def update_store(value):
     if not value:
@@ -97,16 +205,51 @@ def update_style(data):
 
 @callback(
   Output('container-button-basic', 'children'),
-  Input('submit-val', 'n_clicks'),
+  Input('submit-buy', 'n_clicks'),
+  Input('submit-sell', 'n_clicks'),
   State('input-on-submit', 'value'),
+  State('symbol-bet', 'value'),
   prevent_initial_call=True
 )
 
-def update_output(n_clicks, value):
-  return 'BUY - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(
-      value,
-      n_clicks
-  )
+def update_output(buy_click, sell_click, price, symbol):
+  msg = "None of the buttons have been clicked yet"
+  # print("Price ", price)
+  # print("Symbol ", symbol)
+  
+  if "submit-buy" == ctx.triggered_id:
+    #  put binance buy logic here
+    # order(side, quantity, symbol,order_type,reduceOnly,positionSide,workingType,price,stopPrice,priceProtect ):
+    order_succeeded = order(
+      symbol,
+      "BUY", 
+      TYPE_ORDER,
+      TIME_IN_FORCE,
+      TRADE_QUANTITY, 
+      price,
+      STOP_PRICE
+      )
+    if order_succeeded:
+      in_position = False
+    msg = 'BUY - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(price, 0) 
+    print("Buy! Buy! Buy!")
+  elif "submit-sell" == ctx.triggered_id:
+    #  put binance sell logic here
+    order_succeeded = order(
+      symbol,
+      "SELL",
+      TYPE_ORDER,
+      TIME_IN_FORCE,
+      TRADE_QUANTITY, 
+      price,
+      STOP_PRICE
+      )
+    if order_succeeded:
+      in_position = False
+    msg = 'SELL - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(price, 0) 
+    print("Sell! Sell! Sell!")
+
+  return msg
 
 
 @app.callback(
@@ -228,14 +371,12 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Output("ask_table", "style_data_conditional"),
   Output("mid-price", "children"),
   Output("input-on-submit", "value"),
-  Output("symbol-bet", "children"),
   Input("aggregation-level", "value"),
   Input("quantity-precision", "value"),
   Input("price-precision", "value"),
   Input("pair-select", "value"),
   Input("timer", "n_intervals"),
 )
-
 
 def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_intervals):
   
@@ -248,7 +389,7 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
     "symbol":symbol.upper(),
     "limit":"100",
   }
-  
+   
   data = requests.get(url, params=params).json()
   
   bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
@@ -291,9 +432,9 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
      lambda x: f"%.{price_precision}f" % x)
     
   # print(bid_df.to_dict("records"))
-  
+   
   return (bid_df.to_dict("records"), table_styling(bid_df, "bid"),  
-          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price, symbol.upper())
+          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price)
   pass
 
 
