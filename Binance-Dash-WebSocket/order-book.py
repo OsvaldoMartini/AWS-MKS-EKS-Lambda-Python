@@ -1,4 +1,5 @@
-from dash import Dash, html, dcc, Input, Output, dash_table
+from dash import Dash, dcc, html, Input, Output, State, callback, dash_table
+from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from decimal import Decimal
@@ -21,8 +22,18 @@ def dropdown_option(title, options, default_value, _id):
 
 app.layout = html.Div(children=[
  
+ dcc.Input(id="input"),
+ dcc.Store(id="store"),
+ html.P(id="output"),
  dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
-    html.H1(id='timer_display', children=''),
+    html.H1(id='timer_display', children='', style = {"positon":"relative","top":"0px"}),
+    html.Div(children=[
+      html.H4(id='symbol-bet', children=''),
+      html.Div(dcc.Input(id='input-on-submit', type='text'))
+    ]),
+    html.Button('Submit', id='submit-val', n_clicks=0),
+    html.Div(id='container-button-basic',
+             children='Enter a value and press submit'),
  
  html.Div(children=[
   html.Div(children=[
@@ -41,8 +52,8 @@ app.layout = html.Div(children=[
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
                     default_value = "0.0001", _id = "aggregation-level"),
-    dropdown_option("Pair", options = ["AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
-                    default_value = "AXSUSDT", _id = "pair-select"),
+    dropdown_option("Pair", options = ["ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
+                    default_value = "ORDIUSDT", _id = "pair-select"),
     dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
                     default_value = "3", _id = "quantity-precision"),
     dropdown_option("Price Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
@@ -56,19 +67,58 @@ app.layout = html.Div(children=[
  dcc.Interval(id="timer", interval=2000),
 ])
 
+# callback #1
 @app.callback(
-    # Output('label1', 'children'),
-    # Input('interval1', 'n_intervals')
+  Output("store", "data"),
+  Input("input", "value"),
+)
+def update_store(value):
+    if not value:
+        raise PreventUpdate
+    return {
+        "value": value,
+        "style": {
+            "color": "red" if len(value) % 2 == 0 else "blue"
+        }
+    }
+
+# callback #2
+@app.callback(
+  Output("output", "children"),
+  Output("output", "style"),
+  Input("store", "data")
+)
+
+def update_style(data):
+  if not data:
+    raise PreventUpdate
+  return data["value"], data["style"]
+
+
+@callback(
+  Output('container-button-basic', 'children'),
+  Input('submit-val', 'n_clicks'),
+  State('input-on-submit', 'value'),
+  prevent_initial_call=True
+)
+
+def update_output(n_clicks, value):
+  return 'BUY - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(
+      value,
+      n_clicks
+  )
+
+
+@app.callback(
     Output("timer_display", "children"),
     Input("interval-component", "n_intervals"),
 )
 
 def update_interval(n):
-  
+  # current_time = timer.time()
   current_time = datetime.now().time()
-
-  
-  print(current_time.strftime('%H-%M-%S'))
+ 
+  # print(current_time.strftime('%H-%M-%S'))
   
   # time_interval_s = 120
   # time_interval_ms = time_interval_s * 1000
@@ -177,6 +227,8 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Output("ask_table", "data"),
   Output("ask_table", "style_data_conditional"),
   Output("mid-price", "children"),
+  Output("input-on-submit", "value"),
+  Output("symbol-bet", "children"),
   Input("aggregation-level", "value"),
   Input("quantity-precision", "value"),
   Input("price-precision", "value"),
@@ -205,9 +257,9 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
 #  Middle Price
   mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
   # print(bid_df.price)
-  print("Largest BID: " ,bid_df.price.iloc[0])
+  # print("Largest BID: " ,bid_df.price.iloc[0])
   # print(ask_df.price) 
-  print("Smallest ASK: " ,ask_df.price.iloc[0])
+  # print("Smallest ASK: " ,ask_df.price.iloc[0])
   mid_price_precision = int(quantity_precision) + 2 
   mid_price = f"%.{mid_price_precision}f" % mid_price 
   
@@ -240,10 +292,8 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
     
   # print(bid_df.to_dict("records"))
   
-  
-  
   return (bid_df.to_dict("records"), table_styling(bid_df, "bid"),  
-          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price)
+          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price, symbol.upper())
   pass
 
 
