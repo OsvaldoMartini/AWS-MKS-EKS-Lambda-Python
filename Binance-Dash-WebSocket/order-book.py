@@ -161,13 +161,19 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   
   params = {
     "symbol":symbol.upper(),
-    "limit":"1000",
+    "limit":"100",
   }
   
   data = requests.get(url, params=params).json()
   
   bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
   ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
+  
+  #  Middle Price
+  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2 
+  mid_price_precision = int(quantity_precision) + 2 
+  mid_price = f"%.{quantity_precision}f" % mid_price 
+  
   
   # Bids
   bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
@@ -176,13 +182,7 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   # Asks
   ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
   ask_df = ask_df.sort_values("price", ascending = False) 
-  
-  
-  #  Middle Price
-  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[-1])/2 
-  # mid_price_precision = inf(quantity_precision) + 2 
-  mid_price = f"%.{quantity_precision}f" % mid_price 
-  
+     
   # print(bid_df)
   
   bid_df = bid_df.iloc[:levels_to_show]
