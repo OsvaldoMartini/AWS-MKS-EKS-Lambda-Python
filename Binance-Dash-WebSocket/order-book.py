@@ -5,6 +5,10 @@ from decimal import Decimal
 import pandas as pd
 import requests
 import math
+import warnings
+
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 app = Dash(external_stylesheets=[dbc.themes.CYBORG])
 
@@ -34,9 +38,9 @@ app.layout = html.Div(children=[
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
                     default_value = "0.0001", _id = "aggregation-level"),
-    dropdown_option("Pair", options = ["ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
-                    default_value = "BAKEUSDT", _id = "pair-select"),
-    dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5"],
+    dropdown_option("Pair", options = ["AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
+                    default_value = "AXSUSDT", _id = "pair-select"),
+    dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
                     default_value = "3", _id = "quantity-precision"),
     dropdown_option("Price Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
                     default_value = "4", _id = "price-precision"),
@@ -169,12 +173,16 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
   ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
   
-  #  Middle Price
-  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2 
+#  Middle Price
+  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
+  print(bid_df.price)
+  print("Largest BID: " ,bid_df.price.iloc[0])
+  print(ask_df.price) 
+  print("Smallest ASK: " ,ask_df.price.iloc[0])
   mid_price_precision = int(quantity_precision) + 2 
-  mid_price = f"%.{quantity_precision}f" % mid_price 
+  mid_price = f"%.{mid_price_precision}f" % mid_price 
   
-  
+
   # Bids
   bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
   bid_df = bid_df.sort_values("price", ascending = False) 
@@ -182,7 +190,7 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   # Asks
   ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
   ask_df = ask_df.sort_values("price", ascending = False) 
-     
+ 
   # print(bid_df)
   
   bid_df = bid_df.iloc[:levels_to_show]
