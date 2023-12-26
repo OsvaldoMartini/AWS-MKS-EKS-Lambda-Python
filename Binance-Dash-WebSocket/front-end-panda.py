@@ -83,9 +83,6 @@ def update_figure(n_intervals,coin_pair, timeframe, num_bars, range_values):
   
   data = data.iloc[range_values[0]:range_values[1]]
   
-  
-  data= data
-  
   candles = go.Figure(
     data = [
       go.Candlestick(
