@@ -40,7 +40,7 @@ app.layout = html.Div([
   
   dcc.Graph(id="candles"),
   dcc.Graph(id="indicator"),
-  dcc.Interval(id="interval", interval = 1000)
+  dcc.Interval(id="interval", interval = 2000)
 ])
 
 # Change the Value of Range Slider
@@ -72,8 +72,9 @@ def update_figure(n_intervals,symbol, timeframe, num_bars, range_values):
   
   # data = client.get_historical_klines(symbol=symbol, start_str=start_str, interval="1m")
   # data = client.futures_klines(symbol=symbol.upper(), interval="1m", start_str = "14 days ago UTC")
-  data = client.futures_klines(symbol=symbol.upper(), interval="1m", startTime = "10 days ago UTC", limit=100)
-  
+  # data = client.futures_klines(symbol=symbol.upper(), interval="1m", startTime = "10 days ago UTC", limit=100)
+  data = client.futures_klines(symbol=symbol.upper(), interval="1m", limit=100)
+    
   
     # params = {
   #   "symbol":symbol,
@@ -99,15 +100,18 @@ def update_figure(n_intervals,symbol, timeframe, num_bars, range_values):
   data["timestamp"]  = [pd.to_datetime(x, unit='ms').strftime('%Y-%m-%d %H:%M:%S') for x in data.open_time]
   # data.timestamp = pd.to_datetime(data.open_time, unit = "s")
     
+    
+  print("data  .. ", data["timestamp"])  
+    
   # Calculating the RSI
   # 14 Days windows to be calculated 
   data["rsi"] = ta.rsi(data.close.astype(float))
   # 14 Days windows to be calculated for Warmer base
   # It DEPENDS WHERE COME FROM DE DATA 
-  data = data.iloc[5:]
+  data = data.iloc[14:]
   data = data.iloc[range_values[0]:range_values[1]]
   
-  print(data)
+  # print(data)
   
   candles = go.Figure(
     data = [
