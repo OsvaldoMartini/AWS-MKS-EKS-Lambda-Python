@@ -111,5 +111,5 @@ def update_figure(n_intervals,coin_pair, timeframe, num_bars, range_values):
   return candles, indicator
  
 if __name__ == "__main__":
-  app.run_server(debug=True)
+  app.run_server(debug=True, port=8060)
   
