@@ -127,8 +127,8 @@ app.layout = html.Div(children=[
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
                     default_value = "0.0001", _id = "aggregation-level"),
-    dropdown_option("Pair", options = ["AGLDUSDT", "ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
-                    default_value = "ORDIUSDT", _id = "pair-select"),
+    dropdown_option("Pair", options = ["AGLDUSDT", "BSVUSDT","ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
+                    default_value = "BSVUSDT", _id = "pair-select"),
     dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
                     default_value = "3", _id = "quantity-precision"),
     dropdown_option("Price Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
