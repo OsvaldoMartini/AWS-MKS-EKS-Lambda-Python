@@ -4,7 +4,7 @@
 		{
 			"label": "G3 BUID CGMINER",
 			"type": "shell",
-			"command": "g++",
+			"command": "gcc",
 			"args": [
 				"-g3",
 				"-Wall",
