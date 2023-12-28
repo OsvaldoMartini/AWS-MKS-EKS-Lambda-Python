@@ -17,7 +17,7 @@ cursor.execute("CREATE INDEX index_time ON trades (time)")
 conn.commit()
 conn.close()
 
-url = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
+url = "wss://stream.binance.com:9443/ws/bonkusdt@aggTrade"
 # url = "wss://stream.binance.com:9443/stream?streams=ethusdt@kline_1m/btcusdt@kline_1m/bnbusdt@kline_1m/ethbtc@kline_1m"
 
 

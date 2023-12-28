@@ -9,7 +9,7 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BONKUSDT'
-TRADE_QUANTITY = 5000
+TRADE_QUANTITY = 50
 
 closes = []
 in_position = False
@@ -20,12 +20,10 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 def order(side, quantity, symbol,order_type=ORDER_TYPE_MARKET):
     try:
         print("sending order  SIDE {} QRT {} ".format( side, quantity ))
-        order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity)
+        order = client.create_order(symbol=symbol, side=side, type=order_type, quantity=quantity, recvWindow = 60000)
         print(order)
     except Exception as e:
         print("an exception occured - {}".format(e))
-        return False
-
     return True
 
     

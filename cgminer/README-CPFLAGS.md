@@ -57,7 +57,24 @@ Installation...........: make install (as root if needed, with 'su' or 'sudo')
   prefix...............: /usr/local
 
 
+  export CPPFLAGS=""
+  export CFLAGS="-g -O2 -Wall -march=native -I/opt/AMDAPP/include"
+  export LDFLAGS="-L/opt/AMDAPP/lib/x86_64 -lpthread"
+  export LDADD="-ldl -lcurl   compat/jansson-2.9/src/.libs/libjansson.a -lz -lpthread    -lm  -lrt"
+
+  echo $CPPFLAGS
+  echo $CFLAGS
+  echo $LDFLAGS
+  echo $LDADD
+  
+
 CPPFLAGS="" CFLAGS="-O2 -Wall -march=native -I/opt/AMDAPP/include" LDFLAGS="-L/opt/AMDAPP/lib/x86_64 -lpthread" LDADD="-ldl -lcurl   compat/jansson-2.9/src/.libs/libjansson.a -lz -lpthread    -lm  -lrt" make
+
+OR
+
+CFLAGS="-O2 -msse2" ./configure --enable-cpumining --enable-scrypt --without-libudev
+
+
 
 ```
 
