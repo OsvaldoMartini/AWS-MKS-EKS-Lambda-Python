@@ -17,11 +17,11 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 app = Dash(external_stylesheets=[dbc.themes.CYBORG])
 
 TRADE_SYMBOL = ""
-TRADE_QUANTITY = "0.7"
+TRADE_QUANTITY = "1"
 TYPE_ORDER  = "STOP" #"STOP" #"LIMIT" 
 POSITION_SIDE = "BOTH"
 PRICE ="73.350"
-STOP_PRICE = "73.500"
+STOP_PRICE_PERC = 5
 TIME_IN_FORCE = "GTC"
 WORKING_TYPE = "MARK_PRICE"
 PRICE_PROTECT = "true"
@@ -39,34 +39,45 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 # client.futures_change_margin_type(symbol='ORDIUSDT', marginType='ISOLATED',leverage=5, recvWindow = 60000)
 # client.futures_change_margin_type(symbol='ORDIUSDT', marginType='CROSSED', leverage=5, recvWindow = 60000)
 # client.change_leverage(symbol="BTCUSDT", leverage=5, recvWindow = 60000)
+
+# percent = lambda part, whole:float(whole) / 100 * float(part)
+def percent(part, whole):
+  try:
+    return 100 * float(part) / float(whole)
+  except ZeroDivisionError:
+    return 0
+
+def truncate(f, n):
+  try:
+      return math.floor(f * 10 ** n) / 10 ** n
+  except ZeroDivisionError:
+      return 0
+    
 def adjust_leverage(symbol, client):
     client.futures_change_leverage(symbol=symbol, leverage=10)
 
 def adjust_margintype(symbol, client):
     client.futures_change_margin_type(symbol=symbol, marginType='ISOLATED')
 
+def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, stop_price, workingType, leverage):
+    print("Side {} Symbol {} Price {} Quantity {} Stop Price {} Leverage {}".format(side, symbol, price, quantity, stop_price, leverage))
 
-# def order(side, quantity, symbol,order_type,reduceOnly,positionSide,workingType,price,stopPrice,priceProtect ):
-def order(symbol, side, typeOrder, timeInForce, quantity, price, stop_price):
-    print("Side {} Symbol {} Price {} Quantity {}".format(side,symbol, price, quantity))
-    
     try:
         print("sending order")
         timestamp = datetime.now().timestamp()
-        #  order = client.new_order(
-        # binance_client.futures_get_open_orders(symbol='BTCUSDT')  
         order = client.futures_create_order(
           symbol=symbol, 
           side=side, 
-          type=typeOrder, 
+          type=typeOrder,
+          positionSide=positionSide, 
           timeInForce=timeInForce, 
           quantity=quantity, 
           price=price, 
           stopPrice=stop_price,
+          workingType=workingType,
           timestamp = timestamp,
           recvWindow = 60000)
 
-        # order = client.create_order(symbol=symbol, side=side, type=typeOrder, timeInForce=timeInForce, quantity=quantity, price=price, stopPrice=stop_price)
         print(order)
     except Exception as e:
         print("an exception occured - {}".format(e))
@@ -75,16 +86,47 @@ def order(symbol, side, typeOrder, timeInForce, quantity, price, stop_price):
     return True
 
 def dropdown_option(title, options, default_value, _id):
-  
   return html.Div(children=[
     html.H2(title),
     dcc.Dropdown(options = options, value = default_value, id=_id)
     ])
 
+def create_dropdown(title, option, default_value, id_value):
+  return html.Div(
+    [
+      # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
+      #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+      html.H4(title,
+              style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+      dcc.Dropdown(option, id=id_value, value=default_value),
+    ], style = {"padding":"0px 30px 0px 30px"}
+    )
+
+
 app.layout = html.Div(children=[
- 
- dcc.Input(id="input"),
- dcc.Store(id="store"),
+  
+ html.Div([
+    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"], "BTCUSDT", "pair-select"),
+    create_dropdown("Quantity Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100", "1000"], "0.001", "quantity-precision"),
+    create_dropdown("Price Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"], "0.001", "price-precision"),
+  ], style = {"display":"flex", "margin":"auto", "width":"800px", "justify-content":"space-around"}),
+    
+  html.Div([
+    dcc.Slider(min=0, max=125, step=5, value = 20, id ="leverage-slider"),
+  ], id = "leverage-slider-container",
+           style={"width":"800px", "margin":"auto", "padding-top":"30px"}),  
+    
+  html.Div(
+    [
+      # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
+      #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+      html.H4("Balance",
+              style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+      dcc.Input(id="balance-input", type='text', value="2.22"),
+      dcc.Store(id="store"),
+    ], style = {"padding":"0px 30px 0px 30px"}
+  ), 
+    
  html.P(id="output"),
  dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
     html.H1(id='timer_display', children='', style = {"positon":"relative","top":"0px"}),
@@ -107,8 +149,14 @@ app.layout = html.Div(children=[
       "color": "white",
       "width":"100px"
       }),
-    html.Div(id='container-button-basic',
-             children='Enter a value and press submit'),
+    html.Div(children=[
+      # html.H4(id='symbol-bet', children=''),
+      html.Div(dcc.Textarea(id='container-button-basic', value='Enter a value and press submit'), 
+               style={'width':'0.15%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center', 'height': 300}
+            ),
+      
+    ]),
+
  
  html.Div(children=[
   html.Div(children=[
@@ -126,13 +174,7 @@ app.layout = html.Div(children=[
   
   html.Div(children=[
     dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
-                    default_value = "0.0001", _id = "aggregation-level"),
-    dropdown_option("Pair", options = ["AGLDUSDT", "BSVUSDT","ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"],
-                    default_value = "BSVUSDT", _id = "pair-select"),
-    dropdown_option("Quantity Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
-                    default_value = "3", _id = "quantity-precision"),
-    dropdown_option("Price Precision", options = ["0", "1", "2", "3", "4", "5", "6"],
-                    default_value = "4", _id = "price-precision"),
+                    default_value = "0.1", _id = "aggregation-level"),
   ], style = {"padding-left":"100px"}),
   ], style = {"display": "flex",
               "justify-content": "center",
@@ -146,13 +188,15 @@ app.layout = html.Div(children=[
 # callback #
 @app.callback(
   Output("symbol-bet", "value"),
+  Output("quantity-precision", "value"),
+  Output("price-precision", "value"),
   Input("pair-select", "value")
 )
 
 def update_control(value):
   TRADE_SYMBOL = value.upper()
   
-  url_exchangeInfo =   "https://api.binance.com/api/v3/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
+  url_exchangeInfo =   "https://fapi.binance.com/fapi/v1/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
   data = requests.get(url_exchangeInfo).json()
   
   TICK_SIZE = 0.0
@@ -172,13 +216,13 @@ def update_control(value):
   else:
       print(f"tick_size not found for {TRADE_SYMBOL}")
   
-  return value
+  return value, TICK_SIZE, TICK_SIZE
 
 
 # callback #1
 @app.callback(
   Output("store", "data"),
-  Input("input", "value")
+  Input("balance-input", "value")
 )
 def update_store(value):
     if not value:
@@ -204,30 +248,46 @@ def update_style(data):
 
 
 @callback(
-  Output('container-button-basic', 'children'),
+  Output("container-button-basic", "children"),
   Input('submit-buy', 'n_clicks'),
   Input('submit-sell', 'n_clicks'),
+  Input("balance-input","value"),
+  Input("leverage-slider","value"),
+  Input("quantity-precision","value"),
   State('input-on-submit', 'value'),
   State('symbol-bet', 'value'),
   prevent_initial_call=True
 )
 
-def update_output(buy_click, sell_click, price, symbol):
+def update_output(buy_click, sell_click, balance, leverage, quantity_precision,  price, symbol):
+  print("Symbol {} Price {} balance {} Leverage {} Qtdy Precision. {}".format(symbol, price, balance, leverage, quantity_precision))
+    
   msg = "None of the buttons have been clicked yet"
   # print("Price ", price)
   # print("Symbol ", symbol)
+    
+  tick_after_decimal = str(quantity_precision)[::-1].find('.') 
+  # print("tick_after_decimal", tick_after_decimal)
   
+  # print("Leverage1", percent(float(leverage), float(balance)))
+  TRADE_QUANTITY = truncate((float(leverage) * float(balance)) / float(price), tick_after_decimal)
+  # print("TRADE_QUANTITY", TRADE_QUANTITY)
+  STOP_PRICE = truncate(float(price) - percent(float(STOP_PRICE_PERC), float(price)), tick_after_decimal)   
+  # print("STOP_PRICE", STOP_PRICE)
+    
   if "submit-buy" == ctx.triggered_id:
-    #  put binance buy logic here
-    # order(side, quantity, symbol,order_type,reduceOnly,positionSide,workingType,price,stopPrice,priceProtect ):
+  #   #  put binance buy logic here
     order_succeeded = order(
       symbol,
-      "BUY", 
+      "BUY",
       TYPE_ORDER,
+      "BOTH",
       TIME_IN_FORCE,
       TRADE_QUANTITY, 
       price,
-      STOP_PRICE
+      STOP_PRICE,
+      "CONTRACT_PRICE",
+      leverage
       )
     if order_succeeded:
       in_position = False
@@ -239,10 +299,13 @@ def update_output(buy_click, sell_click, price, symbol):
       symbol,
       "SELL",
       TYPE_ORDER,
+      "BOTH",
       TIME_IN_FORCE,
       TRADE_QUANTITY, 
       price,
-      STOP_PRICE
+      STOP_PRICE,
+      "CONTRACT_PRICE",
+      leverage
       )
     if order_succeeded:
       in_position = False
@@ -378,7 +441,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Input("timer", "n_intervals"),
 )
 
-def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_intervals):
+def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_intervals):
   
   # url = "https://api.binance.com/api/v3/depth"
   url = "https://fapi.binance.com/fapi/v1/depth"
@@ -418,18 +481,19 @@ def update_orderbook(agg_level,quantity_precision, price_precision, symbol, n_in
   bid_df = bid_df.iloc[:levels_to_show]
   ask_df = ask_df.iloc[-levels_to_show:]
   
+  quantity_after_decimal = str(quantity_precision)[::-1].find('.')
   bid_df.quantity = bid_df.quantity.apply(
-    lambda x: f"%.{quantity_precision}f" % x)
+    lambda x: f"%.{quantity_after_decimal}f" % x)
   
+  price_after_decimal = str(price_precision)[::-1].find('.')
   bid_df.price = bid_df.price.apply(
-    lambda x: f"%.{price_precision}f" % x)
-  
-  
+    lambda x: f"%.{price_after_decimal}f" % x)
+    
   ask_df.quantity = ask_df.quantity.apply(
-    lambda x: f"%.{quantity_precision}f" % x)
+    lambda x: f"%.{quantity_after_decimal}f" % x)
   
   ask_df.price = ask_df.price.apply(
-     lambda x: f"%.{price_precision}f" % x)
+     lambda x: f"%.{price_after_decimal}f" % x)
     
   # print(bid_df.to_dict("records"))
    
