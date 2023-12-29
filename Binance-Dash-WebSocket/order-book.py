@@ -18,7 +18,8 @@ app = Dash(external_stylesheets=[dbc.themes.CYBORG])
 
 TRADE_SYMBOL = ""
 TRADE_QUANTITY = "1"
-TYPE_ORDER  = "STOP" #"STOP" #"LIMIT" 
+# TYPE_ORDER  = "STOP" #"STOP" #"LIMIT" 
+TYPE_ORDER  = "TAKE_PROFIT_MARKET" #"STOP" #"LIMIT" 
 POSITION_SIDE = "BOTH"
 PRICE ="73.350"
 STOP_PRICE_PERC = 5
@@ -43,7 +44,7 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 # percent = lambda part, whole:float(whole) / 100 * float(part)
 def percent(part, whole):
   try:
-    return 100 * float(part) / float(whole)
+    return float(whole) * float(part) / 100
   except ZeroDivisionError:
     return 0
 
@@ -72,18 +73,19 @@ def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, s
           positionSide=positionSide, 
           timeInForce=timeInForce, 
           quantity=quantity, 
-          price=price, 
-          stopPrice=stop_price,
+          # price=price, 
+          stopprice=stop_price,
           workingType=workingType,
+          closePosition="true",
           timestamp = timestamp,
           recvWindow = 60000)
 
         print(order)
     except Exception as e:
         print("an exception occured - {}".format(e))
-        return False
+        return e.message
 
-    return True
+    return order
 
 def dropdown_option(title, options, default_value, _id):
   return html.Div(children=[
@@ -96,7 +98,7 @@ def create_dropdown(title, option, default_value, id_value):
     [
       # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
       #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
-      html.H4(title,
+      html.H6(title,
               style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
       dcc.Dropdown(option, id=id_value, value=default_value),
     ], style = {"padding":"0px 30px 0px 30px"}
@@ -106,7 +108,7 @@ def create_dropdown(title, option, default_value, id_value):
 app.layout = html.Div(children=[
   
  html.Div([
-    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"], "BTCUSDT", "pair-select"),
+    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "UNIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"], "UNIUSDT", "pair-select"),
     create_dropdown("Quantity Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100", "1000"], "0.001", "quantity-precision"),
     create_dropdown("Price Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"], "0.001", "price-precision"),
   ], style = {"display":"flex", "margin":"auto", "width":"800px", "justify-content":"space-around"}),
@@ -134,7 +136,7 @@ app.layout = html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
       html.Div(dcc.Input(id='symbol-bet', type='text'), style={'width':'0.05%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center'}
             ),
-      html.Div(dcc.Input(id='input-on-submit', type='text'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
+      html.Div(dcc.Input(id='input-on-submit', type='text', value='0.0'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
             ),
     ]),
     html.Button('BUY', id='submit-buy', n_clicks=0, style={
@@ -149,13 +151,22 @@ app.layout = html.Div(children=[
       "color": "white",
       "width":"100px"
       }),
+    
     html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
-      html.Div(dcc.Textarea(id='container-button-basic', value='Enter a value and press submit'), 
-               style={'width':'0.15%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center', 'height': 300}
-            ),
+      # html.Div(dcc.Textarea(id='message-area', value='Enter a value and press submit'), 
+      #          style={'width':'0.15%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center', 'height': 300}
+      #       ),
+      html.Div(id='textarea-example-output', style={'whiteSpace': 'pre-line'}),
       
     ]),
+    
+    # dcc.Textarea(
+    #     id='textarea-example',
+    #     value='Textarea content initialized\nwith multiple lines of text',
+    #     style={'width': '100%', 'height': 300},
+    # ),
+   
 
  
  html.Div(children=[
@@ -184,6 +195,12 @@ app.layout = html.Div(children=[
  dcc.Interval(id="timer", interval=2000),
 ])
 
+# @callback(
+#     Output('textarea-example-output', 'children'),
+#     Input('textarea-example', 'value')
+# )
+# def update_output(value):
+#     return 'You have entered: \n{}'.format(value)
 
 # callback #
 @app.callback(
@@ -248,7 +265,7 @@ def update_style(data):
 
 
 @callback(
-  Output("container-button-basic", "children"),
+  Output("textarea-example-output", "children"),
   Input('submit-buy', 'n_clicks'),
   Input('submit-sell', 'n_clicks'),
   Input("balance-input","value"),
@@ -270,48 +287,52 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
   # print("tick_after_decimal", tick_after_decimal)
   
   # print("Leverage1", percent(float(leverage), float(balance)))
-  TRADE_QUANTITY = truncate((float(leverage) * float(balance)) / float(price), tick_after_decimal)
-  # print("TRADE_QUANTITY", TRADE_QUANTITY)
-  STOP_PRICE = truncate(float(price) - percent(float(STOP_PRICE_PERC), float(price)), tick_after_decimal)   
-  # print("STOP_PRICE", STOP_PRICE)
+  if (float(price) > 0):
+    TRADE_QUANTITY = truncate((float(leverage) * float(balance)) / float(price), tick_after_decimal)
+    print("percent(float(STOP_PRICE_PERC), float(price)))", percent(float(STOP_PRICE_PERC), float(price)))
+    print("TRADE_QUANTITY", TRADE_QUANTITY)
+    STOP_PRICE = truncate(float(price) - percent(float(STOP_PRICE_PERC), float(price)), tick_after_decimal)   
+    print("STOP_PRICE", STOP_PRICE)
+      
+    if "submit-buy" == ctx.triggered_id:
+    #   #  put binance buy logic here
+      order_succeeded = order(
+        symbol,
+        "BUY",
+        TYPE_ORDER,
+        "BOTH",
+        TIME_IN_FORCE,
+        TRADE_QUANTITY, 
+        price,
+        STOP_PRICE,
+        "CONTRACT_PRICE",
+        leverage
+        )
+      if order_succeeded:
+        in_position = False
+      msg = "BUY - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
+      print("Buy! Buy! Buy!")
+    elif "submit-sell" == ctx.triggered_id:
+      #  put binance sell logic here
+      order_succeeded = order(
+        symbol,
+        "SELL",
+        TYPE_ORDER,
+        "BOTH",
+        TIME_IN_FORCE,
+        TRADE_QUANTITY, 
+        price,
+        STOP_PRICE,
+        "CONTRACT_PRICE",
+        leverage
+        )
+      if order_succeeded:
+        in_position = False
+      msg = "SELL - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
+      print("Sell! Sell! Sell!")
     
-  if "submit-buy" == ctx.triggered_id:
-  #   #  put binance buy logic here
-    order_succeeded = order(
-      symbol,
-      "BUY",
-      TYPE_ORDER,
-      "BOTH",
-      TIME_IN_FORCE,
-      TRADE_QUANTITY, 
-      price,
-      STOP_PRICE,
-      "CONTRACT_PRICE",
-      leverage
-      )
-    if order_succeeded:
-      in_position = False
-    msg = 'BUY - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(price, 0) 
-    print("Buy! Buy! Buy!")
-  elif "submit-sell" == ctx.triggered_id:
-    #  put binance sell logic here
-    order_succeeded = order(
-      symbol,
-      "SELL",
-      TYPE_ORDER,
-      "BOTH",
-      TIME_IN_FORCE,
-      TRADE_QUANTITY, 
-      price,
-      STOP_PRICE,
-      "CONTRACT_PRICE",
-      leverage
-      )
-    if order_succeeded:
-      in_position = False
-    msg = 'SELL - > Order Created withThe input value was "{}" and the button has been clicked {} times'.format(price, 0) 
-    print("Sell! Sell! Sell!")
-
+  print("Response:", msg)
+    
   return msg
 
 
