@@ -80,7 +80,7 @@ def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, s
           timestamp = timestamp,
           recvWindow = 60000)
 
-        print(order)
+        # print(order)
     except Exception as e:
         print("an exception occured - {}".format(e))
         return e.message
@@ -108,9 +108,9 @@ def create_dropdown(title, option, default_value, id_value):
 app.layout = html.Div(children=[
   
  html.Div([
-    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "UNIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "BONKUSDT", "TIAUSDT"], "UNIUSDT", "pair-select"),
-    create_dropdown("Quantity Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100", "1000"], "0.001", "quantity-precision"),
-    create_dropdown("Price Precision", ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"], "0.001", "price-precision"),
+    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "UNIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "1000BONKUSDT", "TIAUSDT"], "1000BONKUSDT", "pair-select"),
+    create_dropdown("Quantity Precision", ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000", "10000"], "0.001", "quantity-precision"),
+    create_dropdown("Price Precision", ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000", "10000"], "0.001", "price-precision"),
   ], style = {"display":"flex", "margin":"auto", "width":"800px", "justify-content":"space-around"}),
     
   html.Div([
@@ -184,8 +184,8 @@ app.layout = html.Div(children=[
   ], style = {"width": "300px"}),
   
   html.Div(children=[
-    dropdown_option("Aggregate Level", options = ["0.0001","0.001", "0.01", "0.1", "1", "10", "100"],
-                    default_value = "0.1", _id = "aggregation-level"),
+    dropdown_option("Aggregate Level", options = ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100"],
+                    default_value = "0.001", _id = "aggregation-level"),
   ], style = {"padding-left":"100px"}),
   ], style = {"display": "flex",
               "justify-content": "center",
@@ -215,6 +215,7 @@ def update_control(value):
   
   url_exchangeInfo =   "https://fapi.binance.com/fapi/v1/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
   data = requests.get(url_exchangeInfo).json()
+  # print("TICKET", data) 
   
   TICK_SIZE = 0.0
   found = False
@@ -224,12 +225,12 @@ def update_control(value):
           filters = info[s]['filters']
           for f in range(len(filters)):
               if filters[f]['filterType'] == 'PRICE_FILTER':
-                  TICK_SIZE = float(filters[f]['tickSize'])
+                  TICK_SIZE = filters[f]['tickSize']
                   found = True
                   break
           break
   if found:
-      print("TICK SIZE found", TICK_SIZE)        
+      print("TICK SIZE found", float(TICK_SIZE))        
   else:
       print(f"tick_size not found for {TRADE_SYMBOL}")
   
@@ -289,10 +290,10 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
   # print("Leverage1", percent(float(leverage), float(balance)))
   if (float(price) > 0):
     TRADE_QUANTITY = truncate((float(leverage) * float(balance)) / float(price), tick_after_decimal)
-    print("percent(float(STOP_PRICE_PERC), float(price)))", percent(float(STOP_PRICE_PERC), float(price)))
-    print("TRADE_QUANTITY", TRADE_QUANTITY)
+    # print("percent(float(STOP_PRICE_PERC) {}, float(price))) {}", percent(float(STOP_PRICE_PERC), float(price)))
+    # print("TRADE_QUANTITY", TRADE_QUANTITY)
     STOP_PRICE = truncate(float(price) - percent(float(STOP_PRICE_PERC), float(price)), tick_after_decimal)   
-    print("STOP_PRICE", STOP_PRICE)
+    # print("STOP_PRICE", STOP_PRICE)
       
     if "submit-buy" == ctx.triggered_id:
     #   #  put binance buy logic here
@@ -311,7 +312,7 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       if order_succeeded:
         in_position = False
       msg = "BUY - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
-      print("Buy! Buy! Buy!")
+      # print("Buy! Buy! Buy!")
     elif "submit-sell" == ctx.triggered_id:
       #  put binance sell logic here
       order_succeeded = order(
@@ -329,9 +330,9 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       if order_succeeded:
         in_position = False
       msg = "SELL - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
-      print("Sell! Sell! Sell!")
+      # print("Sell! Sell! Sell!")
     
-  print("Response:", msg)
+  # print("Response:", msg)
     
   return msg
 
@@ -476,16 +477,24 @@ def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_i
    
   data = requests.get(url, params=params).json()
   
+  pre_data = pd.DataFrame(data["bids"], columns=["price","quantity"])
+  # print("PRE DATA price", pre_data.price)
+  price_after_decimal = str(pre_data.price.iloc[0])[::-1].find('.')
+  # print("price_after_decimal", price_after_decimal)
+  
   bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
   ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
   
 #  Middle Price
+  # print("bid_df.price", bid_df.price)
+  # price_after_decimal = str(bid_df.price.iloc[0])[::-1].find('.')
+  # print("price_after_decimal", price_after_decimal)
   mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
   # print(bid_df.price)
   # print("Largest BID: " ,bid_df.price.iloc[0])
   # print(ask_df.price) 
   # print("Smallest ASK: " ,ask_df.price.iloc[0])
-  mid_price_precision = int(quantity_precision) + 2 
+  mid_price_precision = int(price_after_decimal)
   mid_price = f"%.{mid_price_precision}f" % mid_price 
   
 
