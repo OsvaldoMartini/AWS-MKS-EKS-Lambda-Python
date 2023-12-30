@@ -35,6 +35,13 @@ REDUCE_ONLY = "false"
 # TAKE_PROFIT
 # TAKE_PROFIT_MARKET
 # TRAILING_STOP_MARKET
+# 1- LIMIT,
+# 2- MARKET,
+# 3- STOP_LOSS,
+# 4- STOP_LOSS_LIMIT,
+# 5- TAKE_PROFIT,
+# 6- TAKE_PROFIT_LIMIT,
+# 7- LIMIT_MAKER
 
 
 client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
@@ -61,29 +68,38 @@ def adjust_leverage(symbol, client):
 def adjust_margintype(symbol, client):
     client.futures_change_margin_type(symbol=symbol, marginType='ISOLATED')
 
-def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, stop_price, workingType, leverage):
-    # print("Side {} Symbol {} Price {} Quantity {} Stop Price {} Leverage {}".format(side, symbol, price, quantity, stop_price, leverage))
+def tick_size(price, minPrice, tickSize):
+  return round((price - minPrice) / tickSize) * tickSize + minPrice;
 
+def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, stop_price, workingType, leverage):
+    print("Side {} Symbol {} Price {} Quantity {} Stop Price {} Leverage {}".format(side, symbol, price, quantity, stop_price, leverage))
+
+    price = round(tick_size(float(price), 0.0000010, 0.0000010), 7)
+    stop_price = round(tick_size(float(stop_price), 0.0000010, 0.0000010),7)
+    print("Min Price {}".format(price))
+    quantity = round(quantity,0)
+    
     try:
         print("sending order")
         timestamp = datetime.now().timestamp()
         order = client.futures_create_order(
           symbol=symbol, 
+          callbackRate=1,
           side=side, 
           type=typeOrder,
           positionSide=positionSide, 
           timeInForce=timeInForce, 
           quantity=quantity, 
-          # price=price, 
+          price=price, 
           stopprice=stop_price,
           workingType=workingType,
-          closePosition="true",
+          # closePosition="true",
           timestamp = timestamp,
           recvWindow = 60000)
 
         print(order)
     except Exception as e:
-        # print("an exception occured - {}".format(e))
+        print("an exception occured - {}".format(e))
         return e.message
 
     return order
@@ -125,6 +141,18 @@ app.layout = html.Div(children=[
       [
         # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
         #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+        html.Div(children=[
+          create_dropdown("Type Order", [
+                "LIMIT",
+                "MARKET",
+                "STOP",
+                "STOP_MARKET",
+                "TAKE_PROFIT",
+                "TAKE_PROFIT_MARKET",
+                "TRAILING_STOP_MARKET"],
+                          "MARKET", "type-order"),
+        ], ),
+        
         html.H4("Balance",
                 style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
         dcc.Input(id="balance-input", type='text', value="2.22"),
@@ -139,7 +167,7 @@ app.layout = html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
       html.Div(dcc.Input(id='symbol-bet', type='text'), style={'width':'0.05%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center'}
             ),
-      html.Div(dcc.Input(id='input-on-submit', type='text'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
+      html.Div(dcc.Input(id='price-to-submit', type='text'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
             ),
     ]),
     html.Button('BUY', id='submit-buy', n_clicks=0, style={
@@ -179,8 +207,8 @@ app.layout = html.Div(children=[
   ], style = {"width": "300px"}),
   
   html.Div(children=[
-    dropdown_option("Aggregate Level", options = ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100"],
-                    default_value = "0.001", _id = "aggregation-level"),
+    create_dropdown("Aggregate Level", ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100"],
+                    "0.001", "aggregation-level"),
   ], style = {"padding-left":"100px"}),
   ], style = {"display": "flex",
               "justify-content": "center",
@@ -206,7 +234,7 @@ app.layout = html.Div(children=[
 # callback #
 @app.callback(
   Output("symbol-bet", "value", "allow_duplicate=True"),
-  Output("input-on-submit", "value", "allow_duplicate=True"),
+  Output("price-to-submit", "value", "allow_duplicate=True"),
   Output("quantity-precision", "value"),
   Output("price-precision", "value"),
   Output("aggregation-level", "value", "allow_duplicate=True"),
@@ -259,18 +287,22 @@ def get_decimal_tick(value):
   Output("store", "data"),
   Output("aggregation-level", "value", "allow_duplicate=True"),
   Input("balance-input", "value"),
-  Input("input-on-submit", "value"),
+  Input("price-to-submit", "value"),
+  State("interval-component", "n_intervals"),
   prevent_initial_call=True
 )
 
-def update_store(value, price):
+def update_store(value, price, n_intervals):
+    if n_intervals > 1 and ctx.triggered_id == "price-to-submit":
+      raise PreventUpdate
+    
     print("UPDATE STORE BALANCE {} PRICE {}".format(value, price))
     if not value:
         raise PreventUpdate
     decPos = price[::-1].find('.')
     factor = 10 ** decPos
     TICK_SIZE = np.format_float_positional(math.floor(1 ) / factor, trim='-') 
-    print("UPDATE STORE TICK_SIZE {} ".format(TICK_SIZE))
+    # print("UPDATE STORE TICK_SIZE {} ".format(TICK_SIZE))
     return ({
         "value": value,
         "style": {
@@ -296,15 +328,20 @@ def update_style(data):
   Output("textarea-example-output", "children"),
   Input('submit-buy', 'n_clicks'),
   Input('submit-sell', 'n_clicks'),
-  Input("balance-input","value"),
-  Input("leverage-slider","value"),
-  Input("quantity-precision","value"),
-  State('input-on-submit', 'value'),
+  State("balance-input","value"),
+  State("leverage-slider","value"),
+  State("quantity-precision","value"),
+  State("type-order","value"),
+  State('price-to-submit', 'value'),
   State('symbol-bet', 'value'),
   prevent_initial_call=True
 )
 
-def update_output(buy_click, sell_click, balance, leverage, quantity_precision,  price, symbol):
+def update_output(buy_click, sell_click, balance, leverage, quantity_precision, type_order, price, symbol):
+  if ctx.triggered_id == "type-order" or ctx.triggered_id == "quantity-precision" or ctx.triggered_id == "leverage-slider":
+    raise PreventUpdate
+  print("Type Order", type_order)
+    
   # print("quantity_precision", quantity_precision)
   # quantity_precision = np.format_float_positional(quantity_precision, trim='-')
   msg = "None of the buttons have been clicked yet"
@@ -334,7 +371,7 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       order_succeeded = order(
         symbol,
         "BUY",
-        TYPE_ORDER,
+        type_order,
         "BOTH",
         TIME_IN_FORCE,
         TRADE_QUANTITY, 
@@ -352,7 +389,7 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       order_succeeded = order(
         symbol,
         "SELL",
-        TYPE_ORDER,
+        type_order,
         "BOTH",
         TIME_IN_FORCE,
         TRADE_QUANTITY, 
@@ -489,7 +526,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Output("ask_table", "data"),
   Output("ask_table", "style_data_conditional"),
   Output("mid-price", "children"),
-  Output("input-on-submit", "value"),
+  Output("price-to-submit", "value"),
   Output("symbol-bet", "value"),
   Input("aggregation-level", "value"),
   Input("quantity-precision", "value"),
@@ -499,7 +536,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
 )
 
 def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_intervals):
-  # print("UPDATE ORDER BOOK")
+  print("UPDATE ORDER BOOK")
   # print("update_orderbook {} {}  {} {} {}".format(agg_level, quantity_precision, price_precision, symbol, n_intervals))
   # url = "https://api.binance.com/api/v3/depth"
   url = "https://fapi.binance.com/fapi/v1/depth"
