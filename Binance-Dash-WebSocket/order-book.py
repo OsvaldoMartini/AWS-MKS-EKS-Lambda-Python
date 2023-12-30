@@ -118,20 +118,22 @@ app.layout = html.Div(children=[
     dcc.Slider(min=0, max=125, step=5, value = 20, id ="leverage-slider"),
   ], id = "leverage-slider-container",
            style={"width":"800px", "margin":"auto", "padding-top":"30px"}),  
+  
+ html.Div(children=[
+    html.Div(children=[
+      html.Div(
+      [
+        # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
+        #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+        html.H4("Balance",
+                style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
+        dcc.Input(id="balance-input", type='text', value="2.22"),
+        dcc.Store(id="store"),
+      ], style = {"padding":"0px 30px 0px 30px"}
+    ), 
     
-  html.Div(
-    [
-      # html.H4(" ".join(id_value.replace("-", " ").split(" ")[:-1]),
-      #         style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
-      html.H4("Balance",
-              style = {"padding":"0px 30px 0px 30px", "text-size":"15px"}),
-      dcc.Input(id="balance-input", type='text', value="2.22"),
-      dcc.Store(id="store"),
-    ], style = {"padding":"0px 30px 0px 30px"}
-  ), 
-    
- html.P(id="output"),
- dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
+    html.P(id="output"),
+    dcc.Interval(id='interval-component', interval=1 * 1000, n_intervals=0),
     html.H1(id='timer_display', children='', style = {"positon":"relative","top":"0px"}),
     html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
@@ -151,8 +153,8 @@ app.layout = html.Div(children=[
       "border": "none",
       "color": "white",
       "width":"100px"
-      }),
-    
+    }),
+      
     html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
       # html.Div(dcc.Textarea(id='message-area', value='Enter a value and press submit'), 
@@ -161,16 +163,8 @@ app.layout = html.Div(children=[
       html.Div(id='textarea-example-output', style={'whiteSpace': 'pre-line'}),
       
     ]),
-    
-    # dcc.Textarea(
-    #     id='textarea-example',
-    #     value='Textarea content initialized\nwith multiple lines of text',
-    #     style={'width': '100%', 'height': 300},
-    # ),
-   
-
  
- html.Div(children=[
+  ]),
   html.Div(children=[
     dash_table.DataTable(
       id= "ask_table",
@@ -191,7 +185,8 @@ app.layout = html.Div(children=[
   ], style = {"display": "flex",
               "justify-content": "center",
               "align-items": "center",
-              "height":"100vh",}), 
+              # "height":"100vh",
+              }), 
 
  dcc.Interval(id="timer", interval=2000),
 ])
