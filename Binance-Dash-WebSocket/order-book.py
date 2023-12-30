@@ -11,6 +11,7 @@ from datetime import datetime
 import config
 from binance.client import Client
 from binance.enums import *
+import numpy as np
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -61,10 +62,10 @@ def adjust_margintype(symbol, client):
     client.futures_change_margin_type(symbol=symbol, marginType='ISOLATED')
 
 def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, stop_price, workingType, leverage):
-    print("Side {} Symbol {} Price {} Quantity {} Stop Price {} Leverage {}".format(side, symbol, price, quantity, stop_price, leverage))
+    # print("Side {} Symbol {} Price {} Quantity {} Stop Price {} Leverage {}".format(side, symbol, price, quantity, stop_price, leverage))
 
     try:
-        print("sending order")
+        # print("sending order")
         timestamp = datetime.now().timestamp()
         order = client.futures_create_order(
           symbol=symbol, 
@@ -80,9 +81,9 @@ def order(symbol, side, typeOrder, positionSide, timeInForce, quantity, price, s
           timestamp = timestamp,
           recvWindow = 60000)
 
-        # print(order)
+        # # print(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        # print("an exception occured - {}".format(e))
         return e.message
 
     return order
@@ -136,7 +137,7 @@ app.layout = html.Div(children=[
       # html.H4(id='symbol-bet', children=''),
       html.Div(dcc.Input(id='symbol-bet', type='text'), style={'width':'0.05%','padding':5, 'verticalAlign':'middle', 'justifyContent':'center'}
             ),
-      html.Div(dcc.Input(id='input-on-submit', type='text', value='0.0'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
+      html.Div(dcc.Input(id='input-on-submit', type='text'), style={'width':'0.05%', 'display':'table-cell','padding':5, 'verticalAlign':'middle','justifyContent':'center'}
             ),
     ]),
     html.Button('BUY', id='submit-buy', n_clicks=0, style={
@@ -202,39 +203,62 @@ app.layout = html.Div(children=[
 # def update_output(value):
 #     return 'You have entered: \n{}'.format(value)
 
+# def __init__(self, name, age):
+#     # self.name = name
+#     # self.age = age
+#     update_control("1000BONKUSDT")
+
 # callback #
 @app.callback(
-  Output("symbol-bet", "value"),
+  Output("symbol-bet", "value", "allow_duplicate=True"),
+  Output("input-on-submit", "value", "allow_duplicate=True"),
   Output("quantity-precision", "value"),
   Output("price-precision", "value"),
-  Input("pair-select", "value")
+  Output("aggregation-level", "value"),
+  Input("pair-select", "value"),
+  prevent_initial_call=True
 )
 
 def update_control(value):
   TRADE_SYMBOL = value.upper()
+    
+  levels_to_show = 10
+    
+  # url_exchangeInfo =   "https://fapi.binance.com/fapi/v1/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
+  params = {
+    "symbol":TRADE_SYMBOL,
+    "limit":"5",
+  }
   
-  url_exchangeInfo =   "https://fapi.binance.com/fapi/v1/exchangeInfo?symbol={}".format(TRADE_SYMBOL)
-  data = requests.get(url_exchangeInfo).json()
-  # print("TICKET", data) 
-  
-  TICK_SIZE = 0.0
-  found = False
-  info = data['symbols']
-  for s in range(len(info)):
-      if info[s]['symbol'] == TRADE_SYMBOL:
-          filters = info[s]['filters']
-          for f in range(len(filters)):
-              if filters[f]['filterType'] == 'PRICE_FILTER':
-                  TICK_SIZE = filters[f]['tickSize']
-                  found = True
-                  break
-          break
+  url = "https://fapi.binance.com/fapi/v1/depth"
+  data = requests.get(url, params=params).json()
+  pre_data = pd.DataFrame(data["bids"], columns=["price","quantity"])
+  price = pre_data.price.iloc[0]
+  decPos = str(pre_data.price.iloc[0])[::-1].find('.')
+  factor = 10 ** decPos
+  TICK_SIZE = np.format_float_positional(math.floor(1 ) / factor, trim='-') 
+  print("TICK_SIZE", np.format_float_positional(math.floor(1 ) / factor, trim='-')) 
+  # print("Decimal Positions", '{0:.{decPosf}}'.format(decPos))
+  # print("PRICE FOUND", str(pre_data.price.iloc[0]))
+  # print("QUANTITY FOUND", str(pre_data.quantity.iloc[0]))
+  # print("SYMBOL CHANGES ", data) 
+  found = True
+  # info = data['symbols']
+  # for s in range(len(info)):
+  #     if info[s]['symbol'] == TRADE_SYMBOL:
+  #         filters = info[s]['filters']
+  #         for f in range(len(filters)):
+  #             if filters[f]['filterType'] == 'PRICE_FILTER':
+  #                 TICK_SIZE = float(filters[f]['tickSize'])
+  #                 found = True
+  #                 break
+  #         break
   if found:
-      print("TICK SIZE found", float(TICK_SIZE))        
+      print("TICK SIZE found {}  SYMBOL {}", TICK_SIZE, value)        
   else:
       print(f"tick_size not found for {TRADE_SYMBOL}")
   
-  return value, TICK_SIZE, TICK_SIZE
+  return value, price, TICK_SIZE, TICK_SIZE, TICK_SIZE
 
 
 # callback #1
@@ -243,6 +267,8 @@ def update_control(value):
   Input("balance-input", "value")
 )
 def update_store(value):
+    print("BALANCE", value)
+    
     if not value:
         raise PreventUpdate
     return {
@@ -278,22 +304,29 @@ def update_style(data):
 )
 
 def update_output(buy_click, sell_click, balance, leverage, quantity_precision,  price, symbol):
-  print("Symbol {} Price {} balance {} Leverage {} Qtdy Precision. {}".format(symbol, price, balance, leverage, quantity_precision))
-    
+  print("quantity_precision", quantity_precision)
+  # quantity_precision = np.format_float_positional(quantity_precision, trim='-')
   msg = "None of the buttons have been clicked yet"
-  # print("Price ", price)
-  # print("Symbol ", symbol)
-    
-  tick_after_decimal = str(quantity_precision)[::-1].find('.') 
-  # print("tick_after_decimal", tick_after_decimal)
   
-  # print("Leverage1", percent(float(leverage), float(balance)))
+  if (len(price) > 0):
+    print("Price", price)
+    # price = np.format_float_positional(price, trim='-')
+    print("Symbol {} Price {} balance {} Leverage {} Qtdy Precision. {}".format(symbol, price, balance, leverage, quantity_precision))
+    
+  # # print("Price ", price)
+  # # print("Symbol ", symbol)
+    
+  tick_after_decimal = str(price)[::-1].find('.') 
+  # print("Tick after decimal ", tick_after_decimal)
+  # # print("tick_after_decimal", tick_after_decimal)
+  
+  # # print("Leverage1", percent(float(leverage), float(balance)))
   if (float(price) > 0):
     TRADE_QUANTITY = truncate((float(leverage) * float(balance)) / float(price), tick_after_decimal)
-    # print("percent(float(STOP_PRICE_PERC) {}, float(price))) {}", percent(float(STOP_PRICE_PERC), float(price)))
-    # print("TRADE_QUANTITY", TRADE_QUANTITY)
+    # # print("percent(float(STOP_PRICE_PERC) {}, float(price))) {}", percent(float(STOP_PRICE_PERC), float(price)))
+    # # print("TRADE_QUANTITY", TRADE_QUANTITY)
     STOP_PRICE = truncate(float(price) - percent(float(STOP_PRICE_PERC), float(price)), tick_after_decimal)   
-    # print("STOP_PRICE", STOP_PRICE)
+    # # print("STOP_PRICE", STOP_PRICE)
       
     if "submit-buy" == ctx.triggered_id:
     #   #  put binance buy logic here
@@ -312,7 +345,7 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       if order_succeeded:
         in_position = False
       msg = "BUY - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
-      # print("Buy! Buy! Buy!")
+      # # print("Buy! Buy! Buy!")
     elif "submit-sell" == ctx.triggered_id:
       #  put binance sell logic here
       order_succeeded = order(
@@ -330,9 +363,9 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
       if order_succeeded:
         in_position = False
       msg = "SELL - > Price {} Quantity {}".format(price, TRADE_QUANTITY) 
-      # print("Sell! Sell! Sell!")
+      # # print("Sell! Sell! Sell!")
     
-  # print("Response:", msg)
+  # # print("Response:", msg)
     
   return msg
 
@@ -346,7 +379,7 @@ def update_interval(n):
   # current_time = timer.time()
   current_time = datetime.now().time()
  
-  # print(current_time.strftime('%H-%M-%S'))
+  # # print(current_time.strftime('%H-%M-%S'))
   
   # time_interval_s = 120
   # time_interval_ms = time_interval_s * 1000
@@ -446,7 +479,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   
   levels_df = levels_df[["price", "quantity"]]
   
-  # print(levels_df)
+  # # print(levels_df)
   return levels_df
 
 @app.callback(
@@ -456,6 +489,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Output("ask_table", "style_data_conditional"),
   Output("mid-price", "children"),
   Output("input-on-submit", "value"),
+  Output("symbol-bet", "value"),
   Input("aggregation-level", "value"),
   Input("quantity-precision", "value"),
   Input("price-precision", "value"),
@@ -464,7 +498,7 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
 )
 
 def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_intervals):
-  
+  # print("update_orderbook {} {}  {} {} {}".format(agg_level, quantity_precision, price_precision, symbol, n_intervals))
   # url = "https://api.binance.com/api/v3/depth"
   url = "https://fapi.binance.com/fapi/v1/depth"
   
@@ -481,54 +515,64 @@ def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_i
   # print("PRE DATA price", pre_data.price)
   price_after_decimal = str(pre_data.price.iloc[0])[::-1].find('.')
   # print("price_after_decimal", price_after_decimal)
-  
-  bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
-  ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
-  
-#  Middle Price
-  # print("bid_df.price", bid_df.price)
-  # price_after_decimal = str(bid_df.price.iloc[0])[::-1].find('.')
-  # print("price_after_decimal", price_after_decimal)
-  mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
-  # print(bid_df.price)
-  # print("Largest BID: " ,bid_df.price.iloc[0])
-  # print(ask_df.price) 
-  # print("Smallest ASK: " ,ask_df.price.iloc[0])
-  mid_price_precision = int(price_after_decimal)
-  mid_price = f"%.{mid_price_precision}f" % mid_price 
-  
-
-  # Bids
-  bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
-  bid_df = bid_df.sort_values("price", ascending = False) 
-  
-  # Asks
-  ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
-  ask_df = ask_df.sort_values("price", ascending = False) 
- 
-  # print(bid_df)
-  
-  bid_df = bid_df.iloc[:levels_to_show]
-  ask_df = ask_df.iloc[-levels_to_show:]
-  
-  quantity_after_decimal = str(quantity_precision)[::-1].find('.')
-  bid_df.quantity = bid_df.quantity.apply(
-    lambda x: f"%.{quantity_after_decimal}f" % x)
-  
-  price_after_decimal = str(price_precision)[::-1].find('.')
-  bid_df.price = bid_df.price.apply(
-    lambda x: f"%.{price_after_decimal}f" % x)
+  quantity_after_decimal = price_after_decimal  #str(pre_data.quantity.iloc[0])[::-1].find('.')
+  # print("quantity_after_decimal", quantity_after_decimal)
+  try:
+    bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
+    ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
     
-  ask_df.quantity = ask_df.quantity.apply(
-    lambda x: f"%.{quantity_after_decimal}f" % x)
-  
-  ask_df.price = ask_df.price.apply(
-     lambda x: f"%.{price_after_decimal}f" % x)
+  #  Middle Price
+    # # print("bid_df.price", bid_df.price)
+    # price_after_decimal = str(bid_df.price.iloc[0])[::-1].find('.')
+    # # print("price_after_decimal", price_after_decimal)
+    mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
+    # # print(bid_df.price)
+    # # print("Largest BID: " ,bid_df.price.iloc[0])
+    # # print(ask_df.price) 
+    # print("Smallest ASK: " ,ask_df.price.iloc[0])
+    mid_price_precision = int(price_after_decimal)
+    mid_price = f"%.{mid_price_precision}f" % mid_price 
     
-  # print(bid_df.to_dict("records"))
-   
+    # Bids
+    # print("agg_level: ", agg_level)
+    bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
+    bid_df = bid_df.sort_values("price", ascending = False) 
+    
+    # Asks
+    ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
+    ask_df = ask_df.sort_values("price", ascending = False) 
+  
+    # # print(bid_df)
+    
+    bid_df = bid_df.iloc[:levels_to_show]
+    ask_df = ask_df.iloc[-levels_to_show:]
+    
+    # quantity_precision[::-1].find('.') # np.format_float_positional(quantity_precision, trim='-')
+    quantity_after_decimal = price_after_decimal 
+    # print("quantity_precision", quantity_precision)
+    # quantity_after_decimal = str(quantity_precision)[::-1].find('.')
+    # quantity_after_decimal = str(quantity_precision)[::-1].find('.')
+    bid_df.quantity = bid_df.quantity.apply(
+      lambda x: f"%.{quantity_after_decimal}f" % x)
+    
+    # price_precision = np.format_float_positional(price_precision, trim='-')
+    # price_after_decimal = str(price_precision)[::-1].find('.')
+    bid_df.price = bid_df.price.apply(
+      lambda x: f"%.{price_after_decimal}f" % x)
+      
+    ask_df.quantity = ask_df.quantity.apply(
+      lambda x: f"%.{quantity_after_decimal}f" % x)
+    
+    ask_df.price = ask_df.price.apply(
+      lambda x: f"%.{price_after_decimal}f" % x)
+  except Exception as e:
+      # print("an exception occured - {}".format(e))
+      return e.message
+    
+  # # print(bid_df.to_dict("records"))
+  # print(mid_price) 
   return (bid_df.to_dict("records"), table_styling(bid_df, "bid"),  
-          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price)
+          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price, symbol)
   pass
 
 
