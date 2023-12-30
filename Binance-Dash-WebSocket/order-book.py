@@ -109,7 +109,7 @@ def create_dropdown(title, option, default_value, id_value):
 app.layout = html.Div(children=[
   
  html.Div([
-    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "UNIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "1000BONKUSDT", "TIAUSDT"], "1000BONKUSDT", "pair-select"),
+    create_dropdown("Pair", ["AGLDUSDT", "ORDIUSDT", "UNIUSDT", "AXSUSDT", "ETHUSDT", "BTCUSDT", "BAKEUSDT", "1000BONKUSDT", "TIAUSDT"], "TIAUSDT", "pair-select"),
     create_dropdown("Quantity Precision", ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000", "10000"], "0.001", "quantity-precision"),
     create_dropdown("Price Precision", ["0.00000001", "0.0000001", "0.000001", "0.00001", "0.0001", "0.001", "0.01", "0.1", "1", "10", "100", "1000", "10000"], "0.001", "price-precision"),
   ], style = {"display":"flex", "margin":"auto", "width":"800px", "justify-content":"space-around"}),
@@ -214,8 +214,8 @@ app.layout = html.Div(children=[
   prevent_initial_call=True
 )
 
-def update_control(value):
-  print("UPDATE CONTROL TICK SIZE")
+def get_decimal_tick(value):
+  print("GET DECIMAL TICK SIZE")
   TRADE_SYMBOL = value.upper()
     
   levels_to_show = 10
@@ -230,6 +230,7 @@ def update_control(value):
   data = requests.get(url, params=params).json()
   pre_data = pd.DataFrame(data["bids"], columns=["price","quantity"])
   price = pre_data.price.iloc[0]
+  print("DECIMAL TICK SIZE", price)
   decPos = str(pre_data.price.iloc[0])[::-1].find('.')
   factor = 10 ** decPos
   TICK_SIZE = np.format_float_positional(math.floor(1 ) / factor, trim='-') 
@@ -263,20 +264,20 @@ def update_control(value):
 )
 
 def update_store(value, price):
-    # print("BALANCE {} PRICE {}".format(value, price))
+    print("UPDATE STORE BALANCE {} PRICE {}".format(value, price))
     if not value:
         raise PreventUpdate
     decPos = price[::-1].find('.')
     factor = 10 ** decPos
     TICK_SIZE = np.format_float_positional(math.floor(1 ) / factor, trim='-') 
-    
+    print("UPDATE STORE TICK_SIZE {} ".format(TICK_SIZE))
     return ({
         "value": value,
         "style": {
             "color": "red" if len(value) % 2 == 0 else "blue"
         }
     }, TICK_SIZE)
-    pass
+  
 
 # callback #2
 @app.callback(
