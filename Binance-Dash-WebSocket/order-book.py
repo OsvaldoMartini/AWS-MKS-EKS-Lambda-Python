@@ -216,7 +216,7 @@ app.layout = html.Div(children=[
               # "height":"100vh",
               }), 
 
- dcc.Interval(id="timer", interval=2000),
+ dcc.Interval(id="timer-update-order-book", interval=2000),
 ])
 
 # @callback(
@@ -243,6 +243,7 @@ app.layout = html.Div(children=[
 )
 
 def get_decimal_tick(value):
+  print("1 CALLBACK EVENT:", ctx.triggered_id)
   print("GET DECIMAL TICK SIZE")
   TRADE_SYMBOL = value.upper()
     
@@ -293,6 +294,7 @@ def get_decimal_tick(value):
 )
 
 def update_store(value, price, n_intervals):
+    print("2 CALLBACK EVENT:", ctx.triggered_id)
     if n_intervals > 1 and ctx.triggered_id == "price-to-submit":
       raise PreventUpdate
     
@@ -319,6 +321,9 @@ def update_store(value, price, n_intervals):
 )
 
 def update_style(data):
+  if ctx.triggered_id is None:
+      raise PreventUpdate
+  print("3 CALLBACK EVENT:", ctx.triggered_id)
   if not data:
     raise PreventUpdate
   return data["value"], data["style"]
@@ -413,7 +418,11 @@ def update_output(buy_click, sell_click, balance, leverage, quantity_precision, 
     Input("interval-component", "n_intervals"),
 )
 
-def update_interval(n):
+def update_interval(n_intervals):
+  if not n_intervals:
+      raise PreventUpdate
+  
+  # print("4 CALLBACK EVENT:", ctx.triggered_id)
   # current_time = timer.time()
   current_time = datetime.now().time()
  
@@ -529,78 +538,87 @@ def aggregate_levels(levels_df, agg_level = Decimal('1'), side = "bid"):
   Output("price-to-submit", "value"),
   Output("symbol-bet", "value"),
   Input("aggregation-level", "value"),
-  Input("quantity-precision", "value"),
-  Input("price-precision", "value"),
-  Input("pair-select", "value"),
-  Input("timer", "n_intervals"),
+  State("quantity-precision", "value"),
+  State("price-precision", "value"),
+  State("pair-select", "value"),
+  Input("timer-update-order-book", "n_intervals"),
+  # State("interval-component", "n_intervals"),
 )
 
 def update_orderbook(agg_level, quantity_precision, price_precision, symbol, n_intervals):
-  print("UPDATE ORDER BOOK")
-  # print("update_orderbook {} {}  {} {} {}".format(agg_level, quantity_precision, price_precision, symbol, n_intervals))
-  # url = "https://api.binance.com/api/v3/depth"
-  url = "https://fapi.binance.com/fapi/v1/depth"
-  
-  levels_to_show = 10
-  
-  params = {
-    "symbol":symbol.upper(),
-    "limit":"100",
-  }
-   
-  data = requests.get(url, params=params).json()
-  
-  pre_data = pd.DataFrame(data["bids"], columns=["price","quantity"])
-  # print("PRE DATA price", pre_data.price)
-  price_after_decimal = str(pre_data.price.iloc[0])[::-1].find('.')
-  # print("price_after_decimal", price_after_decimal)
-  quantity_after_decimal = price_after_decimal  #str(pre_data.quantity.iloc[0])[::-1].find('.')
-  # print("quantity_after_decimal", quantity_after_decimal)
-  try:
-    bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
-    ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
+  # if n_intervals < 1 or ctx.triggered_id != "timer-update-order-book" or ctx.triggered_id != "aggregation-level":
+  #   raise PreventUpdate
+  if ctx.triggered_id == "timer-update-order-book" or ctx.triggered_id != "aggregation-level":
     
-  #  Middle Price
-    # price_after_decimal = str(bid_df.price.iloc[0])[::-1].find('.')
-    mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
-    # # print("Largest BID: " ,bid_df.price.iloc[0])
-    # print("Smallest ASK: " ,ask_df.price.iloc[0])
-    mid_price_precision = int(price_after_decimal)
-    mid_price = f"%.{mid_price_precision}f" % mid_price 
+    print("5 CALLBACK EVENT:", ctx.triggered_id)
     
-    # Bids
-    bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
-    bid_df = bid_df.sort_values("price", ascending = False) 
+    print("UPDATE ORDER BOOK")
+    # print("update_orderbook {} {}  {} {} {}".format(agg_level, quantity_precision, price_precision, symbol, n_intervals))
+    # url = "https://api.binance.com/api/v3/depth"
+    url = "https://fapi.binance.com/fapi/v1/depth"
     
-    # Asks
-    ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
-    ask_df = ask_df.sort_values("price", ascending = False) 
-   
-    bid_df = bid_df.iloc[:levels_to_show]
-    ask_df = ask_df.iloc[-levels_to_show:]
+    levels_to_show = 10
     
-    # quantity_precision[::-1].find('.') # np.format_float_positional(quantity_precision, trim='-')
-    quantity_after_decimal = price_after_decimal 
-    # quantity_after_decimal = str(quantity_precision)[::-1].find('.')
-    bid_df.quantity = bid_df.quantity.apply(
-      lambda x: f"%.{quantity_after_decimal}f" % x)
+    params = {
+      "symbol":symbol.upper(),
+      "limit":"100",
+    }
     
-    # price_precision = np.format_float_positional(price_precision, trim='-')
-    # price_after_decimal = str(price_precision)[::-1].find('.')
-    bid_df.price = bid_df.price.apply(
-      lambda x: f"%.{price_after_decimal}f" % x)
+    data = requests.get(url, params=params).json()
+    
+    pre_data = pd.DataFrame(data["bids"], columns=["price","quantity"])
+    # print("PRE DATA price", pre_data.price)
+    price_after_decimal = str(pre_data.price.iloc[0])[::-1].find('.')
+    # print("price_after_decimal", price_after_decimal)
+    quantity_after_decimal = price_after_decimal  #str(pre_data.quantity.iloc[0])[::-1].find('.')
+    # print("quantity_after_decimal", quantity_after_decimal)
+    try:
+      bid_df = pd.DataFrame(data["bids"], columns=["price","quantity"], dtype =float)
+      ask_df = pd.DataFrame(data["asks"], columns=["price","quantity"], dtype =float)
       
-    ask_df.quantity = ask_df.quantity.apply(
-      lambda x: f"%.{quantity_after_decimal}f" % x)
+    #  Middle Price
+      # price_after_decimal = str(bid_df.price.iloc[0])[::-1].find('.')
+      mid_price = (bid_df.price.iloc[0] + ask_df.price.iloc[0])/2
+      # # print("Largest BID: " ,bid_df.price.iloc[0])
+      # print("Smallest ASK: " ,ask_df.price.iloc[0])
+      mid_price_precision = int(price_after_decimal)
+      mid_price = f"%.{mid_price_precision}f" % mid_price 
+      
+      # Bids
+      bid_df = aggregate_levels(bid_df, agg_level = Decimal(agg_level), side = "bid")
+      bid_df = bid_df.sort_values("price", ascending = False) 
+      
+      # Asks
+      ask_df = aggregate_levels(ask_df, agg_level = Decimal(agg_level), side = "ask")
+      ask_df = ask_df.sort_values("price", ascending = False) 
     
-    ask_df.price = ask_df.price.apply(
-      lambda x: f"%.{price_after_decimal}f" % x)
-  except Exception as e:
-      # print("an exception occured - {}".format(e))
-      return e.message
-    
-  return (bid_df.to_dict("records"), table_styling(bid_df, "bid"),  
-          ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price, symbol)
+      bid_df = bid_df.iloc[:levels_to_show]
+      ask_df = ask_df.iloc[-levels_to_show:]
+      
+      # quantity_precision[::-1].find('.') # np.format_float_positional(quantity_precision, trim='-')
+      quantity_after_decimal = price_after_decimal 
+      # quantity_after_decimal = str(quantity_precision)[::-1].find('.')
+      bid_df.quantity = bid_df.quantity.apply(
+        lambda x: f"%.{quantity_after_decimal}f" % x)
+      
+      # price_precision = np.format_float_positional(price_precision, trim='-')
+      # price_after_decimal = str(price_precision)[::-1].find('.')
+      bid_df.price = bid_df.price.apply(
+        lambda x: f"%.{price_after_decimal}f" % x)
+        
+      ask_df.quantity = ask_df.quantity.apply(
+        lambda x: f"%.{quantity_after_decimal}f" % x)
+      
+      ask_df.price = ask_df.price.apply(
+        lambda x: f"%.{price_after_decimal}f" % x)
+    except Exception as e:
+        # print("an exception occured - {}".format(e))
+        return e.message
+      
+    return (bid_df.to_dict("records"), table_styling(bid_df, "bid"),  
+            ask_df.to_dict("records"),  table_styling(ask_df, "ask"), mid_price, mid_price, symbol)
+  elif n_intervals <= 1:
+     raise PreventUpdate
   pass
 
 
