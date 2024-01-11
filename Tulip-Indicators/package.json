@@ -1,0 +1,14 @@
+{
+  "name": "tulip-indicators",
+  "version": "1.0.0",
+  "description": "A library to calculate technical indicators like RSI,EMA,MACD etc.",
+  "main": "data.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Osvaldo Martini",
+  "license": "ISC",
+  "dependencies": {
+    "tulind": "^0.8.20"
+  }
+}
