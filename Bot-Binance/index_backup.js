@@ -48,6 +48,29 @@ CLOSE_TIME_END = 59;
 AUTH_TO_BUY = false;
 AUTH_TO_SELL = false;
 
+function calculateRSI(closingPrices) {
+  // Calculate the average of the upward price changes
+  let avgUpwardChange = 0;
+  for (let i = 1; i < closingPrices.length; i++) {
+    avgUpwardChange += Math.max(0, closingPrices[i] - closingPrices[i - 1]);
+  }
+  avgUpwardChange /= closingPrices.length;
+
+  // Calculate the average of the downward price changes
+  let avgDownwardChange = 0;
+  for (let i = 1; i < closingPrices.length; i++) {
+    avgDownwardChange += Math.max(0, closingPrices[i - 1] - closingPrices[i]);
+  }
+  avgDownwardChange /= closingPrices.length;
+
+  // Calculate the RSI
+  const rsi = 100 - 100 / (1 + avgUpwardChange / avgDownwardChange);
+
+  log("Manual Last RSI: ", rsi);
+
+  return rsi;
+}
+
 // Array.prototype.insert = function (index, ...items) {
 //   this.splice(index, 0, ...items);
 // };
@@ -201,6 +224,11 @@ const preData = async (config, binanceClient) => {
 
   filter_data_per_time(klines, false);
 
+  // Example usage
+  // const closingPrices = [100, 110, 105, 115, 120, 130, 140, 150, 145, 155];
+  // const last_rsi = calculateRSI(closingPrices);
+  // console.log("LAST RSI: ", last_rsi); // Output: 71.43
+
   if (closesArray.length > RSI_PERIOD) {
     last_tulind = 0.0;
     tulind.indicators.rsi.indicator(
@@ -216,20 +244,23 @@ const preData = async (config, binanceClient) => {
     log("EMA : ", klinedata[klinedata.length - 1].ema);
     log("MSA : ", klinedata[klinedata.length - 1].msa);
     log("MACD : ", klinedata[klinedata.length - 1].macd);
+    const last_rsi = calculateRSI(closesArray);
 
-    talibRSI = talib.RSI(
+    talibRS_1 = talib.RSI(closesArray, 14);
+    talibRS_2 = talib.RSI(
       klinedata.map((f) => f.close),
       14
     );
-    log("RSI TA-LIB : ", talibRSI[talibRSI.length - 1]);
+    log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
+    log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
 
-    calling_bot_decision(last_tulind);
+    calling_bot_decision(last_rsi);
 
-    if (last_tulind > RSI_OVERBOUGHT) {
+    if (last_rsi > RSI_OVERBOUGHT) {
       console.log("Overbought! Sell! Sell! Sell!");
     }
 
-    if (last_tulind < RSI_OVERSOLD) {
+    if (last_rsi < RSI_OVERSOLD) {
       console.log("Overbought! Sell! Sell! Sell!");
       console.log("Oversold! Buy! Buy! Buy!");
     }
@@ -362,14 +393,17 @@ const tick = async (config, binanceClient) => {
       log("EMA : ", klinedata[klinedata.length - 1].ema);
       log("MSA : ", klinedata[klinedata.length - 1].msa);
       log("MACD : ", klinedata[klinedata.length - 1].macd);
+      const last_rsi = calculateRSI(closesArray);
 
-      talibRSI = talib.RSI(
+      talibRS_1 = talib.RSI(closesArray, 14);
+      talibRS_2 = talib.RSI(
         klinedata.map((f) => f.close),
         14
       );
-      log("RSI TA-LIB: ", talibRSI[talibRSI.length - 1]);
+      log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
+      log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
 
-      calling_bot_decision(last_tulind);
+      calling_bot_decision(last_rsi);
     }
 
     // Give us the Price in the Unit we want
