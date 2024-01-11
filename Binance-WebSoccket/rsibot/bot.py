@@ -2,14 +2,17 @@ import websocket, json, pprint, talib, numpy
 import config
 from binance.client import Client
 from binance.enums import *
+import numpy as np
+import math
 
-SOCKET_SPOT = "wss://stream.binance.com:9443/ws/bonkusdt@kline_1s"
 
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'BONKUSDT'
+TRADE_SYMBOL = 'btcusdt'
 TRADE_QUANTITY = 50
+SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL)
+
 
 closes = []
 in_position = False
@@ -36,9 +39,9 @@ def on_close(ws):
 def on_message(ws, message):
     global closes, in_position
     
-    print('received message')
+    # print('received message')
     json_message = json.loads(message)
-    # pprint.pprint(json_message)
+    # print(json_message)
 
     candle = json_message['k']
 
@@ -51,24 +54,31 @@ def on_message(ws, message):
     # print(info['filters'][2]['minQty'])
 
     if is_candle_closed:
-        print("candle closed at {}".format(close))
+        # print("candle closed at {}".format(close))
         closes.append(float(close))
-        print("closes")
-        print(closes)
-
+        
         if len(closes) > RSI_PERIOD:
             np_closes = numpy.array(closes)
+            np.set_printoptions(suppress = True)
+            # print("Numpy tt: {} Closes {}".format(len(np_closes), np_closes))
+        
             rsi = talib.RSI(np_closes, RSI_PERIOD)
-            print("all rsis calculated so far")
-            print(rsi)
+            sma = talib.SMA(np_closes, RSI_PERIOD)
+            last_sma = sma[-1]
+            print("SMA: {}".format(last_sma))
+
+            # print("all rsis calculated so far")
+            # np_rsi = numpy.array(rsi)
+            # print("Numpy RSIs {}".format(rsi))
+        
             last_rsi = rsi[-1]
-            print("the current rsi is {}".format(last_rsi))
+            print("RSI: {}".format(last_rsi))
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
                     print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
-                    order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
+                    # order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL.upper())
                     if order_succeeded:
                         in_position = False
                 else:
@@ -80,7 +90,7 @@ def on_message(ws, message):
                 else:
                     print("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
+                    # order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL.upper())
                     if order_succeeded:
                         in_position = True
                     
