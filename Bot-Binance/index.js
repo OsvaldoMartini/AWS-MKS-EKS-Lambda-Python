@@ -1,6 +1,8 @@
 require("dotenv").config({ path: "./.env" });
 const crypto = require("crypto");
 const tulind = require("tulind");
+var talib = require("ta-lib");
+
 //Tulind Functions
 const {
   sma_inc,
@@ -116,8 +118,8 @@ function filter_data_per_time(klines, secondLoad) {
     // }
 
     // if (secondLoad) {
-    // closesArray.push[closesArray.length - 1] =
-    //   klines[klines.length - 1][klines[0].length - 1].close;
+    //   closesArray.push[closesArray.length - 1] =
+    //     klines[klines.length - 1][klines[0].length - 1].close;
     // }
 
     // if (secondLoad) {
@@ -161,7 +163,7 @@ const preData = async (config, binanceClient) => {
   params_kline = {
     symbol: symbol,
     interval: "1m",
-    limit: "100",
+    limit: "60",
     recvWindow: 10000,
     timestamp: Date.now(),
   };
@@ -239,6 +241,17 @@ const preData = async (config, binanceClient) => {
     );
 
     log("RSI : ", klinedata[klinedata.length - 1].rsi);
+    log("MSA : ", klinedata[klinedata.length - 1].msa);
+    log("MACD : ", klinedata[klinedata.length - 1].macd);
+    log("EMA : ", klinedata[klinedata.length - 1].ema);
+
+    talibRS_1 = talib.RSI(closesArray, 14);
+    talibRS_2 = talib.RSI(
+      klinedata.map((f) => f.close),
+      14
+    );
+    log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
+    log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
 
     calling_bot_decision(last_rsi);
 
@@ -313,7 +326,7 @@ const tick = async (config, binanceClient) => {
     params_kline = {
       symbol: symbolToRate,
       interval: "1m",
-      limit: "100",
+      limit: "60",
       recvWindow: 10000,
       timestamp: Date.now(),
     };
@@ -377,6 +390,17 @@ const tick = async (config, binanceClient) => {
       );
 
       log("RSI : ", klinedata[klinedata.length - 1].rsi);
+      log("MSA : ", klinedata[klinedata.length - 1].msa);
+      log("MACD : ", klinedata[klinedata.length - 1].macd);
+      log("EMA : ", klinedata[klinedata.length - 1].ema);
+
+      talibRS_1 = talib.RSI(closesArray, 14);
+      talibRS_2 = talib.RSI(
+        klinedata.map((f) => f.close),
+        14
+      );
+      log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
+      log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
 
       calling_bot_decision(last_rsi);
     }

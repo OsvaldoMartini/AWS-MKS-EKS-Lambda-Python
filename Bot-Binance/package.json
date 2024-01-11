@@ -17,6 +17,7 @@
     "moment": "^2.30.1",
     "querystring": "^0.2.1",
     "requests": "^0.3.0",
+    "ta-lib": "^0.11.0",
     "tulind": "^0.8.20",
     "websocket": "^1.0.34",
     "ws": "^8.15.1"
