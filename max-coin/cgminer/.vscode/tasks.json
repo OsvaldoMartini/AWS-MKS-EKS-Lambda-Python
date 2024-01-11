@@ -10,6 +10,7 @@
 				"-Wall",
 				"-I.",
 				"-I./ccan",
+				"-I./compat/jansson-2.5/src",
 				"cgminer.c",
 				"-o",
 				"cgminer",
