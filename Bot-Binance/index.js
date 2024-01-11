@@ -27,7 +27,7 @@ const ASSET = "BTC";
 const BASE = "USDT";
 const ALLOCATION = 100; //Percentage of our  portfolio to allocate for each trade
 const SPREAD = 0.2; //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
-const INTERVAL = 2000; // every 2 seconds evaluate  goig to sell or buy the limit order of the preious ticket  and create new one
+const INTERVAL = 1000; // every 2 seconds evaluate  goig to sell or buy the limit order of the preious ticket  and create new one
 const ONLY_CALC = false;
 MARKETS = {};
 SYMBOL_LEVERAGE = 0;
@@ -246,10 +246,10 @@ const preData = async (config, binanceClient) => {
     log("MACD : ", klinedata[klinedata.length - 1].macd);
     const last_rsi = calculateRSI(closesArray);
 
-    talibRS_1 = talib.RSI(closesArray, 30);
+    talibRS_1 = talib.RSI(closesArray, 14);
     talibRS_2 = talib.RSI(
       klinedata.map((f) => f.close),
-      30
+      14
     );
     log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
     log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
@@ -395,10 +395,10 @@ const tick = async (config, binanceClient) => {
       log("MACD : ", klinedata[klinedata.length - 1].macd);
       const last_rsi = calculateRSI(closesArray);
 
-      talibRS_1 = talib.RSI(closesArray, 30);
+      talibRS_1 = talib.RSI(closesArray, 14);
       talibRS_2 = talib.RSI(
         klinedata.map((f) => f.close),
-        30
+        14
       );
       log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
       log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
