@@ -1,6 +1,14 @@
 require("dotenv").config({ path: "./.env" });
 const crypto = require("crypto");
-// const tulind = require("tulind");
+const tulind = require("tulind");
+//Tulind Functions
+const {
+  sma_inc,
+  ema_inc,
+  markers_inc,
+  rsi_inc,
+  macd_inc,
+} = require("./indicators");
 const log = console.log;
 
 // var W3CWebSocket = require("websocket").w3cwebsocket;
@@ -56,7 +64,7 @@ function calculateRSI(closingPrices) {
   // Calculate the RSI
   const rsi = 100 - 100 / (1 + avgUpwardChange / avgDownwardChange);
 
-  log("Last RSI: ", rsi);
+  log("Manual Last RSI: ", rsi);
 
   return rsi;
 }
@@ -100,20 +108,25 @@ function filter_data_per_time(klines, secondLoad) {
     // );
     // var array = [['TEST1'], ['TEST2'], ['TEST3'], ['TEST4'], ['TEST5']];
     // [].concat.apply([], array);
-    if (!secondLoad) {
-      closesArray = closesArray.concat.apply(
-        [],
-        klines[klines.length - 1].map((f) => f.close)
-      );
-    }
+    // if (!secondLoad) {
+    closesArray = closesArray.concat.apply(
+      [],
+      klines[klines.length - 1].map((f) => f.close)
+    );
+    // }
 
-    if (secondLoad) {
-      leftRotateByOne(closesArray);
-      closesArray[closesArray.length - 1] =
-        klines[klines.length - 1][klines[0].length - 1].close;
-    }
+    // if (secondLoad) {
+    // closesArray.push[closesArray.length - 1] =
+    //   klines[klines.length - 1][klines[0].length - 1].close;
+    // }
 
-    log("Closes :", closesArray);
+    // if (secondLoad) {
+    //   leftRotateByOne(closesArray);
+    //   closesArray[closesArray.length - 1] =
+    //     klines[klines.length - 1][klines[0].length - 1].close;
+    // }
+
+    log(`Closes tt: ${closesArray.length}`, closesArray);
   }
 }
 
@@ -145,10 +158,10 @@ const preData = async (config, binanceClient) => {
     timestamp: Date.now(),
   };
 
-  params_2 = {
+  params_kline = {
     symbol: symbol,
     interval: "1m",
-    limit: "15",
+    limit: "100",
     recvWindow: 10000,
     timestamp: Date.now(),
   };
@@ -157,9 +170,9 @@ const preData = async (config, binanceClient) => {
   cli_signature = signature(stringified);
   params_1["signature"] = cli_signature;
 
-  stringified = queryString.stringify(params_2);
+  stringified = queryString.stringify(params_kline);
   cli_signature = signature(stringified);
-  params_2["signature"] = cli_signature;
+  params_kline["signature"] = cli_signature;
 
   // data = requests.get(url, (params = params)).json();
   const result = await Promise.all([
@@ -179,7 +192,7 @@ const preData = async (config, binanceClient) => {
       headers: {
         "X-MBX-APIKEY": process.env.API_KEY,
       },
-      params: params_2,
+      params: params_kline,
     }),
     // https://fapi.binance.com/fapi/v2/positionRisk?symbol=1000BONKUSDT&timestamp=1702853580832&signature=ca7f9f94abc876aa4fed4cf7b35c311ce935d2abfcbbbbf48293806d1a1313ec
   ]);
@@ -198,41 +211,51 @@ const preData = async (config, binanceClient) => {
     close: d[4] * 1,
   }));
 
+  klinedata = await sma_inc(klinedata);
+  klinedata = await ema_inc(klinedata);
+  klinedata = markers_inc(klinedata);
+  klinedata = await rsi_inc(klinedata);
+  klinedata = await macd_inc(klinedata);
+
   klines.push(klinedata);
   // console.log("KLINES DATA: \n", klines);
 
   filter_data_per_time(klines, false);
-
-  const last_rsi = calculateRSI(closesArray);
 
   // Example usage
   // const closingPrices = [100, 110, 105, 115, 120, 130, 140, 150, 145, 155];
   // const last_rsi = calculateRSI(closingPrices);
   // console.log("LAST RSI: ", last_rsi); // Output: 71.43
 
-  if (last_rsi > RSI_OVERBOUGHT) {
-    console.log("Overbought! Sell! Sell! Sell!");
-  }
-
-  if (last_rsi < RSI_OVERSOLD) {
-    console.log("Overbought! Sell! Sell! Sell!");
-    console.log("Oversold! Buy! Buy! Buy!");
-  }
-
   if (closesArray.length > RSI_PERIOD) {
     const last_rsi = calculateRSI(closesArray);
+    tulind.indicators.rsi.indicator(
+      [klinedata.map((f) => f.close)],
+      [14],
+      (err, res) => {
+        if (err) return log(err);
+        log("Tulind RSI: ", res[0].slice(-1)[0]);
+      }
+    );
+
+    log("RSI : ", klinedata[klinedata.length - 1].rsi);
+
     calling_bot_decision(last_rsi);
+
+    if (last_rsi > RSI_OVERBOUGHT) {
+      console.log("Overbought! Sell! Sell! Sell!");
+    }
+
+    if (last_rsi < RSI_OVERSOLD) {
+      console.log("Overbought! Sell! Sell! Sell!");
+      console.log("Oversold! Buy! Buy! Buy!");
+    }
   }
 
   // const open = require("./data").data.map((d) => d[1]);
   // const high = require("./data").data.map((d) => d[2]);
   // const low = require("./data").data.map((d) => d[3]);
   // const close = require("./data").data.map((d) => d[4]);
-
-  // tulind.indicators.rsi.indicator([klinedata.close], [14], (err, res) => {
-  //   if (err) return log(err);
-  //   log(res[0].slice(-1)[0]);
-  // });
 };
 
 function calling_bot_decision(last_rsi) {
@@ -290,7 +313,7 @@ const tick = async (config, binanceClient) => {
     params_kline = {
       symbol: symbolToRate,
       interval: "1m",
-      limit: "15",
+      limit: "100",
       recvWindow: 10000,
       timestamp: Date.now(),
     };
@@ -332,13 +355,29 @@ const tick = async (config, binanceClient) => {
       close: d[4] * 1,
     }));
 
-    klines.push(klinedata);
-    // console.log("KLINES DATA: \n", klines);
+    klinedata = await sma_inc(klinedata);
+    klinedata = await ema_inc(klinedata);
+    klinedata = markers_inc(klinedata);
+    klinedata = await rsi_inc(klinedata);
+    klinedata = await macd_inc(klinedata);
 
+    klines.push(klinedata);
     filter_data_per_time(klines, true);
 
     if (closesArray.length > RSI_PERIOD) {
       const last_rsi = calculateRSI(closesArray);
+
+      tulind.indicators.rsi.indicator(
+        [klinedata.map((f) => f.close)],
+        [14],
+        (err, res) => {
+          if (err) return log(err);
+          log("Tulind RSI: ", res[0].slice(-1)[0]);
+        }
+      );
+
+      log("RSI : ", klinedata[klinedata.length - 1].rsi);
+
       calling_bot_decision(last_rsi);
     }
 
