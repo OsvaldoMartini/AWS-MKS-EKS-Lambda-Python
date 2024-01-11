@@ -13,7 +13,7 @@ const axios = require("axios");
 // const MARKET_TYPE = "margin";
 const STOP_PERCENT = 0.95;
 const MARKET_TYPE = "future";
-const ASSET = "POWR";
+const ASSET = "BTC";
 const BASE = "USDT";
 const ALLOCATION = 100; //Percentage of our  portfolio to allocate for each trade
 const SPREAD = 0.2; //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
@@ -33,8 +33,10 @@ RSI_OVERSOLD = 30;
 IN_POSITION = false;
 ORDER_SUCCEEDED = false;
 closesArray = [];
-CLOSE_TIME_START = 15;
-CLOSE_TIME_END = 45;
+CLOSE_TIME_START = 1;
+CLOSE_TIME_END = 59;
+AUTH_TO_BUY = false;
+AUTH_TO_SELL = false;
 
 function calculateRSI(closingPrices) {
   // Calculate the average of the upward price changes
@@ -54,14 +56,76 @@ function calculateRSI(closingPrices) {
   // Calculate the RSI
   const rsi = 100 - 100 / (1 + avgUpwardChange / avgDownwardChange);
 
+  log("Last RSI: ", rsi);
+
   return rsi;
 }
+
+// Array.prototype.insert = function (index, ...items) {
+//   this.splice(index, 0, ...items);
+// };
 
 function signature(query_string) {
   return crypto
     .createHmac("sha256", process.env.API_SECRET)
     .update(query_string)
     .digest("hex");
+}
+
+function filter_data_per_time(klines, secondLoad) {
+  date = new Date();
+  seconds = date.getSeconds();
+  // console.log(seconds);
+
+  if (seconds >= CLOSE_TIME_START && seconds <= CLOSE_TIME_END) {
+    console.log(
+      `======= ======= Catch Seconds between ${CLOSE_TIME_START} and ${CLOSE_TIME_END} ======= =======`
+    );
+
+    klines[klines.length - 1].forEach((f) => {
+      mseconds = date.getMilliseconds();
+      console.log(
+        `Times: ${seconds}:${mseconds} open: ${f.open} high: ${f.high} low: ${f.low} close: ${f.close}: ${f.close}`
+      );
+    });
+
+    console.log("======= ======= end of chunck ======= =======");
+
+    // closesArray.push(klines[klines.length - 1].map((f) => f.close));
+    // Oly Gets the Closes Times between 15 and 45 seconds
+    // closesArray.push(
+    //   klines[klines.length - 1]
+    //     .map((f) => f.close)
+
+    // );
+    // var array = [['TEST1'], ['TEST2'], ['TEST3'], ['TEST4'], ['TEST5']];
+    // [].concat.apply([], array);
+    if (!secondLoad) {
+      closesArray = closesArray.concat.apply(
+        [],
+        klines[klines.length - 1].map((f) => f.close)
+      );
+    }
+
+    if (secondLoad) {
+      leftRotateByOne(closesArray);
+      closesArray[closesArray.length - 1] =
+        klines[klines.length - 1][klines[0].length - 1].close;
+    }
+
+    log("Closes :", closesArray);
+  }
+}
+
+function leftRotateByOne(arr) {
+  if (arr.length <= 1) {
+    return arr;
+  }
+
+  let elem1 = arr.shift();
+  arr.push(elem1);
+
+  return arr;
 }
 
 const preData = async (config, binanceClient) => {
@@ -84,7 +148,7 @@ const preData = async (config, binanceClient) => {
   params_2 = {
     symbol: symbol,
     interval: "1m",
-    limit: "5",
+    limit: "15",
     recvWindow: 10000,
     timestamp: Date.now(),
   };
@@ -135,19 +199,10 @@ const preData = async (config, binanceClient) => {
   }));
 
   klines.push(klinedata);
-  console.log("KLINES DATA: \n", klines);
+  // console.log("KLINES DATA: \n", klines);
 
-  // closesArray.push(klines[klines.length - 1].map((f) => f.close));
-  // Oly Gets the Closes Times between 15 and 45 seconds
-  closesArray.push(
-    klines[klines.length - 1]
-      .filter((f) => {
-        date = new Date(f.time);
-        seconds = date.getSeconds();
-        return seconds >= CLOSE_TIME_START && seconds <= CLOSE_TIME_END;
-      })
-      .map((f) => f.close)
-  );
+  filter_data_per_time(klines, false);
+
   const last_rsi = calculateRSI(closesArray);
 
   // Example usage
@@ -164,7 +219,10 @@ const preData = async (config, binanceClient) => {
     console.log("Oversold! Buy! Buy! Buy!");
   }
 
-  calling_bot_decision(last_rsi);
+  if (closesArray.length > RSI_PERIOD) {
+    const last_rsi = calculateRSI(closesArray);
+    calling_bot_decision(last_rsi);
+  }
 
   // const open = require("./data").data.map((d) => d[1]);
   // const high = require("./data").data.map((d) => d[2]);
@@ -232,7 +290,7 @@ const tick = async (config, binanceClient) => {
     params_kline = {
       symbol: symbolToRate,
       interval: "1m",
-      limit: "5",
+      limit: "15",
       recvWindow: 10000,
       timestamp: Date.now(),
     };
@@ -275,19 +333,9 @@ const tick = async (config, binanceClient) => {
     }));
 
     klines.push(klinedata);
-    console.log("KLINES DATA: \n", klines);
+    // console.log("KLINES DATA: \n", klines);
 
-    // closesArray.push(klines[klines.length - 1].map((f) => f.close));
-    // Oly Gets the Closes Times between 15 and 45 seconds
-    closesArray.push(
-      klines[klines.length - 1]
-        .filter((f) => {
-          date = new Date(f.time);
-          seconds = date.getSeconds();
-          return seconds >= CLOSE_TIME_START && seconds <= CLOSE_TIME_END;
-        })
-        .map((f) => f.close)
-    );
+    filter_data_per_time(klines, true);
 
     if (closesArray.length > RSI_PERIOD) {
       const last_rsi = calculateRSI(closesArray);
