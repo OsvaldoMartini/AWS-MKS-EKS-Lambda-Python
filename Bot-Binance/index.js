@@ -128,7 +128,7 @@ function filter_data_per_time(klines, secondLoad) {
     //     klines[klines.length - 1][klines[0].length - 1].close;
     // }
 
-    log(`Closes tt: ${closesArray.length}`, closesArray);
+    // log(`Closes tt: ${closesArray.length}`, closesArray);
   }
 }
 
@@ -230,25 +230,26 @@ const preData = async (config, binanceClient) => {
   // console.log("LAST RSI: ", last_rsi); // Output: 71.43
 
   if (closesArray.length > RSI_PERIOD) {
-    const last_rsi = calculateRSI(closesArray);
+    last_tulind = 0.0;
     tulind.indicators.rsi.indicator(
       [klinedata.map((f) => f.close)],
       [14],
       (err, res) => {
         if (err) return log(err);
-        log("Tulind RSI: ", res[0].slice(-1)[0]);
+        last_tulind = res[0].slice(-1)[0];
+        log("Tulind RSI: ", last_tulind);
       }
     );
-
     log("RSI : ", klinedata[klinedata.length - 1].rsi);
+    log("EMA : ", klinedata[klinedata.length - 1].ema);
     log("MSA : ", klinedata[klinedata.length - 1].msa);
     log("MACD : ", klinedata[klinedata.length - 1].macd);
-    log("EMA : ", klinedata[klinedata.length - 1].ema);
+    const last_rsi = calculateRSI(closesArray);
 
-    talibRS_1 = talib.RSI(closesArray, 14);
+    talibRS_1 = talib.RSI(closesArray, 30);
     talibRS_2 = talib.RSI(
       klinedata.map((f) => f.close),
-      14
+      30
     );
     log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
     log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
@@ -378,26 +379,26 @@ const tick = async (config, binanceClient) => {
     filter_data_per_time(klines, true);
 
     if (closesArray.length > RSI_PERIOD) {
-      const last_rsi = calculateRSI(closesArray);
-
+      last_tulind = 0.0;
       tulind.indicators.rsi.indicator(
         [klinedata.map((f) => f.close)],
         [14],
         (err, res) => {
           if (err) return log(err);
-          log("Tulind RSI: ", res[0].slice(-1)[0]);
+          last_tulind = res[0].slice(-1)[0];
+          log("Tulind RSI: ", last_tulind);
         }
       );
-
       log("RSI : ", klinedata[klinedata.length - 1].rsi);
+      log("EMA : ", klinedata[klinedata.length - 1].ema);
       log("MSA : ", klinedata[klinedata.length - 1].msa);
       log("MACD : ", klinedata[klinedata.length - 1].macd);
-      log("EMA : ", klinedata[klinedata.length - 1].ema);
+      const last_rsi = calculateRSI(closesArray);
 
-      talibRS_1 = talib.RSI(closesArray, 14);
+      talibRS_1 = talib.RSI(closesArray, 30);
       talibRS_2 = talib.RSI(
         klinedata.map((f) => f.close),
-        14
+        30
       );
       log("RSI TA-LIB 1: ", talibRS_1[talibRS_1.length - 1]);
       log("RSI TA-LIB 2: ", talibRS_2[talibRS_2.length - 1]);
