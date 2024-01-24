@@ -70,7 +70,7 @@ def on_message(ws, message):
             # print("Numpy RSIs {}".format(rsi))
         
             last_rsi = rsi[-1]
-            print("RSI: {}                SMA: {}".format(last_rsi, last_sma))
+            print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:

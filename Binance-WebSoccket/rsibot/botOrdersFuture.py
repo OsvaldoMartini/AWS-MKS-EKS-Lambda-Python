@@ -60,7 +60,7 @@ def strategy(pair, qty, open_position=False):
   applytechnicals(df)
   inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
-  print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)))
+  print(f'current Close is '+str(df.Close.iloc[-1]))
   if df.Buy.iloc[-1]:
     order = client.create_order(symbol=pair,
                                 side='BUY',
