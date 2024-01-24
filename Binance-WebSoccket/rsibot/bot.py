@@ -65,14 +65,12 @@ def on_message(ws, message):
             rsi = talib.RSI(np_closes, RSI_PERIOD)
             sma = talib.SMA(np_closes, RSI_PERIOD)
             last_sma = sma[-1]
-            print("SMA: {}".format(last_sma))
-
             # print("all rsis calculated so far")
             # np_rsi = numpy.array(rsi)
             # print("Numpy RSIs {}".format(rsi))
         
             last_rsi = rsi[-1]
-            print("RSI: {}".format(last_rsi))
+            print("RSI: {}                SMA: {}".format(last_rsi, last_sma))
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
