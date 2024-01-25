@@ -40,11 +40,11 @@ logger = logging.getLogger()
 PROFIT = 1.001
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
-RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'LSKUSDT'
+RSI_OVERSOLD = 20
+TRADE_SYMBOL = 'ALTBTC'
 QTY_BUY = 15 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 1.181
+ONLY_BY_WHEN = 0.00000820
 ByPass = True
 
 loggin_setup(TRADE_SYMBOL)
@@ -142,7 +142,9 @@ def on_message(ws, message):
             # print("Numpy RSIs {}".format(rsi))
         
             last_rsi = rsi[-1]
+            # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             if not in_position:
+                # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 logger.info("RSI: {}  current Close is {}    BUY WHEN {}".format (round(last_rsi, 2),  close, ONLY_BY_WHEN))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits

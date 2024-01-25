@@ -91,7 +91,7 @@ def strategy(pair, qty, open_position=False):
   
 while True:
   # strategy('MANTAUSDT', 50) # Runs One Time
-  strategy('BTCUSDT', 50) # Runs One Time
+  strategy('ALTUSDT', 50) # Runs One Time
   time.sleep(0.5) 
   
   

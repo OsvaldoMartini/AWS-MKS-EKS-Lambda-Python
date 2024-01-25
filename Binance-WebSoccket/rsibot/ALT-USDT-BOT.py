@@ -37,15 +37,15 @@ def loggin_setup(filename):
 
 logger = logging.getLogger()
 
-PROFIT = 1.001
+PROFIT = 1.004
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'LSKUSDT'
-QTY_BUY = 15 # USDT
+TRADE_SYMBOL = 'ALTUSDT'
+QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 1.181
-ByPass = True
+ONLY_BY_WHEN = 0.32710
+ByPass = False
 
 loggin_setup(TRADE_SYMBOL)
 
@@ -65,7 +65,9 @@ SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL
 # balance = 33.45275975
 # balance = 33.49762823
 # balance = 33.65854172
-
+# balance = 33.54358782
+# balance = 33.350
+# balance = 33.30836479
 
 closes = []
 in_position = False
@@ -94,16 +96,16 @@ def order(side, symbol, quoteOrderQty, order_type):
 
 def orderSell(side, symbol, quantity, order_type):
     try:
-        logger.info("sending order  SIDE {} QTY {} ".format( side, quantity ))
+        logger.info("sending order  SIDE {} QTY {} ".format(side, quantity ))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
         logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
         order = False
         while str(e).find("Account has insufficient balance for requested") >= 0 and not order:
-            quantity = round(quantity - 0.001, 3) 
+            quantity = math.trunc(quantity - 1) 
             logger.info("Attempt to SELL {}".format(str(quantity)))
-            order = orderSell(side, symbol, round(quantity, 3) , order_type)    
+            order = orderSell(side, symbol, math.trunc(quantity) , order_type)    
     return order
 
     
@@ -142,13 +144,15 @@ def on_message(ws, message):
             # print("Numpy RSIs {}".format(rsi))
         
             last_rsi = rsi[-1]
+            # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             if not in_position:
+                # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 logger.info("RSI: {}  current Close is {}    BUY WHEN {}".format (round(last_rsi, 2),  close, ONLY_BY_WHEN))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 logger.info("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
                 if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
+                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), math.trunc(amountQty), ORDER_TYPE_MARKET)
                     in_position = False        
                     logger.info(order_succeeded)
 
@@ -157,7 +161,7 @@ def on_message(ws, message):
                      logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
                      if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
                         logger.info("Overbought! Sell! Sell! Sell!")
-                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
+                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), math.trunc(amountQty), ORDER_TYPE_MARKET)
                         logger.info(order_succeeded)
                         in_position = False
                 else:
