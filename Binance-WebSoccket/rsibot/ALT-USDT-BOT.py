@@ -31,6 +31,9 @@ from datetime import datetime, timezone, timedelta
 # balance = 33.19435273
 # balance = 32.89885495
 # balance = 32.77350370
+# balance = 32.55632435
+# balance = 32.26410725
+
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
@@ -55,15 +58,15 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.006
+PROFIT = 1.04
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
-RSI_OVERSOLD = 30
+RSI_OVERSOLD = 25
 TRADE_SYMBOL = 'ALTUSDT'
 QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 0.31335
-ByPass = False
+ByPass = True
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)
@@ -90,23 +93,21 @@ def order(side, symbol, quoteOrderQty, order_type):
     try:
         logger.info("sending order  SIDE {} QTY {} ".format( side, quoteOrderQty ))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
-        logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
     return order
 
-def orderSell(side, symbol, quantity, order_type):
+def orderSell(side, symbol, quantity, order_type, soldDesc):
     try:
-        logger.info("sending order  SIDE {} QTY {} ".format(side, quantity ))
+        logger.info("sending order  SIDE {} QTY {} SOLD MOTIVE: {}".format(side, quantity , soldDesc))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
-        logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
         order = False
         while str(e).find("Account has insufficient balance for requested") >= 0 and not order:
             quantity = math.trunc(quantity - 1) 
             logger.info("Attempt to SELL {}".format(str(quantity)))
-            order = orderSell(side, symbol, math.trunc(quantity) , order_type)    
+            order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
     return order
 
     
@@ -153,7 +154,8 @@ def on_message(ws, message):
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 logger.info("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
                 if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET)
+                    soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT"  
+                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                     in_position = False        
                     logger.info(order_succeeded)
 
@@ -161,8 +163,9 @@ def on_message(ws, message):
                 if in_position:
                      logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
                      if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
+                        soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT"  
                         logger.info("Overbought! Sell! Sell! Sell!")
-                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET)
+                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                         logger.info(order_succeeded)
                         in_position = False
                 else:
