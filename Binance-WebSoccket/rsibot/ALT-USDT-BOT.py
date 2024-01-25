@@ -9,7 +9,24 @@ import sys
 from datetime import datetime, timezone, timedelta
 # import ccxt
 
-
+# balance = 17.25099083
+# balance = 17.25452794
+# balance = 17.557742498
+# balance = 34.11620543
+# balance = 34.07442870
+# balance = 33.94533986
+# balance = 33.916637855
+# balance = 33.87617461
+# balance = 33.80694975
+# balance = 33.79699856
+# balance = 33.52835663
+# balance = 33.45275975
+# balance = 33.49762823
+# balance = 33.65854172
+# balance = 33.54358782
+# balance = 33.350
+# balance = 33.30836479
+# balance = 33.26055656
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
@@ -50,24 +67,6 @@ ByPass = False
 loggin_setup(TRADE_SYMBOL)
 
 SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
-
-# balance = 17.25099083
-# balance = 17.25452794
-# balance = 17.557742498
-# balance = 34.11620543
-# balance = 34.07442870
-# balance = 33.94533986
-# balance = 33.916637855
-# balance = 33.87617461
-# balance = 33.80694975
-# balance = 33.79699856
-# balance = 33.52835663
-# balance = 33.45275975
-# balance = 33.49762823
-# balance = 33.65854172
-# balance = 33.54358782
-# balance = 33.350
-# balance = 33.30836479
 
 closes = []
 in_position = False
