@@ -4,14 +4,15 @@ from binance.client import Client
 from binance.enums import *
 import numpy as np
 import math
+import ccxt
 
 
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'btcusdt'
-TRADE_BUY = 5 # USDT
-TRADE_SELL = 1000 # It Forces to Sell 100%
+TRADE_SYMBOL = 'mantasusdt'
+QTY_BUY = 6 # USDT
+QTY_SELL = 1000 # It Forces to Sell 100%
 
 SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL)
 
@@ -19,18 +20,36 @@ SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL
 # balance = 17.25452794
 # balance = 17.557742498
 
+
 closes = []
 in_position = False
 # buyprice = 39570.01 
 buyprice = 0
+# forceSell = 39800.94000000
+
+
+
 
 client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
+exchange = ccxt.binance({'apiKey': config.API_KEY, 'secret': config.API_SECRET})
 
+# params = {'fromAsset': 'BTCUSDT', 'toAsset': 'USDT', 'fromAmount': 10000, 'recvWindow': 60000}
+# response = exchange.sapi_post_convert_getquote(params)
+# print("Direct Trade {}".format(response.status))
 
-def order(side, quoteOrderQty, symbol, order_type):
+def order(side, symbol, quoteOrderQty, order_type):
     try:
         print("sending order  SIDE {} QRT {} ".format( side, quoteOrderQty ))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
+        print(order)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+    return order
+
+def orderSell(side, symbol, quantity, order_type):
+    try:
+        print("sending order  SIDE {} QRT {} ".format( side, quantity ))
+        order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
         print(order)
     except Exception as e:
         print("an exception occured - {}".format(e))
@@ -44,7 +63,7 @@ def on_close(ws):
     print('closed connection')
 
 def on_message(ws, message):
-    global closes, in_position, buyprice
+    global closes, in_position, buyprice, amountQty
     
     # print('received message')
     json_message = json.loads(message)
@@ -55,7 +74,10 @@ def on_message(ws, message):
     is_candle_closed = candle['x']
     close = candle['c']
     
-    
+    # amountQty = 0.00013
+    # order_succeeded = order(SIDE_SELL, TRADE_SYMBOL.upper(), float(amountQty), ORDER_TYPE_MARKET)
+    # order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), float(amountQty), ORDER_TYPE_MARKET)
+    # {side: "SELL", symbol: "BTCUSDT", quantity: "0.00013", type: "MARKET"}
     # info = client.get_symbol_info('BONKUSDT')
     # print(info)
     # print(info['filters'][2]['minQty'])
@@ -83,9 +105,10 @@ def on_message(ws, message):
                 print("RSI: {}  current Close is {}".format (round(last_rsi, 2),  close))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                print("RSI: {}  current Close is {}  Target Profit {}   Stop Loss {}".format (round(last_rsi, 2),  close, str(buyprice * 1.005), str(buyprice * 0.995)))
+                print("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * 1.005), str(buyprice * 0.995), close ))
                 if float(close) <= buyprice * 0.995 or float(close) >= 1.005 * buyprice:
-                    order_succeeded = order(SIDE_SELL, TRADE_SELL, TRADE_SYMBOL.upper(), ORDER_TYPE_MARKET)
+                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
+                            
                     if order_succeeded:
                         print(order_succeeded)
                         in_position = False
@@ -94,11 +117,9 @@ def on_message(ws, message):
                 if in_position:
                     print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
-                if float(close) <= buyprice * 0.995 or float(close) >= 1.005 * buyprice:
-                        order_succeeded = order(SIDE_SELL, TRADE_SELL, TRADE_SYMBOL.upper(), ORDER_TYPE_MARKET)
-                        if order_succeeded:
-                            print(order_succeeded)
-                            in_position = False
+                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
+                    if order_succeeded:
+                        in_position = False
                 else:
                     print("It is overbought, but we don't own any. Nothing to do.")
             
@@ -108,10 +129,11 @@ def on_message(ws, message):
                 else:
                     print("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    order_succeeded = order(SIDE_BUY, TRADE_BUY, TRADE_SYMBOL.upper(), ORDER_TYPE_MARKET)
+                    order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
                     if order_succeeded:
                         print(order)
                         buyprice = float(order_succeeded['fills'][0]['price'])
+                        amountQty = float(order_succeeded['fills'][0]['qty'])
                         in_position = True
                         print("BOUGHT PRICE:" + str(buyprice)) 
                         # while open_position:
@@ -120,7 +142,7 @@ def on_message(ws, message):
                         #     print(f'current Stop is '+ str(buyprice * 0.995)) # 0.998 To near, We Don't get the Chance to have Profits
                         #     # Stop Loss
                         #     if close <= buyprice * 0.995 or close >= 1.005 * buyprice:
-                        #          order_succeeded = order(SIDE_SELL, TRADE_BUY, TRADE_SYMBOL.upper(), ORDER_TYPE_MARKET)
+                        #          order_succeeded = order(SIDE_SELL, QTY_BUY, TRADE_SYMBOL.upper(), ORDER_TYPE_MARKET)
                         #          if order_succeeded:
                         #             print(order_succeeded)
                         #             in_position = False

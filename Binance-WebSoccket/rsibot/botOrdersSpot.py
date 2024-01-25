@@ -18,7 +18,7 @@ def getminutedata(symbol, interval, lookback):
   frame = frame.astype(float)
   return frame
 
-df = getminutedata('MANTAUSDT', Client.KLINE_INTERVAL_1MINUTE,'100')
+# df = getminutedata('MANTAUSDT', Client.KLINE_INTERVAL_1MINUTE,'100')
 
 def applytechnicals(df):
   df['%K'] = ta.momentum.stoch(df.High, df.Low, df.Close, window=14, smooth_window=3)
@@ -27,7 +27,7 @@ def applytechnicals(df):
   df['macd'] = ta.trend.macd_diff(df.Close)
   df.dropna(inplace=True)
  
-applytechnicals(df) 
+# applytechnicals(df) 
 
 
 class Signals:
@@ -49,8 +49,8 @@ class Signals:
                      (self.df['%K'].between(20,80)) & (self.df['%D'].between(20,80))
                      & (self.df.rsi > 50) & (self.df.macd > 0), 1, 0)  
 
-inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
-inst.decide()
+# inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
+# inst.decide()
 
 # df[df.Buy == 1]
 # print(df)
@@ -60,7 +60,7 @@ def strategy(pair, qty, open_position=False):
   applytechnicals(df)
   inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
-  print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)))
+  print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
   if df.Buy.iloc[-1]:
     order = client.create_order(symbol=pair,
                                 side='BUY',
@@ -91,7 +91,7 @@ def strategy(pair, qty, open_position=False):
   
 while True:
   # strategy('MANTAUSDT', 50) # Runs One Time
-  strategy('MANTAUSDT', 50) # Runs One Time
+  strategy('BTCUSDT', 50) # Runs One Time
   time.sleep(0.5) 
   
   
