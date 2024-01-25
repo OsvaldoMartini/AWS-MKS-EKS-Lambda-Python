@@ -75,9 +75,9 @@ def orderSellQty(side, symbol, quantity, order_type):
         print("an exception occured - {}".format(e))
     return order
 
-amountQty = 18
+amountQty = 17.4456
 # order = order(SIDE_BUY, TRADE_SYMBOL, QTY_BUY, ORDER_TYPE_MARKET)
-orderSell(SIDE_SELL, TRADE_SYMBOL, int(round(amountQty, 0)), ORDER_TYPE_MARKET, 0, 0.001)
+orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, 0, 0.001)
     
 def on_open(ws):
     print('opened connection')

@@ -1,3 +1,4 @@
+import os
 import websocket, json, pprint, talib, numpy
 import config
 from binance.client import Client
@@ -27,20 +28,23 @@ from datetime import datetime, timezone, timedelta
 # balance = 33.350
 # balance = 33.30836479
 # balance = 33.26055656
+# balance = 33.19435273
+# balance = 32.89885495
+# balance = 32.77350370
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
     # return datetime.now(tz=timezone(timedelta(hours=1)))
 
 def loggin_setup(filename):
-  log_file = filename.lower() + "_" + str(aware_utcnow().strftime('%m_%d_%Y_%I_%M_%S')) + '.log'
-  logging.basicConfig(filename=log_file, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+  log_filename = filename.lower() + "_" + str(aware_utcnow().strftime('%m_%d_%Y_%I_%M_%S')) + '.log'
+  os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+  logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
   formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
   logging.getLogger().setLevel(logging.INFO)
-  logging.getLogger().setLevel(logging.INFO)
-
+  
   # Console Logging
   stdout_handler = logging.StreamHandler(sys.stdout)
   stdout_handler.setLevel(logging.DEBUG)
@@ -51,20 +55,18 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-
-logger = logging.getLogger()
-
-PROFIT = 1.004
+PROFIT = 1.006
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
 QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 39740
+ONLY_BY_WHEN = 39460
 ByPass = False
 
-loggin_setup(TRADE_SYMBOL)
+logger = logging.getLogger()
+loggin_setup("./logs/" + TRADE_SYMBOL)
 
 SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
 
@@ -151,7 +153,7 @@ def on_message(ws, message):
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 logger.info("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
                 if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), math.trunc(amountQty), ORDER_TYPE_MARKET)
+                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET)
                     in_position = False        
                     logger.info(order_succeeded)
 
@@ -160,7 +162,7 @@ def on_message(ws, message):
                      logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
                      if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
                         logger.info("Overbought! Sell! Sell! Sell!")
-                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), math.trunc(amountQty), ORDER_TYPE_MARKET)
+                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET)
                         logger.info(order_succeeded)
                         in_position = False
                 else:
