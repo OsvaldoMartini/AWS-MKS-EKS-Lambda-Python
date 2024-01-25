@@ -4,21 +4,54 @@ from binance.client import Client
 from binance.enums import *
 import numpy as np
 import math
+import logging
+import sys
+from datetime import datetime, timezone, timedelta
 # import ccxt
 
+def aware_utcnow():
+    return datetime.now(timezone.utc)
+    # return datetime.now(tz=timezone(timedelta(hours=1)))
+
+log_file = "btc_usdt_" + str(aware_utcnow().strftime('%m_%d_%Y_%I_%M_%S')) + '.log'
+logging.basicConfig(filename=log_file, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Console Logging
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.DEBUG)
+stdout_handler.setFormatter(formatter)
+
+logger.addHandler(stdout_handler)
+
+logger.info('Initialization Logging')
+# logger.error('This is an error message.')
 
 RSI_PERIOD = 14
-RSI_OVERBOUGHT = 70
-RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'btcusdt'
-QTY_BUY = 6 # USDT
+RSI_OVERBOUGHT = 80
+RSI_OVERSOLD = 20
+TRADE_SYMBOL = 'BTCUSDT'
+QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
+ONLY_BY_WHEN = 39740.00
 
-SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL)
+SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
 
 # balance = 17.25099083
 # balance = 17.25452794
 # balance = 17.557742498
+# balance = 34.11620543
+# balance = 34.07442870
+# balance = 33.94533986
+# balance = 33.916637855
+# balance = 33.87617461
+# balance = 33.80694975
+# balance = 33.79699856
+# balance = 33.52835663
 
 
 closes = []
@@ -39,28 +72,33 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 
 def order(side, symbol, quoteOrderQty, order_type):
     try:
-        print("sending order  SIDE {} QRT {} ".format( side, quoteOrderQty ))
+        logger.info("sending order  SIDE {} QTY {} ".format( side, quoteOrderQty ))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
-        print(order)
+        logger.info(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        logger.info("an exception occured - {}".format(e))
     return order
 
 def orderSell(side, symbol, quantity, order_type):
     try:
-        print("sending order  SIDE {} QRT {} ".format( side, quantity ))
+        logger.info("sending order  SIDE {} QTY {} ".format( side, quantity ))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
-        print(order)
+        logger.info(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        logger.info("an exception occured - {}".format(e))
+        order = False
+        while str(e).find("Account has insufficient balance for requested") >= 0 and not order:
+            quantity = round(quantity - 0.00001, 5) 
+            logger.info("Attempt to SELL {}".format(str(quantity)))
+            order = orderSell(side, symbol, round(quantity, 5) , order_type)    
     return order
 
     
 def on_open(ws):
-    print('opened connection')
+    logger.info('opened connection')
 
 def on_close(ws):
-    print('closed connection')
+    logger.info('closed connection')
 
 def on_message(ws, message):
     global closes, in_position, buyprice, amountQty
@@ -73,14 +111,6 @@ def on_message(ws, message):
 
     is_candle_closed = candle['x']
     close = candle['c']
-    
-    # amountQty = 0.00013
-    # order_succeeded = order(SIDE_SELL, TRADE_SYMBOL.upper(), float(amountQty), ORDER_TYPE_MARKET)
-    # order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), float(amountQty), ORDER_TYPE_MARKET)
-    # {side: "SELL", symbol: "BTCUSDT", quantity: "0.00013", type: "MARKET"}
-    # info = client.get_symbol_info('BONKUSDT')
-    # print(info)
-    # print(info['filters'][2]['minQty'])
 
     if is_candle_closed:
         # print("candle closed at {}".format(close))
@@ -102,40 +132,40 @@ def on_message(ws, message):
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
-                print("RSI: {}  current Close is {}".format (round(last_rsi, 2),  close))
+                logger.info("RSI: {}  current Close is {}".format (round(last_rsi, 2),  close))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                print("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * 1.005), str(buyprice * 0.995), close ))
-                if float(close) <= buyprice * 0.995 or float(close) >= 1.005 * buyprice:
+                logger.info("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * 1.004), str(buyprice * 0.995), close ))
+                if float(close) <= buyprice * 0.995 or float(close) >= 1.004 * buyprice:
                     order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
-                            
-                    if order_succeeded:
-                        print(order_succeeded)
-                        in_position = False
+                    in_position = False        
+                    logger.info(order_succeeded)
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                    print("Overbought! Sell! Sell! Sell!")
-                    # put binance sell logic here
-                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
-                    if order_succeeded:
+                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(1.004 * buyprice))
+                     if float(close) <= buyprice * 0.995 or float(close) >= 1.004 * buyprice:
+                        logger.info("Overbought! Sell! Sell! Sell!")
+                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), amountQty, ORDER_TYPE_MARKET)
+                        logger.info(order_succeeded)
                         in_position = False
                 else:
-                    print("It is overbought, but we don't own any. Nothing to do.")
+                    logger.info("It is overbought, but we don't own any. Nothing to do.")
             
             if last_rsi < RSI_OVERSOLD:
                 if in_position:
-                    print("It is oversold, but you already own it, nothing to do.")
+                    logger.info("It is oversold, but you already own it, nothing to do.")
                 else:
-                    print("Oversold! Buy! Buy! Buy!")
+                    logger.info("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
-                    if order_succeeded:
-                        print(order)
-                        buyprice = float(order_succeeded['fills'][0]['price'])
-                        amountQty = float(order_succeeded['fills'][0]['qty'])
-                        in_position = True
-                        print("BOUGHT PRICE:" + str(buyprice)) 
+                    if float(close) < ONLY_BY_WHEN:
+                        order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
+                        if order_succeeded:
+                            logger.info(order)
+                            buyprice = float(order_succeeded['fills'][0]['price'])
+                            amountQty = float(order_succeeded['fills'][0]['qty'])
+                            in_position = True
+                            logger.info("BOUGHT PRICE:" + str(buyprice)) 
                         # while open_position:
                         #     print(f'current Close '+ str(close))
                         #     print(f'current Target '+ str(buyprice * 1.005))
