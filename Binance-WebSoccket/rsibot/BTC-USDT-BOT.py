@@ -4,7 +4,7 @@ from binance.client import Client
 from binance.enums import *
 import numpy as np
 import math
-import ccxt
+# import ccxt
 
 
 RSI_PERIOD = 14
@@ -31,7 +31,7 @@ buyprice = 0
 
 
 client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
-exchange = ccxt.binance({'apiKey': config.API_KEY, 'secret': config.API_SECRET})
+# exchange = ccxt.binance({'apiKey': config.API_KEY, 'secret': config.API_SECRET})
 
 # params = {'fromAsset': 'BTCUSDT', 'toAsset': 'USDT', 'fromAmount': 10000, 'recvWindow': 60000}
 # response = exchange.sapi_post_convert_getquote(params)
