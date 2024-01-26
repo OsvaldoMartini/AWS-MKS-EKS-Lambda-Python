@@ -41,6 +41,8 @@ from datetime import datetime, timezone, timedelta
 # balance = 33.30454215
 # balance = 28.28391263
 # balance = 27.97146840
+# balance = 28.09037416
+# balance = 76.58375102
 
 
 def aware_utcnow():
@@ -68,12 +70,12 @@ def loggin_setup(filename):
 
 PROFIT = 1.0055
 RSI_PERIOD = 14
-RSI_OVERBOUGHT = 80
-RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'OMUSDT'
-QTY_BUY = 10 # USDT
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD = 25
+TRADE_SYMBOL = '1000SATSUSDT'
+QTY_BUY = 20 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 10.518
+ONLY_BY_WHEN = 0.0004516
 ByPass = True
 
 logger = logging.getLogger()

@@ -33,6 +33,16 @@ from datetime import datetime, timezone, timedelta
 # balance = 32.77350370
 # balance = 32.55632435
 # balance = 32.26410725
+# balance = 32.48765925
+# balance = 35.33248501
+# balance = 33.85719541
+# balance = 33.504457359
+# balance = 33.35608892
+# balance = 33.30454215
+# balance = 28.28391263
+# balance = 27.97146840
+# balance = 28.09037416
+# balance = 76.58375102
 
 
 def aware_utcnow():
@@ -40,7 +50,7 @@ def aware_utcnow():
     # return datetime.now(tz=timezone(timedelta(hours=1)))
 
 def loggin_setup(filename):
-  log_filename = filename.lower() + "_" + str(aware_utcnow().strftime('%m_%d_%Y_%I_%M_%S')) + '.log'
+  log_filename = filename.lower() + "_" + str(aware_utcnow().strftime('%d_%m_%Y_%I_%M_%S')) + '.log'
   os.makedirs(os.path.dirname(log_filename), exist_ok=True)
   logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
@@ -58,15 +68,15 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.04
+PROFIT = 1.009
 RSI_PERIOD = 14
-RSI_OVERBOUGHT = 80
+RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 25
 TRADE_SYMBOL = 'ALTUSDT'
-QTY_BUY = 10 # USDT
+QTY_BUY = 20 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 0.31335
-ByPass = True
+ONLY_BY_WHEN = 0.33455
+ByPass = False
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)
@@ -149,12 +159,13 @@ def on_message(ws, message):
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
-                logger.info("RSI: {}  current Close is {}    BUY WHEN {}".format (round(last_rsi, 2),  close, ONLY_BY_WHEN))
+                buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
+                logger.info("RSI: {}  current Close is {}  {}".format (round(last_rsi, 2),  close, buyPassWhen))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                logger.info("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
+                logger.info("SPOT: {} RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (TRADE_SYMBOL, round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
                 if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                    soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT"  
+                    soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                     order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                     in_position = False        
                     logger.info(order_succeeded)
@@ -163,7 +174,7 @@ def on_message(ws, message):
                 if in_position:
                      logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
                      if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                        soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT"  
+                        soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                         logger.info("Overbought! Sell! Sell! Sell!")
                         order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                         logger.info(order_succeeded)

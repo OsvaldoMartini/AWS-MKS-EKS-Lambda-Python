@@ -48,7 +48,7 @@ def order(side, symbol, quoteOrderQty, order_type):
         print("an exception occured - {}".format(e))
     return order
 
-def orderSell(side, symbol, quantity, order_type, attept, factor):
+def orderSell_Other(side, symbol, quantity, order_type, attept, factor):
     try:
         print("sending order  SIDE {} QRT {} --- Attempt {}".format(side, quantity, attept ))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
@@ -66,6 +66,20 @@ def orderSell(side, symbol, quantity, order_type, attept, factor):
             order = orderSell(side, symbol, round(quantity, 5) , order_type, attept, factor)    
     return order
 
+def orderSell(side, symbol, quantity, order_type, soldDesc):
+    try:
+        print("sending order  SIDE {} QTY {} SOLD MOTIVE: {}".format(side, quantity , soldDesc))
+        order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+        order = False
+        while str(e).find("Account has insufficient balance for requested") >= 0 and not order:
+            quantity = math.trunc(quantity - 1) 
+            print("Attempt to SELL {}".format(str(quantity)))
+            order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
+    return order
+
+
 def orderSellQty(side, symbol, quantity, order_type):
     try:
         print("sending order  SIDE {} QRT {} ".format( side, quantity ))
@@ -75,10 +89,11 @@ def orderSellQty(side, symbol, quantity, order_type):
         print("an exception occured - {}".format(e))
     return order
 
-amountQty = 17.4456
+amountQty = 42453.08000
 # order = order(SIDE_BUY, TRADE_SYMBOL, QTY_BUY, ORDER_TYPE_MARKET)
-orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, 0, 0.001)
-    
+TRADE_SYMBOL = '1000SATSUSDT'
+orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, "TEST")
+
 def on_open(ws):
     print('opened connection')
 

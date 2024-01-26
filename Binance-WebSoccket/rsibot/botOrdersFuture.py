@@ -6,6 +6,9 @@ import ta
 import numpy as np
 import time
 
+# BUY 0.3270588   PROFIT:      LOSS: 0.32670 (0.15)  032633 (0.15)
+
+
 client = Client(config.API_KEY, config.API_SECRET)
 
 def getminutedata(symbol, interval, lookback):
@@ -62,10 +65,10 @@ def strategy(pair, qty, open_position=False):
   inst.decide()
   print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
   if df.Buy.iloc[-1]:
-    order = client.create_order(symbol=pair,
-                                side='BUY',
-                                type='MARKET',
-                                quantity=qty)
+    # order = client.create_order(symbol=pair,
+    #                             side='BUY',
+    #                             type='MARKET',
+    #                             quantity=qty)
     print(order)
     buyprice = float(order['fills'][0]['price'])
     open_position = True
@@ -78,11 +81,11 @@ def strategy(pair, qty, open_position=False):
     print(f'current Stop is '+ str(buyprice * 0.995)) # 0.998 To near, We Don't get the Chance to have Profits
     # Stop Loss
     if df.Close[-1] <= buyprice * 0.995 or df.Close[-1] >= 1.005 * buyprice:
-      order = client.create_order(symbol=pair,
-                                  side='SELL',
-                                  type='MARKET',
-                                  quantity=qty,
-                                  recvWindow = 60000)
+      # order = client.create_order(symbol=pair,
+      #                             side='SELL',
+      #                             type='MARKET',
+      #                             quantity=qty,
+      #                             recvWindow = 60000)
       print(order)
       break
 

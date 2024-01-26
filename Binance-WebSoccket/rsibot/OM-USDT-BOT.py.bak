@@ -66,15 +66,15 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.0055
+PROFIT = 1.04
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
-RSI_OVERSOLD = 30
+RSI_OVERSOLD = 20
 TRADE_SYMBOL = 'OMUSDT'
 QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 10.518
-ByPass = True
+ByPass = False
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)
@@ -158,6 +158,7 @@ def on_message(ws, message):
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
+              
                 logger.info("RSI: {}  current Close is {}  {}".format (round(last_rsi, 2),  close, buyPassWhen))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
