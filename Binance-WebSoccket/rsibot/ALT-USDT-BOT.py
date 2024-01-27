@@ -43,6 +43,14 @@ from datetime import datetime, timezone, timedelta
 # balance = 27.97146840
 # balance = 28.09037416
 # balance = 76.58375102
+# balance = 78.62466593
+# balance = 78.55509714
+# balance = 78.55920142
+# balance = 78.44214068
+# balance = 78.51556829
+# balance = 78.10052908
+
+
 
 
 def aware_utcnow():
@@ -68,7 +76,7 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.009
+PROFIT = 1.0055
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 25
@@ -76,7 +84,7 @@ TRADE_SYMBOL = 'ALTUSDT'
 QTY_BUY = 20 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 0.33455
-ByPass = False
+ByPass = True
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)

@@ -76,15 +76,15 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.009
+PROFIT = 1.0055
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'BTCUSDT'
-QTY_BUY = 10 # USDT
+TRADE_SYMBOL = 'CFXUSDT'
+QTY_BUY = 7 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 41180
-ByPass = False
+ByPass = True
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)

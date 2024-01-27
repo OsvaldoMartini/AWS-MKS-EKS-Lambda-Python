@@ -20,12 +20,8 @@ PROFIT = 1.0055 # LET'S SEE IF THIS GETS PROFITS
 RSI_PERIOD = 14
 # RSI_OVERBOUGHT = 80
 # RSI_OVERSOLD = 30
-TRADE_SYMBOL = '1000SATSUSDT'
+TRADE_SYMBOL = 'CFXUSDT'
 QTY_BUY = 10 # USDT
-QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 41180
-ByPass = False
-
 
 def aware_utcnow():
     return datetime.now(timezone.utc)

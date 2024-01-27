@@ -43,6 +43,14 @@ from datetime import datetime, timezone, timedelta
 # balance = 27.97146840
 # balance = 28.09037416
 # balance = 76.58375102
+# balance = 78.62466593
+# balance = 78.55509714
+# balance = 78.55920142
+# balance = 78.44214068
+# balance = 78.51556829
+# balance = 78.10052908
+
+
 
 
 def aware_utcnow():

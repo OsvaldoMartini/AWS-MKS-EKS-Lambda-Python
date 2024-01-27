@@ -41,6 +41,8 @@ from datetime import datetime, timezone, timedelta
 # balance = 33.30454215
 # balance = 28.28391263
 # balance = 27.97146840
+# balance = 28.09037416
+# balance = 76.58375102
 
 
 def aware_utcnow():
@@ -66,7 +68,7 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.009
+PROFIT = 1.0055
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 25

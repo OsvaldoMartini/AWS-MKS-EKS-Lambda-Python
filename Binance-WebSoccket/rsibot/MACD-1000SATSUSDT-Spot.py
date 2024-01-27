@@ -127,14 +127,15 @@ def strategy(pair, qty, profit_perc, open_position=False, ):
   # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(df.Close.iloc[-1]), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
   logger.info("MACD-BOT SPOT: {}   RSI: {}   current Close is {}   Buy MACD {} ".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]) ))
   if df.Buy.iloc[-1]:
-    order = orderBuy(SIDE_BUY,
-                     pair,
-                     qty,
-                     ORDER_TYPE_MARKET)
+    # order = orderBuy(SIDE_BUY,
+    #                  pair,
+    #                  qty,
+    #                  ORDER_TYPE_MARKET)
     logger.info(order)
     buyprice = float(order['fills'][0]['price'])
     amountQty = float(order['fills'][0]['qty'])
-    open_position = True
+    # open_position = True
+    logger.info("Buy !!! Buy !!! Buy !!!") 
     logger.info("BOUGHT PRICE:" + str(buyprice)) 
     
   while open_position:
