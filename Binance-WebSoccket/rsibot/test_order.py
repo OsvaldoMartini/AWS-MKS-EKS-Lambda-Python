@@ -41,10 +41,7 @@ in_position = False
 
 SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
 
-# balance = 17.25099083
-# balance = 17.25452794
-# balance = 17.557742498
-
+# balance = 18.36
 
 closes = []
 in_position = False
@@ -199,16 +196,15 @@ def order_future_cancel_all_open_order(symbol):
         print("an exception occured - {}".format(e))
     return order
 
-def order_future_cancel_REDUDE_only(side, symbol, stopPrice, quantity, positionSide, order_type):
+def order_future_cancel_REDUDE_only(side, symbol, quantity, positionSide, order_type):
     try:
         print("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
-        # {"symbol":"CFXUSDT","type":"MARKET","side":"SELL","positionSide":"BOTH","quantity":449,"reduceOnly":true,"placeType":"order-form"}
-        order = client.futures_create_order(symbol=symbol, 
-                                            side=side, 
-                                            positionSide=positionSide,  
-                                            type=order_type, 
-                                            stopprice=stopPrice,
+        # dualSidePosition='false', 
+        order = client.futures_create_order(side='BUY', 
+                                            symbol=symbol,
                                             quantity=quantity,
+                                            positionSide='BOTH',  
+                                            type='MARKET', 
                                             reduceOnly=True, 
                                             recvWindow = 60000)        
         print(order)
@@ -223,9 +219,11 @@ def on_close(ws):
     print('closed connection')
     
     
-ACTION_BUY = True    
+ACTION_BUY = False 
 
 # balance = 19.50
+# balance = 16.97
+# balance = 14.30
 
 def on_message(ws, message):
     global closes, in_position, buyprice, amountQty, takeProfit_WHEN_BUY, stopLoss_WHEN_BUY, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL, volume
@@ -253,19 +251,26 @@ def on_message(ws, message):
     TRADE_SYMBOL = 'CFXUSDT'
     QTY_BUY = 5
     
+    # order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, 449, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+    # {"symbol":"CFXUSDT","type":"MARKET","side":"SELL","positionSide":"BOTH","quantity":783,"reduceOnly":true,"placeType":"order-form"}
+    # order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, 450, 'BOTH', 'MARKET')  # SHOULD WORK
+    
     # Watcher Dog / Cancel / Reduce Positio  
     if in_position:
         try:
-            if ACTION_BUY and (takeProfit_WHEN_BUY <= round(float(close) * 1.003, 7) or stopLoss_WHEN_BUY <= round((float(close) * 0.997), 4)): # TakeProfit
-                order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, close, volume, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+            if ACTION_BUY and (takeProfit_WHEN_BUY >= round(float(close) * 1.003, 7) or stopLoss_WHEN_BUY <= round((float(close) * 0.997), 4)): # TakeProfit
+                order = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                order = order_future_cancel_REDUDE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                in_position = False
             elif not ACTION_BUY and (takeProfit_WHEN_SELL <= round(float(close) * 0.997, 7) or stopLoss_WHEN_SELL >= round((float(close) * 1.003), 4)):  # TakeProfit 
-                order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, volume,  'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+                order = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                order = order_future_cancel_REDUDE_only('BUY', TRADE_SYMBOL, volume,  'BOTH', 'MARKET')
+                in_position = False
             
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214241, '7psQJgCAulNsQ6dDnD1A9y')
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214275, 'KR6VqRg4Os6D5uXSuvvFus')
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214189, 'TZrMNRYPNzko7I9w4nLKOQ')
             # # {'orderId': 7107189247, 'symbol': 'CFXUSDT', 'status': 'NEW', 'clientOrderId': 'r1TYhjT4NyLJJ6FSVcTYrc', 
-            print('Ola')
         except Exception as e:
             print("an exception occured - {}".format(e))
     
@@ -281,7 +286,6 @@ def on_message(ws, message):
             stopLoss_WHEN_SELL = round(float(close) * 1.005, 4)  
             print("current Close {}   Take Profit When Selling {}    Stop Loss When Selling  {}".format(close, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
         
-    if not in_position:
         buyVolume = round((QTY_BUY * ALLOCATION) / float(close), 0)
         volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 0)
         print("Volume Actual: {}".format(volume))
