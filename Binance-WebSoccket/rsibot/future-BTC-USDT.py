@@ -26,9 +26,10 @@ import ccxt
 # balance = 6.52
 # balance = 6.33
 # balance = 6.13
+# balance = 6.13
 
 
-ACTION_BUY = False 
+ACTION_BUY = False
 
 
 # ENUMS
@@ -272,7 +273,7 @@ def on_message(ws, message):
     PRECISION_PROFIT_LOSS = 1 # BTCUSDT
     QTY_BUY = 5
     
-    PROFIT_CALC = 1.002   # BTCUSDT
+    PROFIT_CALC = 1.005   # BTCUSDT
     LOSS_CALC = 0.99813     # BTCUSDT
     # PROFIT_CALC = 1.0002   # CFXUSDT
     # LOSS_CALC = 0.9998     # CFXUSDT

@@ -51,6 +51,8 @@ from datetime import datetime, timezone, timedelta
 # balance = 78.10052908
 # balance = 60.30221175
 # balance = 60.26690514
+# balance = 60.15021606
+# balance = 60.08925408
 
 
 
@@ -78,7 +80,7 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT_SELL = 1.0005
+PROFIT_SELL = 1.0006
 LOSS_SELL = 0.9995
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
