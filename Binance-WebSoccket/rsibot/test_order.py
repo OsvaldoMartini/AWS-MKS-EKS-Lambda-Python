@@ -13,6 +13,16 @@ import ccxt
 # balance = 13.20
 # balance = 12.45
 # balance = 12.54
+# balance = 12.05
+# balance = 11.36
+# balance = 10.11
+# balance = 10.11
+# balance = 9.94
+# balance = 9.79
+# balance = 9.47
+# balance = 9.53
+
+ACTION_BUY = False 
 
 
 # ENUMS
@@ -227,12 +237,8 @@ def on_open(ws):
 def on_close(ws):
     print('closed connection')
     
-    
-ACTION_BUY = True 
-
-
 def on_message(ws, message):
-    global closes, in_position, buyprice, amountQty, takeProfit_WHEN_BUY, stopLoss_WHEN_BUY, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL, volume, REDUCE_PROFIT_WHEN_BUY, REDUCE_LOSSES_WHEN_BUY, REDUCE_PROFIT_WHEN_SELL, REDUCE_LOSSES_WHEN_SELL
+    global closes, in_position, buyprice, amountQty, PROFIT_WHEN_BUY, LOSSES_WHEN_BUY, PROFIT_WHEN_SELL, LOSSES_WHEN_SELL, volume
     
     # print('received message')
     json_message = json.loads(message)
@@ -260,35 +266,24 @@ def on_message(ws, message):
     PRECISION_PROFIT_LOSS = 1 # BTCUSDT
     QTY_BUY = 5
     
+    PROFIT_CALC = 1.002   # BTCUSDT
+    LOSS_CALC = 0.99813     # BTCUSDT
+    # PROFIT_CALC = 1.0002   # CFXUSDT
+    # LOSS_CALC = 0.9998     # CFXUSDT
+       
+    
     # order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, 449, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
     # {"symbol":"CFXUSDT","type":"MARKET","side":"SELL","positionSide":"BOTH","quantity":783,"reduceOnly":true,"placeType":"order-form"}
     # order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, 450, 'BOTH', 'MARKET')  # SHOULD WORK
     
-    if not in_position:
-        # Params
-        #  BTC-USDT "quantity":0.003
-        buyVolume = round((QTY_BUY * ALLOCATION) / float(close), 1)
-        volume = 0.003 #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)
-        print("Volume Actual: {}".format(volume))
-        print("BuyVolumelume: {}".format(buyVolume))
-        
-        REDUCE_PROFIT_WHEN_BUY = float(close) * 1.003  
-        REDUCE_LOSSES_WHEN_BUY =  float(close) * 0.997  
-        REDUCE_PROFIT_WHEN_SELL = float(close) * 0.997  
-        REDUCE_LOSSES_WHEN_SELL =  float(close) * 1.003
-        print("Close {} REDUCE_PROFIT_WHEN_BUY  value {}".format(str(close), str(REDUCE_PROFIT_WHEN_BUY)))
-        print("Close {} REDUCE_LOSSES_WHEN_BUY  value {}".format(str(close), str(REDUCE_LOSSES_WHEN_BUY)))
-        print("Close {} REDUCE_PROFIT_WHEN_SELL  value {}".format(str(close), str(REDUCE_PROFIT_WHEN_SELL)))
-        print("Close {} REDUCE_LOSSES_WHEN_SELL  value {}".format(str(close), str(REDUCE_LOSSES_WHEN_SELL)))
-    
     # Watcher Dog / Cancel / Reduce Position
     if in_position:
         try:
-            if ACTION_BUY and (REDUCE_PROFIT_WHEN_BUY <= float(close) or REDUCE_LOSSES_WHEN_BUY >= float(close)): # TakeProfit
+            if ACTION_BUY and (PROFIT_WHEN_BUY <= float(close) or LOSSES_WHEN_BUY >= float(close)): # TakeProfit
                 order = order_future_cancel_REDUDE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
                 order = order_future_cancel_all_open_order(TRADE_SYMBOL)
                 in_position = False
-            elif not ACTION_BUY and (REDUCE_PROFIT_WHEN_SELL >= float(close) or REDUCE_LOSSES_WHEN_SELL <= float(close)):  # TakeProfit 
+            elif not ACTION_BUY and (PROFIT_WHEN_SELL >= float(close) or LOSSES_WHEN_SELL <= float(close)):  # TakeProfit 
                 order = order_future_cancel_REDUDE_only('BUY', TRADE_SYMBOL, volume,  'BOTH', 'MARKET')
                 order = order_future_cancel_all_open_order(TRADE_SYMBOL)
                 in_position = False
@@ -303,15 +298,23 @@ def on_message(ws, message):
     # Define the Prices Profit and Stop Loss 
     if not in_position:
         order = order_future_cancel_all_open_order(TRADE_SYMBOL)
-        if ACTION_BUY:
-            takeProfit_WHEN_BUY = round(float(close) * 1.005, PRECISION_PROFIT_LOSS)  
-            stopLoss_WHEN_BUY = round(float(close) * 0.996, PRECISION_PROFIT_LOSS)  
-            print("current Close {}   Take Profit When Buying {}    Stop Loss When Buying  {}".format(close, takeProfit_WHEN_BUY, stopLoss_WHEN_BUY))
-        elif not ACTION_BUY:
-            takeProfit_WHEN_SELL = round(float(close) * 0.996, PRECISION_PROFIT_LOSS)  
-            stopLoss_WHEN_SELL = round(float(close) * 1.005, PRECISION_PROFIT_LOSS)  
-            print("current Close {}   Take Profit When Selling {}    Stop Loss When Selling  {}".format(close, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
         
+        # Params
+        buyVolume = round((QTY_BUY * ALLOCATION) / float(close), 1)
+        volume = 0.003 #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  BTC-USDT "quantity":0.003   
+        # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  # CFX-USDT "quantity":410   
+        print("Volume Actual: {}".format(volume))
+        print("BuyVolumelume: {}".format(buyVolume))
+        
+        PROFIT_WHEN_BUY = round(float(close) * PROFIT_CALC, PRECISION_PROFIT_LOSS)  
+        LOSSES_WHEN_BUY = round(float(close) * LOSS_CALC, PRECISION_PROFIT_LOSS)  
+        PROFIT_WHEN_SELL = round(float(close) * LOSS_CALC, PRECISION_PROFIT_LOSS)  
+        LOSSES_WHEN_SELL = round(float(close) * PROFIT_CALC, PRECISION_PROFIT_LOSS)  
+        print("Close {} REDUCE_PROFIT_WHEN_BUY  value {}".format(str(close), str(PROFIT_WHEN_BUY)))
+        print("Close {} REDUCE_LOSSES_WHEN_BUY  value {}".format(str(close), str(LOSSES_WHEN_BUY)))
+        print("Close {} REDUCE_PROFIT_WHEN_SELL  value {}".format(str(close), str(PROFIT_WHEN_SELL)))
+        print("Close {} REDUCE_LOSSES_WHEN_SELL  value {}".format(str(close), str(LOSSES_WHEN_SELL)))
+
         if ACTION_BUY:
           order = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
         else:
@@ -321,36 +324,32 @@ def on_message(ws, message):
         clientOrderId = order['clientOrderId']
         orderStatus = order['status']
         print("OrderId  {}  clientOrderId {}".format(orderId, clientOrderId))  
-        # order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, TAKE_PROFIT_LIMIT)
+        # order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, profit_sell, TAKE_PROFIT_LIMIT)
         # {"symbol":"CFXUSDT","type":"LIMIT","side":"SELL","quantity":452,"price":"0.2240","positionSide":"BOTH","leverage":20,"isolated":true,"timeInForce":"GTC","reduceOnly":true,"placeType":"position"}
-        try:
+        # try:
             
-            if ACTION_BUY and orderStatus =='NEW':
-                takeProfit_WHEN_BUY = round((float(close) * 1.005), PRECISION_PROFIT_LOSS)  
-                stopLoss_WHEN_BUY = round((float(close) * 0.996), PRECISION_PROFIT_LOSS)  
-                order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-                order = order_future_stop_loss(SIDE_SELL, TRADE_SYMBOL, volume, stopLoss_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_STOP)
-                print('Created StopLoss and TakeProfit for  BYUING')
-                print("BUYING current Close {}   Take Profit When Buying {}    Stop Loss When Buying  {}".format(close, takeProfit_WHEN_BUY, stopLoss_WHEN_BUY))
-            elif not ACTION_BUY and orderStatus =='NEW':
-                takeProfit_WHEN_SELL = round(float(close) * 0.996, PRECISION_PROFIT_LOSS)  
-                stopLoss_WHEN_SELL = round(float(close) * 1.005, PRECISION_PROFIT_LOSS)   
-                order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-                order = order_future_stop_loss(SIDE_BUY, TRADE_SYMBOL, volume, stopLoss_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_STOP)
-                print('Created StopLoss and TakeProfit for SELLING')
-                print("SELLING current Close {}   Take Profit When Selling {}    Stop Loss When Selling  {}".format(close, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
+        #     if ACTION_BUY and orderStatus =='NEW':
+        #         order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, PROFIT_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+        #         order = order_future_stop_loss(SIDE_SELL, TRADE_SYMBOL, volume, LOSSES_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_STOP)
+        #         print('Created StopLoss and TakeProfit for  BYUING')
+        #         print("BUYING current Close {}   Take Profit When Buying {}    Stop Loss When Buying  {}".format(close, PROFIT_WHEN_BUY, LOSSES_WHEN_BUY))
+        #     elif not ACTION_BUY and orderStatus =='NEW':
+        #         order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, PROFIT_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+        #         order = order_future_stop_loss(SIDE_BUY, TRADE_SYMBOL, volume, LOSSES_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_STOP)
+        #         print('Created StopLoss and TakeProfit for SELLING')
+        #         print("SELLING current Close {}   Take Profit When Selling {}    Stop Loss When Selling  {}".format(close, PROFIT_WHEN_SELL, LOSSES_WHEN_SELL))
             
-        except Exception as e:
-            print("an exception occured - {}".format(e))
+        # except Exception as e:
+        #     print("an exception occured - {}".format(e))
             
     in_position = True
     
     
     if in_position:
         if ACTION_BUY:
-           print("BUY Profit {} Stop Loss {} REDUCE PROFIT {} REDUCE LOSSES {} Close {}  ".format(takeProfit_WHEN_BUY, stopLoss_WHEN_BUY, REDUCE_PROFIT_WHEN_BUY, REDUCE_LOSSES_WHEN_BUY, close))
+           print("BUY PROFIT {} Stop Loss {} Close {}  ".format(PROFIT_WHEN_BUY, LOSSES_WHEN_BUY, close))
         elif not ACTION_BUY:
-           print("SELL Profit {} Stop Loss {} REDUCE PROFIT {} REDUCE LOSSES {} Close {}  ".format(takeProfit_WHEN_SELL, stopLoss_WHEN_SELL, REDUCE_PROFIT_WHEN_SELL, REDUCE_LOSSES_WHEN_SELL, close))
+           print("SELL PROFIT {} Stop Loss {} Close {}  ".format(PROFIT_WHEN_SELL, LOSSES_WHEN_SELL, close))
           
     # orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, "TEST")
 
@@ -368,8 +367,8 @@ def on_message(ws, message):
     # {side: "BUY", symbol: "ALTUSDT", quoteOrderQty: "5", type: "MARKET"} // As Total USDT
     # {"side":"BUY","symbol":"BTCUSDT","quantity":"0.00020","type":"TAKE_PROFIT_LIMIT","stopPrice":"40000","price":"40150","timeInForce":"GTC"}
     # {"side":"BUY","symbol":"BTCUSDT","quantity":"0.00337","type":"TAKE_PROFIT_LIMIT","stopPrice":"","trailingDelta":"200","price":"4050"}
-    # print("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * 1.005), str(buyprice * 0.995), close ))
-    # if float(close) <= buyprice * 0.995 or float(close) >= 1.005 * buyprice:
+    # print("RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT_CALC), str(buyprice * 0.995), close ))
+    # if float(close) <= buyprice * 0.995 or float(close) >= PROFIT_CALC * buyprice:
 
 
                 
