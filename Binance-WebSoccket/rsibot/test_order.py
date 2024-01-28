@@ -199,14 +199,15 @@ def order_future_cancel_all_open_order(symbol):
         print("an exception occured - {}".format(e))
     return order
 
-def order_future_cancel_REDUDE_only(side, symbol, quantity, positionSide, order_type):
+def order_future_cancel_REDUDE_only(side, symbol, stopPrice, quantity, positionSide, order_type):
     try:
         print("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
-        # dualSidePosition='false', 
-        order = client.futures_cancel_all_open_orders(symbol=symbol, 
+        # {"symbol":"CFXUSDT","type":"MARKET","side":"SELL","positionSide":"BOTH","quantity":449,"reduceOnly":true,"placeType":"order-form"}
+        order = client.futures_create_order(symbol=symbol, 
                                             side=side, 
                                             positionSide=positionSide,  
                                             type=order_type, 
+                                            stopprice=stopPrice,
                                             quantity=quantity,
                                             reduceOnly=True, 
                                             recvWindow = 60000)        
@@ -224,7 +225,7 @@ def on_close(ws):
     
 ACTION_BUY = True    
 
-
+# balance = 19.50
 
 def on_message(ws, message):
     global closes, in_position, buyprice, amountQty, takeProfit_WHEN_BUY, stopLoss_WHEN_BUY, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL, volume
@@ -252,13 +253,13 @@ def on_message(ws, message):
     TRADE_SYMBOL = 'CFXUSDT'
     QTY_BUY = 5
     
-    # Cancel / Reduce Positio  
+    # Watcher Dog / Cancel / Reduce Positio  
     if in_position:
         try:
-            # if ACTION_BUY and takeProfit_WHEN_BUY <= round(float(close) * 1.004, 7): # TakeProfit
-            #     order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-            # elif takeProfit_WHEN_SELL <= round(float(close) * 0.996, 7):  # TakeProfit 
-            #     order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, volume,  'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+            if ACTION_BUY and (takeProfit_WHEN_BUY <= round(float(close) * 1.003, 7) or stopLoss_WHEN_BUY <= round((float(close) * 0.997), 4)): # TakeProfit
+                order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, close, volume, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+            elif not ACTION_BUY and (takeProfit_WHEN_SELL <= round(float(close) * 0.997, 7) or stopLoss_WHEN_SELL >= round((float(close) * 1.003), 4)):  # TakeProfit 
+                order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, volume,  'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
             
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214241, '7psQJgCAulNsQ6dDnD1A9y')
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214275, 'KR6VqRg4Os6D5uXSuvvFus')
@@ -307,7 +308,7 @@ def on_message(ws, message):
                 order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
                 order = order_future_stop_loss(SIDE_SELL, TRADE_SYMBOL, volume, stopLoss_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_STOP)
             elif not ACTION_BUY and orderStatus =='NEW':
-                takeProfit_WHEN_SELL = round(float(close) * 0.997, 4)  
+                takeProfit_WHEN_SELL = round(float(close) * 0.996, 4)  
                 stopLoss_WHEN_SELL = round(float(close) * 1.005, 4)   
                 print('Created StopLoss and TakeProfit for SELLING')
                 print("SELLING current Close {}   Take Profit When Selling {}    Stop Loss When Selling  {}".format(close, takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
@@ -323,9 +324,11 @@ def on_message(ws, message):
     
     if in_position:
         if ACTION_BUY:
-            print("Take Profit Buying : {}  Stop Loss {}".format(takeProfit_WHEN_BUY, stopLoss_WHEN_BUY))
+            print("Take Profit Buying : {}  Stop Loss {} Close {} REDUCE PROFIT {} ".format(takeProfit_WHEN_BUY, stopLoss_WHEN_BUY, close, (takeProfit_WHEN_BUY * 1.003, 7)))
+            print("Stop Loss {} Close {} REDUCE LOSSES AT {} ".format(stopLoss_WHEN_BUY, close, (takeProfit_WHEN_BUY * 0.997, 7)))
         elif not ACTION_BUY:
-            print("Take Profit Selling : {}  Stop Loss {}".format(takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
+           print("Take Profit Selling : {}  Stop Loss {} Close {} REDUCE PROFIT {} ".format(takeProfit_WHEN_SELL, stopLoss_WHEN_SELL, close, (takeProfit_WHEN_SELL * 0.997, 7)))
+           print("Stop Loss {} Close {} REDUCE LOSSES AT {} ".format(stopLoss_WHEN_SELL, close, (takeProfit_WHEN_SELL * 1.003, 7)))
         
     
     # orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, "TEST")
