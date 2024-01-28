@@ -23,7 +23,7 @@ const axios = require("axios");
 // const MARKET_TYPE = "margin";
 const STOP_PERCENT = 0.95;
 const MARKET_TYPE = "future";
-const ASSET = "BTC";
+const ASSET = "CFX";
 const BASE = "USDT";
 const ALLOCATION = 100; //Percentage of our  portfolio to allocate for each trade
 const SPREAD = 0.2; //Spread Percentage mid rate Buy or Sell limit order example:  10.000 our sale limit will be 12.000 and buy order will be 8.000
@@ -113,7 +113,7 @@ function leftRotateByOne(arr) {
   if (arr.length <= 1) {
     return arr;
   }
-
+  close;
   let elem1 = arr.shift();
   arr.push(elem1);
 
@@ -282,6 +282,9 @@ const tick = async (config, binanceClient) => {
     orders.forEach(async (order) => {
       try {
         await binanceClient.cancelOrder(order.id, order.info.symbol);
+        // await binanceClient.create_order(order.id, order.info.symbol);
+        // close_position = binance.create_order(symbol=symbol, type="MARKET", side="buy", amount=pos['positionAmt'], params={"reduceOnly": True})
+        // await binanceClient.closeOrder(order.id, order.info.symbol);
         // user was successfully created
         console.log(`
       Order Closed ${order.id} Symbol: ${order.info.symbol}

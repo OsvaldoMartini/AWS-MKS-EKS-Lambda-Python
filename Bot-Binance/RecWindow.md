@@ -1,3 +1,51 @@
+
+
+
+## Throubleshooting RecWindow
+## TimeStamp RecWindow``
+```bash
+wget -qO- http://ipecho.net/plain
+
+
+# Windows
+net stop w32time
+w32tm /unregister
+
+w32tm /register
+
+net start w32time
+
+w32tm /resync
+```
+## Synchronizing a Linux System Clock with NTP Server
+[NTP Server](https://tecadmin.net/synchronizing-a-linux-system-clock-with-ntp-server/#:~:text=The%20Network%20Time%20Protocol%20(NTP,systemd%20system%20and%20service%20manager.)
+
+- Step 1: Install Timesync Service
+Timesync is the minimalistic service to synchronize local time with NTP servers. The package contains the systemd-timesyncd system service that may be used to synchronize the local system clock with a remote Network Time Protocol server.
+```bash
+sudo apt install systemd-timesyncd 
+
+sudo systemctl status systemd-timesyncd 
+```
+- Step 2: Enable the Clock Synchronization
+To synchronize the Linux system clock with an NTP server using timedatectl, you need to run the following command as root or use sudo:
+```bash
+sudo timedatectl set-ntp true 
+```
+- Step 3: Verify Changes
+You can verify the status of the NTP synchronization by running the following command:
+```bash
+timedatectl 
+```
+- Step 4: Synchronize Hardware Clock
+It’s important to note that the timedatectl command only affects the system clock, which is the main clock on the system used by the operating system and applications. The hardware clock, also known as the real-time clock (RTC), is a separate clock that runs independently of the system and is used to keep the time even when the system is powered off. To synchronize the hardware clock with the system clock, you need to run the following command:
+```bash
+sudo timedatectl set-local-rtc 1 
+```
+
+
+
+
 # Amazon Linux 2 Local
 
 [AWS Local](https://www.youtube.com/watch?v=oYo1LHbEKyI)

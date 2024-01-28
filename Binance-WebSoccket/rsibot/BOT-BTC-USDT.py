@@ -49,6 +49,8 @@ from datetime import datetime, timezone, timedelta
 # balance = 78.44214068
 # balance = 78.51556829
 # balance = 78.10052908
+# balance = 60.30221175
+# balance = 60.26690514
 
 
 
@@ -76,7 +78,8 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.009
+PROFIT_SELL = 1.0005
+LOSS_SELL = 0.9995
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
@@ -84,7 +87,7 @@ TRADE_SYMBOL = 'BTCUSDT'
 QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 41180
-ByPass = False
+ByPass = True
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)
@@ -171,8 +174,8 @@ def on_message(ws, message):
                 logger.info("RSI: {}  current Close is {}  {}".format (round(last_rsi, 2),  close, buyPassWhen))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                logger.info("SPOT: {} RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (TRADE_SYMBOL, round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
-                if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
+                logger.info("SPOT: {} RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (TRADE_SYMBOL, round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT_SELL), str(buyprice * 0.995), close ))
+                if float(close) <= buyprice * LOSS_SELL or float(close) >= PROFIT_SELL * buyprice:
                     soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                     order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                     in_position = False        
@@ -180,8 +183,8 @@ def on_message(ws, message):
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
-                     if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
+                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
+                     if float(close) <= buyprice * 0.995 or float(close) >= PROFIT_SELL * buyprice:
                         soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                         logger.info("Overbought! Sell! Sell! Sell!")
                         order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
