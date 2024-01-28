@@ -222,7 +222,7 @@ def on_close(ws):
     print('closed connection')
     
     
-ACTION_BUY = False    
+ACTION_BUY = True    
 
 
 
@@ -255,10 +255,10 @@ def on_message(ws, message):
     # Cancel / Reduce Positio  
     if in_position:
         try:
-            if ACTION_BUY and takeProfit_WHEN_BUY <= round(float(close) * 1.004, 7): # TakeProfit
-                order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-            elif takeProfit_WHEN_SELL <= round(float(close) * 0.996, 7):  # TakeProfit 
-                order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, volume,  'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+            # if ACTION_BUY and takeProfit_WHEN_BUY <= round(float(close) * 1.004, 7): # TakeProfit
+            #     order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+            # elif takeProfit_WHEN_SELL <= round(float(close) * 0.996, 7):  # TakeProfit 
+            #     order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, volume,  'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
             
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214241, '7psQJgCAulNsQ6dDnD1A9y')
             # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214275, 'KR6VqRg4Os6D5uXSuvvFus')
