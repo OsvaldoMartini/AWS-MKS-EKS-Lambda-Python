@@ -149,15 +149,16 @@ def order_future_stop_loss(side, symbol, quantity, stopLoss, positionSide, order
         print("an exception occured - {}".format(e))
     return order
 
-def order_future_cancel_order(symbol, side, orderId, origClientOrderId):
+def order_future_cancel_order(symbol, side, orderId, clientOrderId):
     try:
         print("Cancel / Closing  {} orderID {} ".format( symbol, orderId))
         # dualSidePosition='false', 
         order = client.futures_cancel_order(symbol=symbol, 
                                             side=side, 
                                             orderId=orderId, 
-                                            origClientOrderId=origClientOrderId,
-                                            timeInForce='GTC',  # GTC (Good 'Til Canceled)
+                                            clientOrderId=clientOrderId,
+                                            # timeInForce='GTC',  # GTC (Good 'Til Canceled)
+                                            # timestamp=True,
                                             recvWindow = 60000)
         print(order)
     except Exception as e:
@@ -221,47 +222,57 @@ def on_message(ws, message):
     QTY_BUY = 5
     
     if not in_position:
-        order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 1706420720587, 'YU9jTugelnL8uBdasAZNmr')
-        # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214241, '7psQJgCAulNsQ6dDnD1A9y')
-        # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214275, 'KR6VqRg4Os6D5uXSuvvFus')
-        # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214189, 'TZrMNRYPNzko7I9w4nLKOQ')
-        # # {'orderId': 7107189247, 'symbol': 'CFXUSDT', 'status': 'NEW', 'clientOrderId': 'r1TYhjT4NyLJJ6FSVcTYrc', 
-        order = order_future_cancel_all_open_order(TRADE_SYMBOL)
+        try:
+            # OrderId  7107618467  clientOrderId xGN98hcqsbPwgSTUy9E2py
+            # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107710333, 'rWrruVWaNPgroxhXoGJdnj')
+            # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214241, '7psQJgCAulNsQ6dDnD1A9y')
+            # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214275, 'KR6VqRg4Os6D5uXSuvvFus')
+            # order = order_future_cancel_order(TRADE_SYMBOL, 'BOTH', 7107214189, 'TZrMNRYPNzko7I9w4nLKOQ')
+            # # {'orderId': 7107189247, 'symbol': 'CFXUSDT', 'status': 'NEW', 'clientOrderId': 'r1TYhjT4NyLJJ6FSVcTYrc', 
+            # order = order_future_cancel_all_open_order(TRADE_SYMBOL)
+            print('Ola')
+        except Exception as e:
+            print("an exception occured - {}".format(e))
         
-    # if not in_position:
-    #     if ACTION_BUY:
-    #         order = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
-    #     else:
-    #         order = order_future_create_order(SIDE_SELL, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+    if not in_position:
+        if ACTION_BUY:
+          order = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+        else:
+          order = order_future_create_order(SIDE_SELL, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+          
+        orderId = order['orderId']
+        clientOrderId = order['clientOrderId']
+        orderStatus = order['status']
+        print("OrderId  {}  clientOrderId {}".format(orderId, clientOrderId))  
         
-    #     print(order)
-        
-    #     takeProfit_WHEN_BUY = round(float(close) * 1.0055, 4)  # TakeProfit = 45000
-    #     takeProfit_WHEN_SELL = round(float(close) * 0.995, 4)  # TakeProfit = 45000
-    #     print("Take Profit When Selling : {}".format(takeProfit_WHEN_SELL))
-    #     print("Take Profit When Buying : {}".format(takeProfit_WHEN_BUY))
-    #     # order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, TAKE_PROFIT_LIMIT)
-    #     # {"symbol":"CFXUSDT","type":"LIMIT","side":"SELL","quantity":452,"price":"0.2240","positionSide":"BOTH","leverage":20,"isolated":true,"timeInForce":"GTC","reduceOnly":true,"placeType":"position"}
-    #     try:
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT_MARKET)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT_MARKET)
-    #         if ACTION_BUY:
-    #             order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-    #             order = order_future_stop_loss(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_STOP)
-    #         else:
-    #             order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
-    #             order = order_future_stop_loss(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_STOP)
+        takeProfit_WHEN_BUY = round(float(close) * 1.0055, 4)  # TakeProfit = 45000
+        takeProfit_WHEN_SELL = round(float(close) * 0.995, 4)  # TakeProfit = 45000
+        print("Take Profit When Selling : {}".format(takeProfit_WHEN_SELL))
+        print("Take Profit When Buying : {}".format(takeProfit_WHEN_BUY))
+        # order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, TAKE_PROFIT_LIMIT)
+        # {"symbol":"CFXUSDT","type":"LIMIT","side":"SELL","quantity":452,"price":"0.2240","positionSide":"BOTH","leverage":20,"isolated":true,"timeInForce":"GTC","reduceOnly":true,"placeType":"position"}
+        try:
+            
+            if ACTION_BUY and orderStatus =='NEW':
+                order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+                order = order_future_stop_loss(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_STOP)
+            elif not ACTION_BUY and orderStatus =='NEW':
+                order = order_future_profit_limit(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+                order = order_future_stop_loss(SIDE_BUY, TRADE_SYMBOL, volume, takeProfit_WHEN_BUY, 'BOTH', FUTURE_ORDER_TYPE_STOP)
+            
+            print('Created StopLoss and TakeProfit')
                     
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT_LIMIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT_LIMIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_TAKE_PROFIT_LIMIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_TAKE_PROFIT)
-    #         # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_LIMIT)
-    #         print(order)
-    #     except Exception as e:
-    #         print("an exception occured - {}".format(e))
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT_MARKET)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT_MARKET)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT_LIMIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT_LIMIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_TAKE_PROFIT_LIMIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'SHORT', ORDER_TYPE_TAKE_PROFIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'LONG', ORDER_TYPE_TAKE_PROFIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_TAKE_PROFIT)
+            # order = order_future_profit_limit(SIDE_SELL, TRADE_SYMBOL, volume, takeProfit_WHEN_SELL, 'BOTH', ORDER_TYPE_LIMIT)
+        except Exception as e:
+            print("an exception occured - {}".format(e))
             
     in_position = True
     
