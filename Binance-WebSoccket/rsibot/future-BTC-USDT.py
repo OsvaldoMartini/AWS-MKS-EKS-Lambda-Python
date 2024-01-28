@@ -26,10 +26,9 @@ import ccxt
 # balance = 6.52
 # balance = 6.33
 # balance = 6.13
-# balance = 6.13
 
 
-ACTION_BUY = False
+ACTION_BUY = False 
 
 
 # ENUMS
@@ -310,7 +309,7 @@ def on_message(ws, message):
         
         # Params
         buyVolume = round((QTY_BUY * ALLOCATION) / float(close), 1)
-        volume = 0.003 #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  BTC-USDT "quantity":0.003   
+        volume = 0.005 #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  BTC-USDT "quantity":0.003   
         # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  # CFX-USDT "quantity":410   
         print("Volume Actual: {}".format(volume))
         print("BuyVolumelume: {}".format(buyVolume))
