@@ -323,9 +323,9 @@ def on_message(ws, message):
     
     if in_position:
         if ACTION_BUY:
-            print("Take Profit Buying : {}  Stop Loss".format(takeProfit_WHEN_BUY, stopLoss_WHEN_BUY))
+            print("Take Profit Buying : {}  Stop Loss {}".format(takeProfit_WHEN_BUY, stopLoss_WHEN_BUY))
         elif not ACTION_BUY:
-            print("Take Profit Selling : {}  Stop Loss".format(takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
+            print("Take Profit Selling : {}  Stop Loss {}".format(takeProfit_WHEN_SELL, stopLoss_WHEN_SELL))
         
     
     # orderSell(SIDE_SELL, TRADE_SYMBOL, int(math.trunc(amountQty)), ORDER_TYPE_MARKET, "TEST")
