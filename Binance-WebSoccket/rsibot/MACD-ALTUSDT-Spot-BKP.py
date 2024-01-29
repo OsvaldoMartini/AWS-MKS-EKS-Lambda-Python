@@ -17,15 +17,12 @@ client = Client(config.API_KEY, config.API_SECRET)
 
 # PROFIT = 1.007  I CLOSED MANUALLY
 PROFIT = 1.0055 # LET'S SEE IF THIS GETS PROFITS
-LOSSES = 0.995 # LET'S SEE IF DON'T GET TOO MUCH LOSSES
 RSI_PERIOD = 14
-SIGNAL = 25
 # RSI_OVERBOUGHT = 80
 # RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'ALTUSDT'
-DECIMAL_CALC = 5
 QTY_BUY = 10 # USDT
-BLOCK_ORDER = False
+BLOCK_ORDER = True
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
@@ -122,50 +119,80 @@ def orderSell(side, symbol, quantity, order_type, soldDesc):
             order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
     return order
 
-def strategy(pair, qty, losses_perc, profit_perc, signal, open_position=False, ):
+
+https://stackoverflow.com/questions/76817422/binance-api-create-futures-order-with-take-profit-limit-and-stop-loss-market
+
+Here's how you can modify your code to achieve the desired functionality:
+
+# Initial BUY MARKET order
+buy_limit = client.futures_create_order(
+    symbol=coin,
+    side='BUY',
+    positionSide='LONG',
+    type='MARKET',
+    quantity=0.001
+)
+
+tp = round(45000, 2)  # TakeProfit = 45000
+sl = round(50000, 2)  # StopLoss = 50000
+
+# TAKE_PROFIT_LIMIT order (modify this)
+take_profit_limit = client.futures_create_order(
+    symbol=coin,
+    side='SELL',
+    positionSide='LONG',
+    type='TAKE_PROFIT_LIMIT',
+    timeInForce='GTC',  # GTC (Good 'Til Canceled)
+    quantity=0.001,
+    price=tp,           # Specify the take profit price
+    stopPrice=tp,       # Specify the trigger price
+    closePosition=True  # or reduceOnly = True
+)
+
+# STOP_MARKET order
+stop_market = client.futures_create_order(
+    symbol=coin,
+    side='SELL',
+    positionSide='LONG',
+    type='STOP_MARKET',
+    quantity=0.001,
+    stopPrice=sl,       # Specify the trigger price
+    closePosition=True
+)
+
+
+
+def strategy(pair, qty, profit_perc, open_position=False, ):
   df = getminutedata(pair, Client.KLINE_INTERVAL_1MINUTE,'100')
   applytechnicals(df)
-  inst = Signals(df, signal)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
+  inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
   # print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
   # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(df.Close.iloc[-1]), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
   logger.info("MACD-BOT SPOT: {}   RSI: {}   current Close is {}   Buy MACD {} ".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]) ))
   if df.Buy.iloc[-1]:
-    if not BLOCK_ORDER:
-      order = orderBuy(SIDE_BUY,
-                      pair,
-                      qty,
-                      ORDER_TYPE_MARKET)
-      logger.info(order)
-      buyprice = float(order['fills'][0]['price'])
-      amountQty = float(order['fills'][0]['qty'])
-      open_position = True
-      logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("BOUGHT PRICE:" + str(buyprice))
-    else:
-      buyprice = float(df.Close.iloc[-1])
-      amountQty = 5
-      open_position = True
-      logger.info("SIMULATED Buy !!! Buy !!! Buy !!!") 
-      logger.info("SIMULATED BOUGHT PRICE:" + str(buyprice))
-       
+    order = orderBuy(SIDE_BUY,
+                     pair,
+                     qty,
+                     ORDER_TYPE_MARKET)
+    logger.info(order)
+    buyprice = float(order['fills'][0]['price'])
+    amountQty = float(order['fills'][0]['qty'])
+    open_position = True
+    logger.info("BOUGHT PRICE:" + str(buyprice)) 
     
   while open_position:
     time.sleep(0.5)
     df = getminutedata(pair,'1m','2')  # BE AWARE ABOUT THIS '2'  VALUE
-    logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (pair, str(buyprice), amountQty, str(round(buyprice * profit_perc, DECIMAL_CALC)), str(round(buyprice * losses_perc, DECIMAL_CALC)), str(df.Close.iloc[-1]) ))
+    logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (pair, str(buyprice), amountQty, str(buyprice * profit_perc), str(buyprice * 0.995), str(df.Close.iloc[-1]) ))
     # Stop Loss
-    if float(df.Close.iloc[-1]) <= float(round(buyprice * losses_perc, DECIMAL_CALC)) or float(df.Close.iloc[-1]) >= float(round(profit_perc * buyprice, DECIMAL_CALC)):
-      soldDesc = "Sell !!! Sell !!! Sell !!! Stop Lossed" if float(df.Close.iloc[-1]) <= buyprice else "Sell !!! Sell !!! Sell !!! PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
-      if not BLOCK_ORDER:
-        orderSell(SIDE_SELL,
-                        pair,
-                        int(math.trunc(amountQty)),
-                        ORDER_TYPE_MARKET,soldDesc)
-        logger.info(order)
-        open_position = False
-      else:
-         logger.info("SIMULATED Sell !!! Sell !!! Sell !!!" + soldDesc)
+    if df.Close.iloc[-1] <= buyprice * 0.995 or df.Close.iloc[-1] >= profit_perc * buyprice:
+      soldDesc = "Stop Lossed" if float(df.Close.iloc[-1]) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
+      orderSell(SIDE_SELL,
+                      pair,
+                      int(math.trunc(amountQty)),
+                      ORDER_TYPE_MARKET,soldDesc)
+      logger.info(order)
       break
 
   
@@ -177,7 +204,7 @@ while True:
   # strategy('ALTUSDT', 10, 1.055) # Runs One Time
   # strategy('ALTUSDT', 10, 1.005) # Runs One Time
   # strategy('OMUSDT', 10, 1.005) # Runs One Time
-  strategy(TRADE_SYMBOL, QTY_BUY, LOSSES, PROFIT, SIGNAL) # Runs One Time
+  strategy(TRADE_SYMBOL, QTY_BUY, PROFIT) # Runs One Time
   time.sleep(0.5) 
   
   
