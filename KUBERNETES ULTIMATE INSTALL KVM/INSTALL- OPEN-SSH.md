@@ -69,7 +69,7 @@ sudo systemctl restart ssh
  ssh username@ipaddress
 ```
 
-# Firtewall UFW
+# Firewall UFW
 * Check out the list of UFW rules for verification:
 ```bash
   sudo apt update && sudo apt upgrade -y

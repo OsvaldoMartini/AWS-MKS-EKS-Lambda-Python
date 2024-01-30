@@ -5,6 +5,7 @@ from binance.enums import *
 import config
 import pandas as pd
 import ta
+import talib
 import numpy as np
 import math
 import time
@@ -93,6 +94,28 @@ class Signals:
     self.df['Buy'] = np.where((self.df.trigger) &
                      (self.df['%K'].between(20,80)) & (self.df['%D'].between(20,80))
                      & (self.df.rsi > 50) & (self.df.macd > 0), 1, 0)  
+    self.df['Sell'] = np.where((self.df.trigger) &
+                     (self.df['%K'].between(20,80)) & (self.df['%D'].between(20,80))
+                     & (self.df.rsi > 50) & (self.df.macd < 0), 1, 0)  
+    
+    
+    # Calculate MACD using TA-Lib
+    self.df['macd_talib'], self.df['signal_talib'], _ = talib.MACD(self.df.Close, fastperiod=12, slowperiod=26, signalperiod=9)
+    # Create a signal when MACD crosses above the Signal Line
+    self.df['BuyTaLib'] = np.where(self.df['macd_talib'] > self.df['signal_talib'], 1, 0)  
+    # Create a signal when MACD crosses below the Signal Line
+    self.df['SellTaLib'] = np.where(self.df['macd_talib'] < self.df['signal_talib'], 1, 0)  
+    
+    # Calculate MACD histogram using ta
+    self.df['macd_diff'] = ta.trend.macd_diff(self.df.Close, window_fast=12, window_slow=26, window_sign=9)
+    # Define MACD histogram threshold for buy signal
+    macd_diff_buy_threshold = 0
+    # Create a buy signal when MACD histogram crosses above the threshold
+    self.df['BuyTa'] = np.where(self.df['macd_diff'] > macd_diff_buy_threshold, 1, 0)  
+    macd_diff_sell_threshold = 0
+    # Create a sell signal when MACD histogram crosses below the threshold
+    self.df['SellTa'] = np.where(self.df['macd_diff'] < macd_diff_sell_threshold, 1, 0)  
+
 
 # inst = Signals(df, 25)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
 # inst.decide()
@@ -121,6 +144,20 @@ def orderSell(side, symbol, quantity, order_type, soldDesc):
             logger.info("Attempt to SELL {}".format(str(quantity)))
             order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
     return order
+  
+# Function to calculate PNL and ROI for an open position - SPOT
+def calculate_open_position_pnl_roi_spot(current_price, entry_price, quantity):
+
+    entry_price = float(entry_price)
+    quantity = float(quantity)
+
+    # Calculate PNL
+    pnl = round((current_price - entry_price) * quantity, 4)
+
+    # Calculate ROI
+    roi = round((pnl / (entry_price * quantity)) * 100, 4) 
+
+    return pnl, roi  
 
 def strategy(pair, qty, losses_perc, profit_perc, signal, open_position=False, ):
   df = getminutedata(pair, Client.KLINE_INTERVAL_1MINUTE,'100')
@@ -129,7 +166,7 @@ def strategy(pair, qty, losses_perc, profit_perc, signal, open_position=False, )
   inst.decide()
   # print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
   # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(df.Close.iloc[-1]), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
-  logger.info("MACD-BOT SPOT: {}   RSI: {}   current Close is {}   Buy MACD {} ".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]) ))
+  logger.info("MACD SPOT: {} RSI: {} Close {}   Buy MACD {} Sell MACD {}  Buy TaLib {} Sell TaLib {} Buy TA {} Sell TA {}".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]), str(df.Sell.iloc[-1]), str(df.BuyTaLib.iloc[-1]), str(df.SellTaLib.iloc[-1]), str(df.BuyTa.iloc[-1]), str(df.SellTa.iloc[-1])))
   if df.Buy.iloc[-1]:
     if not BLOCK_ORDER:
       order = orderBuy(SIDE_BUY,
@@ -153,7 +190,11 @@ def strategy(pair, qty, losses_perc, profit_perc, signal, open_position=False, )
   while open_position:
     time.sleep(0.5)
     df = getminutedata(pair,'1m','2')  # BE AWARE ABOUT THIS '2'  VALUE
-    logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (pair, str(buyprice), amountQty, str(round(buyprice * profit_perc, DECIMAL_CALC)), str(round(buyprice * losses_perc, DECIMAL_CALC)), str(df.Close.iloc[-1]) ))
+    # Calculate PNL and ROI
+    pnl, roi = calculate_open_position_pnl_roi_spot(df.Close.iloc[-1], buyprice, amountQty)
+    logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {} PNL: {} USDT ROI: {}%".format (pair, str(buyprice), amountQty, str(round(buyprice * profit_perc, DECIMAL_CALC)), str(round(buyprice * losses_perc, DECIMAL_CALC)), str(df.Close.iloc[-1]), pnl, roi ))
+    print(f'PNL: {pnl} USDT')
+    print(f'ROI: {roi}%')
     # Stop Loss
     if float(df.Close.iloc[-1]) <= float(round(buyprice * losses_perc, DECIMAL_CALC)) or float(df.Close.iloc[-1]) >= float(round(profit_perc * buyprice, DECIMAL_CALC)):
       soldDesc = "Sell !!! Sell !!! Sell !!! Stop Lossed" if float(df.Close.iloc[-1]) <= buyprice else "Sell !!! Sell !!! Sell !!! PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  

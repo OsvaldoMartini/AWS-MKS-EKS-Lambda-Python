@@ -76,7 +76,7 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.0055
+PROFIT = 1.0033
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 25
