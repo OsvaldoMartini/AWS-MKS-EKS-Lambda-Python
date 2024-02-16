@@ -6,6 +6,10 @@
 
 [Firewall UFW](https://www.zenarmor.com/docs/network-security-tutorials/how-to-set-up-a-firewall-with-ufw-on-debian)
 
+# MACBook Windows & Linux
+[SSH & X11 Forwarding](https://www.businessnewsdaily.com/11035-how-to-use-x11-forwarding.html)
+
+[SSH On Mac](https://docs.tritondatacenter.com/public-cloud/getting-started/ssh-keys/generating-an-ssh-key-manually/manually-generating-your-ssh-key-in-mac-os-x)
 ## Step 1: Install SSH
 
 ```bash 

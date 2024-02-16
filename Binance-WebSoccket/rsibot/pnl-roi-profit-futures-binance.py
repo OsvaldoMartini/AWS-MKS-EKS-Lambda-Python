@@ -24,20 +24,22 @@ def calculate_pnl_roi(symbol, entry_price, exit_price, quantity):
     # exit_index = timestamps.index(exit_timestamp)
 
     # Calculate PNL
-    pnl = (exit_price - entry_price) * quantity
+    pnlLong = (exit_price - entry_price) * quantity
+    pnlShort = (entry_price - exit_price) * quantity
 
     # Calculate ROI
-    roi = (pnl / (entry_price * quantity)) * 100
+    roiLong = (pnlLong / (entry_price * quantity)) * 100
 
-    return pnl, roi
+    return pnlLong, roiLong, pnlShort
 
 # Example usage
 symbol = 'BTCUSDT'
-entry_price = 43250.0
-exit_price = 43280.0
+entry_price = 45271.9
+exit_price = 43725
 quantity = 1.0
 
-pnl, roi = calculate_pnl_roi(symbol, entry_price, exit_price, quantity)
+pnlLong, roiLong, pnlShort = calculate_pnl_roi(symbol, entry_price, exit_price, quantity)
 
-print(f"PNL: {pnl} USDT")
-print(f"ROI: {roi}%")
+print(f"PNL Long: {pnlLong} USDT")
+print(f"ROI Long: {roiLong}%")
+print(f"PNL Short: {pnlShort} USDT")

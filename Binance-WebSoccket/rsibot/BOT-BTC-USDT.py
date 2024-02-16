@@ -59,6 +59,7 @@ from datetime import datetime, timezone, timedelta
 # balance = 56.40977667
 # balance = 56.90652933
 # balance = 56.41419003
+# balance = 56.18852165
 
 
 
