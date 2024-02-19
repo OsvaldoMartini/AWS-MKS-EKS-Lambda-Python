@@ -47,3 +47,12 @@ sudo journalctl -u pyipad -n 1000 -f
 ```bash
  pyrinwallet start-daemon
 ```
+
+# Execute the LOL-Bridge
+
+```bash
+cd /pyrin
+
+./lol_bridge_pyi
+
+```
