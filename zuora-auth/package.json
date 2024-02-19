@@ -1,0 +1,19 @@
+{
+  "name": "zuora-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "aws-cdk": "^2.128.0",
+    "aws-cdk-lib": "^2.128.0",
+    "constructs": "^10.3.0",
+    "typescript": "^5.3.3"
+  }
+}
