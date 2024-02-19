@@ -1,3 +1,5 @@
+var fetch = require("node-fetch");
+
 const zuoraCredentials = {
   client_id: "f50b1c58-c026-49e5-860c-13dc699a6940",
   client_secret: "+d2Z+MJc5hEXSqBH9kn=/28TBE8FWGzxtT91ht",
@@ -25,26 +27,29 @@ const encodedData = Object.keys(requestData)
   )
   .join("&");
 
-// Make HTTP POST request to Zuora token endpoint
-fetch(sandbox_us_rest_api, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  body: encodedData,
-})
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error("Failed to obtain Zuora token");
-    }
-    return response.json();
+exports.main = async function (event, context) {
+  // Make HTTP POST request to Zuora token endpoint
+  fetch(sandbox_us_rest_api, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: encodedData,
   })
-  .then((data) => {
-    console.log("Zuora Access Token:", data.access_token);
-    console.log("Zuora Token Type:", data.token_type);
-    console.log("Expires In:", data.expires_in, "seconds");
-    return;
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-  });
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to obtain Zuora token");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Zuora Access Token:", data.access_token);
+      console.log("Zuora Token Type:", data.token_type);
+      console.log("Expires In:", data.expires_in, "seconds");
+      return data.json();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      return error.json();
+    });
+};
