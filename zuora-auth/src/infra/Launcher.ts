@@ -5,6 +5,9 @@ import { DataStack } from './stacks/DataStack';
 import { LambdaStack } from './stacks/LambdaStack';
 
 const app = new App();
-new DataStack(app, 'DataStack');
-const lambdaStack = new LambdaStack(app, 'ZuoraGetTokenLambda');
-new ApiStack(app, 'ApiStack', {zuoraTokenLambdaIntegration: lambdaStack.zuoraTokenLambdaIntegration});
+const dataStack = new DataStack(app, 'DataStack');
+const lambdaStack = new LambdaStack(app, 'ZuoraGetTokenLambda', {
+  zuoraTables:dataStack.zuoraTables});
+new ApiStack(app, 'ApiStack', {
+  zuoraTokenLambdaIntegration: lambdaStack.zuoraTokenLambdaIntegration
+});
