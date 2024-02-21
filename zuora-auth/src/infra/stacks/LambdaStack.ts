@@ -11,15 +11,15 @@ interface LambdaStackProps extends StackProps{
 
 export class LambdaStack extends Stack {
 
-  public readonly zuoraTokenLambdaIntegration:LambdaIntegration;
+  public readonly zuoraCallOutLambdaIntegration:LambdaIntegration;
 
   constructor(scope: Construct, id: string, props?: LambdaStackProps) {
     super(scope, id, props)
 
-    const zuoraTokenLambda =  new LambdaFunction(this, 'ZuoraGetTokenLambda', {
+    const zuoraCallOutLambda =  new LambdaFunction(this, 'ZuoraCallOutLambda', {
       //Runtime
       runtime: Runtime.NODEJS_18_X,
-      handler: 'getZuoraToken200.main',
+      handler: 'getCallOut.main',
       //Join works with all operation System Now We navigate in the syste like VS Terminal 
       // UP ONE  Levels '..'
       // FOR TWO levels '..', '..'
@@ -29,6 +29,6 @@ export class LambdaStack extends Stack {
       } 
     })
 
-    this.zuoraTokenLambdaIntegration = new LambdaIntegration(zuoraTokenLambda);
+    this.zuoraCallOutLambdaIntegration = new LambdaIntegration(zuoraCallOutLambda);
   }
 }

@@ -11,7 +11,7 @@ export class ZuoraOAuth extends Stack {
     super(scope, id, props);
 
     // Create an API Gateway
-    const api = new RestApi(this, "ZuoraApi", {
+    const api = new RestApi(this, "ZuoraGetTokenOAuthApi", {
       restApiName: "Zuora API Gateway",
       description: "API Gateway to interact with Zuora",
     });

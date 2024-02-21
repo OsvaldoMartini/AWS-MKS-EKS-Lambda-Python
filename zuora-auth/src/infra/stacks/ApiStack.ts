@@ -5,7 +5,7 @@ import { Construct} from "constructs"
 import { IUserPool } from 'aws-cdk-lib/aws-cognito';
 
 interface ApiStackProps extends StackProps {
-  zuoraTokenLambdaIntegration : LambdaIntegration;
+  zuoraCallOutLambdaIntegration : LambdaIntegration;
   userPool: IUserPool;
 }
 
@@ -14,7 +14,7 @@ export class ApiStack extends Stack {
   constructor(scope: Construct, id: string, props?: ApiStackProps) {
     super(scope, id, props)
 
-    const api = new RestApi(this, 'ZuoraTokenApi');
+    const api = new RestApi(this, 'ZuoraCallOutRestApi');
 
     const authorizer = new CognitoUserPoolsAuthorizer(this, 'ZuoraApiAuthorizer', {
       cognitoUserPools:[props.userPool],
@@ -30,10 +30,10 @@ export class ApiStack extends Stack {
         }
 
 
-    const zouraTokenResource  = api.root.addResource('zuoraToken');
-    zouraTokenResource.addMethod('GET', props.zuoraTokenLambdaIntegration, optionsWithAuth);
-    zouraTokenResource.addMethod('POST', props.zuoraTokenLambdaIntegration, optionsWithAuth);
-    zouraTokenResource.addMethod('PUT', props.zuoraTokenLambdaIntegration, optionsWithAuth);
-    zouraTokenResource.addMethod('DELETE', props.zuoraTokenLambdaIntegration, optionsWithAuth);
+    const zouraCallOutResource  = api.root.addResource('zuoraCallout');
+    zouraCallOutResource.addMethod('GET', props.zuoraCallOutLambdaIntegration, optionsWithAuth);
+    zouraCallOutResource.addMethod('POST', props.zuoraCallOutLambdaIntegration, optionsWithAuth);
+    zouraCallOutResource.addMethod('PUT', props.zuoraCallOutLambdaIntegration, optionsWithAuth);
+    zouraCallOutResource.addMethod('DELETE', props.zuoraCallOutLambdaIntegration, optionsWithAuth);
   }
 }

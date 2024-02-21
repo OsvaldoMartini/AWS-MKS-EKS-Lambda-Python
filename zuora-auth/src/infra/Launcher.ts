@@ -7,15 +7,15 @@ import { AuthStack } from './stacks/AuthStack';
 import { ZuoraOAuth } from './stacks/ZuoraOAuth';
 
 const app = new App();
-const dataStack = new DataStack(app, 'DataStack');
-const lambdaStack = new LambdaStack(app, 'ZuoraGetTokenLambda', {
+const dataStack = new DataStack(app, 'ZuoraCallOutData');
+const lambdaStack = new LambdaStack(app, 'ZuoraCallOutEntryPoint', {
   zuoraTables:dataStack.zuoraTables});
 
-const authStack = new AuthStack(app, 'AuthStack');
+const authStack = new AuthStack(app, 'ZuoraAuthCognito');
 
-new ApiStack(app, 'ApiStack', {
-  zuoraTokenLambdaIntegration: lambdaStack.zuoraTokenLambdaIntegration,
+new ApiStack(app, 'ZouraCallOutApi', {
+  zuoraCallOutLambdaIntegration: lambdaStack.zuoraCallOutLambdaIntegration,
   userPool: authStack.userPool
 });
 
-new ZuoraOAuth(app, 'ZuoraOAuth');
+new ZuoraOAuth(app, 'ZuoraGetTokenOAuth');
