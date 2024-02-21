@@ -10,8 +10,9 @@ const dataStack = new DataStack(app, 'DataStack');
 const lambdaStack = new LambdaStack(app, 'ZuoraGetTokenLambda', {
   zuoraTables:dataStack.zuoraTables});
 
-new AuthStack(app, 'AuthStack');
+const authStack = new AuthStack(app, 'AuthStack');
 
 new ApiStack(app, 'ApiStack', {
-  zuoraTokenLambdaIntegration: lambdaStack.zuoraTokenLambdaIntegration
+  zuoraTokenLambdaIntegration: lambdaStack.zuoraTokenLambdaIntegration,
+  userPool: authStack.userPool
 });
