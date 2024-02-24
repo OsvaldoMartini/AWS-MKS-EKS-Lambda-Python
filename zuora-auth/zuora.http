@@ -1,2 +1,5 @@
-POST  https://ttpajx81q5.execute-api.us-east-1.amazonaws.com/prod/callOut
+POST  https://08jkqyvmk7.execute-api.us-east-1.amazonaws.com/prod/callOut
 ###
+
+GET https://08jkqyvmk7.execute-api.us-east-1.amazonaws.com/prod/callOut
+##
