@@ -1,0 +1,62 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js install
+
+PATH: 
+  C:\Installed\Python312\\Scripts\;C:\Installed\Python312\;%BOLAND%\bin;%BOLAND%\bpl;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\Microsoft VS Code\bin;C:\Installed\apache-maven-3.8.4-bin\bin;D:\Installed\apache-jmeter-5.4.3\bin;C:\Program Files\PuTTY\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\150\DTS\Binn\;D:\Projects\LANSA\CONNECT;C:\Program Files (x86)\Microsoft SQL Server\150\DTS\Binn\;D:\Installed\gradle-7.4.2\bin;D:\Projects\SonarQube\bin\windows-x86-64;C:\ProgramData\chocolatey\bin;C:\Program Files\GitHub CLI\;D:\Installed\kafka_2.12-2.5.0\bin\windows;D:\Installed\apache-zookeeper-3.8.1\bin;C:\Program Files (x86)\sbt\bin;C:\Program Files\Java\jdkAws\jdk1.8.0_402\bin;D:\Installed\kafka_2.13-3.5.0\bin\windows;C:\Program Files (x86)\WinMerge;C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\bin;C:\Program Files\Amazon\AWSSAMCLI\bin\;D:\Installed\Kind-k8s\;D:\Installed\eksctl_Windows_amd64\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\dotnet\;D:\Installed\Flask\bin;C:\Users\osval\AppData\Local\Microsoft\WindowsApps;C:\MinGW\bin\;C:\Program Files\OpenSSH-Win64;C:\Program Files\Git\cmd;C:\Program Files\Git\bin;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PostgreSQL\11\bin;C:\Windows\System32\OpenSSH;C:\Program Files\nodejs\;%CLASSPATH%;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files\nodejs\;D:\Projects\MarginEdge\classpath ;C:\Users\osval\AppData\Roaming\npm
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  20.10.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://dev-851346259155.d.codeartifact.us-east-1.amazonaws.com/npm/libs/@aws-amplify%2fauth: Unauthenticated: request used expired credentials. Please renew your credentials.
+      at params.callback [as _callback] (C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66145:18)
+      at self.callback (C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140890:22)
+      at Request.emit (node:events:514:28)
+      at Request.<anonymous> (C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141862:10)
+      at Request.emit (node:events:514:28)
+      at Gunzip.<anonymous> (C:\Users\osval\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141784:12)
+      at Object.onceWrapper (node:events:628:28)
+      at Gunzip.emit (node:events:514:28)
+      at endReadableNT (node:internal/streams/readable:1589:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  {
+    "name": "zuora-auth",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "@types/node": "^20.11.19",
+      "aws-cdk": "^2.79.1",
+      "aws-cdk-lib": "^2.79.1",
+      "constructs": "^10.2.24",
+      "ts-node": "^10.9.1",
+      "typescript": "^5.3.3"
+    },
+    "dependencies": {
+      "@aws-amplify/auth": "^5.2.3",
+      "@aws-cdk/aws-apigatewayv2": "^1.204.0",
+      "@aws-cdk/aws-apigatewayv2-integrations": "^1.204.0",
+      "@aws-cdk/core": "^1.204.0",
+      "aws-amplify": "^5.0.25"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

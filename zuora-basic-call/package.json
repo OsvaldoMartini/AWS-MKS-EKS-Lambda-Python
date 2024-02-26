@@ -10,14 +10,31 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^18.15.10",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
+    "@aws-cdk/assert": "1.97.0",
+    "@types/jest": "^26.0.10",
+    "@types/node": "^10.17.59",
+    "@types/node-fetch": "^2.5.10",
+    "aws-cdk": "1.97.0",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2-integrations": "^1.204.0",
-    "aws-cdk": "^2.130.0",
-    "aws-cdk-lib": "^2.130.0",
-    "constructs": "^10.3.0"
+    "@aws-cdk/aws-apigateway": "^1.97.0",
+    "@aws-cdk/aws-certificatemanager": "^1.97.0",
+    "@aws-cdk/aws-ec2": "^1.97.0",
+    "@aws-cdk/aws-ecr": "^1.97.0",
+    "@aws-cdk/aws-ecs": "^1.97.0",
+    "@aws-cdk/aws-ecs-patterns": "^1.97.0",
+    "@aws-cdk/aws-elasticloadbalancingv2": "^1.97.0",
+    "@aws-cdk/aws-iam": "^1.97.0",
+    "@aws-cdk/aws-lambda": "^1.97.0",
+    "@aws-cdk/aws-route53": "^1.97.0",
+    "@aws-cdk/aws-secretsmanager": "^1.97.0",
+    "@aws-cdk/core": "1.97.0",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.1",
+    "s": "^1.0.0"
   }
 }

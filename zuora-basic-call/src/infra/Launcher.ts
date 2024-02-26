@@ -13,5 +13,5 @@ const lambdaStack = new LambdaStack(app, 'ZuoraLambda')
 // const authorizerStack = new AuthorizerStack(app, 'ZuoraAuthorizer');
 
 new ApiStack(app, 'ZuoraApi', {
-    zuoraCallOutLambdaIntegration: lambdaStack.zuoraCallOutLambdaIntegration,
+    // zuoraCallOutLambdaIntegration: lambdaStack.zuoraCallOutLambdaIntegration,
 })
