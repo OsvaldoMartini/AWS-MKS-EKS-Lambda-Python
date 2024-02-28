@@ -1,0 +1,8 @@
+
+@url=https://vy5zr8lh1c.execute-api.us-east-1.amazonaws.com/prod/
+
+GET {{url}}/callOut
+###
+
+GET {{url}}/callOutHeader
+###
