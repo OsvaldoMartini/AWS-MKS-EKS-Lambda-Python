@@ -5,6 +5,9 @@ import { Construct } from 'constructs';
 import { join } from 'path';
 
 
+const ticketNumber = process.env.TICKET_PARAMETER ?? '';
+console.log("ticketNumber: ", ticketNumber);
+
 export class LambdaStack extends Stack {
 
     public readonly zuoraCallOutLambdaIntegration: LambdaIntegration

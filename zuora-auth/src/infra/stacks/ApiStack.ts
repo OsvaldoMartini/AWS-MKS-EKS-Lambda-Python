@@ -2,7 +2,7 @@ import { Stack, StackProps } from "aws-cdk-lib"
 import { AuthorizationType, CognitoUserPoolsAuthorizer, Cors, LambdaIntegration, MethodOptions, ResourceOptions, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Construct} from "constructs"
 
-import { IUserPool } from 'aws-cdk-lib/aws-cognito';
+import { IUserPool } from 'aws-cdk-lib/aws-cognito';  
 
 interface ApiStackProps extends StackProps {
   zuoraCallOutLambdaIntegration : LambdaIntegration;
@@ -22,12 +22,12 @@ export class ApiStack extends Stack {
     });
     authorizer._attachToApi(api);
 
-      const optionsWithAuth: MethodOptions = {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.authorizerId
-            }
-        }
+    const optionsWithAuth: MethodOptions = {
+          authorizationType: AuthorizationType.CUSTOM,
+          authorizer: {
+              authorizerId: authorizer.authorizerId
+          }
+      }
 
 
     const zouraCallOutResource  = api.root.addResource('zuoraCallout');
