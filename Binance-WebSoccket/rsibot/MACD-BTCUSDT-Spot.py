@@ -27,6 +27,22 @@ TRADE_SYMBOL = 'BTCUSDT'
 DECIMAL_CALC = 2
 QTY_BUY = 20 # USDT
 BLOCK_ORDER = False
+ACTION_BUY = True
+ONLY_RSI = True
+
+COMMISSION = 0.12
+
+ALLOCATION = 0.001
+SYMBOL_LEVERAGE = 30
+TICKER = 0
+
+
+# PRECISION_PROFIT_LOSS = 7 # CFXUSDT
+PRECISION_PROFIT_LOSS = 1 # BTCUSDT
+
+PROFIT_CALC = 1.005   # BTCUSDT
+LOSS_CALC = 0.99813     # BTCUSDT
+
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
@@ -159,52 +175,308 @@ def calculate_open_position_pnl_roi_spot(current_price, entry_price, quantity):
 
     return pnl, roi  
 
-def strategy(pair, qty, losses_perc, profit_perc, signal, open_position=False, ):
+# Function to calculate PNL and ROI for an open position - SPOT
+def calculate_open_position_pnl_roi_future(selling_price_per_unit, purchase_price_per_unit, quantity_bought_sold, action_buy, fees=0):
+    # Calculate total cost of purchase
+    if not action_buy:
+      total_cost = quantity_bought_sold * purchase_price_per_unit
+      
+      # Calculate total revenue from sale
+      total_revenue = quantity_bought_sold * selling_price_per_unit
+      
+      # Calculate profit or loss
+      pnl = total_revenue - total_cost - fees
+      
+      # Calculate return on investment (ROI)
+      roi = (pnl / total_cost) * 100
+      
+      return pnl, roi    
+    if action_buy:
+      # Calculate total cost of purchase
+      total_cost = quantity_bought_sold * purchase_price_per_unit
+      
+      # If selling price is provided, calculate PNL
+      if selling_price_per_unit is not None:
+          total_revenue = quantity_bought_sold * selling_price_per_unit
+          pnl = total_revenue - total_cost - fees
+      else:
+          pnl = None
+      
+      # Calculate return on investment (ROI)
+      if pnl is not None:
+          roi = (pnl / total_cost) * 100
+      else:
+          roi = None
+      
+      return pnl, roi
+    
+    
+def calculate_roi_with_imr(entry_price, exit_price, quantity, action_buy, imr=1):
+    # Calculate the total value at entry and exit
+    total_entry_value = entry_price * quantity
+    total_exit_value = exit_price * quantity
+
+    # Calculate the profit or loss
+    pnl = total_exit_value - total_entry_value
+
+    # Calculate the ROI considering IMR
+    roi = (pnl / (total_entry_value / imr)) * 100
+    if ACTION_BUY:
+      return roi
+    if not ACTION_BUY:
+      return abs(roi)    
+    
+def calculate_pnl_futures(entry_price, exit_price, quantity, action_buy):
+  if action_buy:
+      pnl = (exit_price - entry_price) * quantity
+  elif not action_buy:
+      pnl = (entry_price - exit_price) * quantity
+  else:
+      raise ValueError("Invalid side provided")
+  return pnl   
+
+
+# USDT-Margined Contracts
+# Initial Margin = Quantity * Entry Price * IMR
+# IMR = 1 / leverage
+# PnL:
+# Long = (Exit Price - Entry Price) * Quantity
+# Short = (Entry Price - Exit Price) * Quantity
+# ROE% = PnL / Initial Margin = side * (1 - entry price / exit price) / IMR
+# Target price:
+# Long target price = entry price * ( ROE% / leverage + 1 )
+# Short target price = entry price * ( 1 - ROE% / leverage )
+
+def calculate_roi_futures(entry_price, exit_price, quantity, action_buy):
+  if action_buy:
+    return ((exit_price - entry_price) / entry_price) * 100
+  elif not action_buy:
+    total_entry_value = entry_price * quantity
+    total_exit_value = exit_price * quantity
+     # Calculate the fees
+    fees = total_exit_value * COMMISSION
+
+    # Calculate the net exit value after fees
+    net_exit_value = total_exit_value - fees
+
+    # Calculate ROI
+    roi = ((net_exit_value - total_entry_value) / total_entry_value) * 100
+    return roi
+    # return ((exit_price - entry_price) / entry_price) * 100
+
+# FUTURES
+def order_future_create_order(side, symbol, quantity, positionSide, order_type):
+    try:
+        print("FUTURES sending order  SIDE {} QTD {} ".format( side, quantity))
+        # dualSidePosition='false', 
+        order = client.futures_create_order(symbol=symbol, 
+                                            side=side, 
+                                            positionSide=positionSide,  
+                                            type=order_type, 
+                                            quantity=quantity, 
+                                            recvWindow = 60000)
+        print(order)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+    return order
+  
+def order_future_cancel_all_open_order(symbol):
+    try:
+        # print("Cancel All open Orders / Closing All  {} ".format( symbol))
+        # cleardualSidePosition='false', 
+        order = client.futures_cancel_all_open_orders(symbol=symbol, 
+                                            timeInForce='GTC',  # GTC (Good 'Til Canceled)
+                                            recvWindow = 60000)
+        # print(order)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+    return order
+
+def order_future_cancel_REDUCE_only(side, symbol, quantity, positionSide, order_type):
+    try:
+        print("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
+        # dualSidePosition='false', 
+        order = client.futures_create_order(side='BUY', 
+                                            symbol=symbol,
+                                            quantity=quantity,
+                                            positionSide='BOTH',  
+                                            type='MARKET', 
+                                            reduceOnly=True, 
+                                            recvWindow = 60000)        
+        print(order)
+    except Exception as e:
+        print("an exception occured - {}".format(e))
+    return order
+
+def get_entry_price(symbol):
+    trades = client.futures_account_trades(symbol=symbol,
+                                           recvWindow = 60000)        
+    # print("My Trades: {} ".format(trades))
+    
+    # Sort trades by timestamp in descending order
+    sorted_trades = sorted(trades, key=lambda x: x['time'], reverse=True)
+    
+    # Find the first buy trade (entry trade)
+    for trade in sorted_trades:
+        if trade['side'] == 'BUY':
+            return float(trade['price'])
+
+    # If no buy trade found, return None
+    return None
+  
+def get_current_price_futures(symbol):
+    ticker = client.futures_symbol_ticker(symbol=symbol)
+    print("TICKER {}".format(ticker))
+    return float(ticker['price'])  
+
+def strategy(pair, qty, losses_perc, profit_perc, signal, ACTION_BUY, open_position=False, ):
   df = getminutedata(pair, Client.KLINE_INTERVAL_1MINUTE,'100')
   applytechnicals(df)
   inst = Signals(df, signal)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
-  # print(f'current Close is '+str(df.Close.iloc[-1]) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
-  # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(df.Close.iloc[-1]), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
+  # print(f'current Close is '+str(current_price) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
+  # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(current_price), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
   logger.info("MACD SPOT: {} RSI: {} Close {}   Buy MACD {} Sell MACD {}  Buy TaLib {} Sell TaLib {} Buy TA {} Sell TA {}".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]), str(df.Sell.iloc[-1]), str(df.BuyTaLib.iloc[-1]), str(df.SellTaLib.iloc[-1]), str(df.BuyTa.iloc[-1]), str(df.SellTa.iloc[-1])))
-  if df.Buy.iloc[-1]:
-    if not BLOCK_ORDER:
-      order = orderBuy(SIDE_BUY,
-                      pair,
-                      qty,
-                      ORDER_TYPE_MARKET)
-      logger.info(order)
-      buyprice = float(order['fills'][0]['price'])
-      amountQty = float(order['fills'][0]['qty'])
-      open_position = True
+  
+   # FUTURES CALULATE VOLUME ORDER
+  # Params
+  # buyVolume = round((QTY_BUY * ALLOCATION) / float(df.Close.iloc[-1]), 1)
+  volume = 0.005 #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  BTC-USDT "quantity":0.003   
+  # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(df.Close.iloc[-1]), 3) #  BTC-USDT "quantity":0.003   
+  # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  # CFX-USDT "quantity":410   
+  print("Volume Actual: {}".format(volume))
+  # print("BuyVolumelume: {}".format(buyVolume))
+    
+  # df.Sell.iloc[-1] = 1  
+  df.Sell.iloc[-1] = 1  
+  if df.Buy.iloc[-1] or df.Sell.iloc[-1]:
+    # Estimative
+    if df.Buy.iloc[-1]:
+      ACTION_BUY = True
       logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("BOUGHT PRICE:" + str(buyprice))
+      
+    if df.Sell.iloc[-1]:
+      ACTION_BUY = False
+      logger.info("Sell !!! Sell !!! Sell !!!")
+    
+    if not BLOCK_ORDER:
+      
+      # SPOT CREATE ORDER
+      # order = orderBuy(SIDE_BUY,
+      #                 pair,
+      #                 qty,
+      #                 ORDER_TYPE_MARKET)
+      # logger.info(order)
+      # entry_price = float(order['fills'][0]['price'])
+      # amountQtySpot = float(order['fills'][0]['qty'])
+      # open_position = True
+      # logger.info("Buy !!! Buy !!! Buy !!!") 
+      # logger.info("BOUGHT PRICE:" + str(entry_price))
+      open_position = True
+      
+      # FUTURES CREATE ORDER
+      orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
+      current_price = get_current_price_futures(TRADE_SYMBOL)
+
+      # Spot
+      # close = df.Close.iloc[-1]
+      
+      #Futures
+      close = float(current_price)
+      PROFIT_WHEN_BUY = round(float(close) * PROFIT_CALC, PRECISION_PROFIT_LOSS)  
+      LOSSES_WHEN_BUY = round(float(close) * LOSS_CALC, PRECISION_PROFIT_LOSS)  
+      PROFIT_WHEN_SELL = round(float(close) * LOSS_CALC, PRECISION_PROFIT_LOSS)  
+      LOSSES_WHEN_SELL = round(float(close) * PROFIT_CALC, PRECISION_PROFIT_LOSS)  
+      print("Close {} REDUCE_PROFIT_WHEN_BUY  value {}".format(str(close), str(PROFIT_WHEN_BUY)))
+      print("Close {} REDUCE_LOSSES_WHEN_BUY  value {}".format(str(close), str(LOSSES_WHEN_BUY)))
+      print("Close {} REDUCE_PROFIT_WHEN_SELL  value {}".format(str(close), str(PROFIT_WHEN_SELL)))
+      print("Close {} REDUCE_LOSSES_WHEN_SELL  value {}".format(str(close), str(LOSSES_WHEN_SELL)))
+
+      if ACTION_BUY:
+        orderFuture = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+      else:
+        orderFuture = order_future_create_order(SIDE_SELL, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+      print("Order FUTURE  {}".format(orderFuture))    
+      orderId = orderFuture['orderId']
+      clientOrderId = orderFuture['clientOrderId']
+      orderStatus = orderFuture['status']
+      origQty = orderFuture['origQty']
+      print("OrderId  {}  clientOrderId {} status {} origQty {}".format(orderId, clientOrderId, orderStatus, origQty))  
+      
+      entry_price = get_entry_price(TRADE_SYMBOL)
+      if entry_price:
+          print("Entry Price:", entry_price)
+      else:
+          print("No entry price found.")
+    
+      if ACTION_BUY:
+        logger.info("BOUGHT ENTRY PRICE:" + str(entry_price))
+        
+      if not ACTION_BUY:
+        logger.info("SELL ENTRY PRICE:" + str(entry_price))
+      
     else:
-      buyprice = float(df.Close.iloc[-1])
-      amountQty = 5
+      entry_price = float(df.Close.iloc[-1])
+      amountQtySpot = 5
       open_position = True
       logger.info("SIMULATED Buy !!! Buy !!! Buy !!!") 
-      logger.info("SIMULATED BOUGHT PRICE:" + str(buyprice))
+      logger.info("SIMULATED BOUGHT PRICE:" + str(entry_price))
        
     
   while open_position:
     time.sleep(0.5)
     df = getminutedata(pair,'1m','2')  # BE AWARE ABOUT THIS '2'  VALUE
-    # Calculate PNL and ROI
-    pnl, roi = calculate_open_position_pnl_roi_spot(df.Close.iloc[-1], buyprice, amountQty)
-    logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {} PNL: {} USDT ROI: {}%".format (pair, str(buyprice), amountQty, str(round(buyprice * profit_perc, DECIMAL_CALC)), str(round(buyprice * losses_perc, DECIMAL_CALC)), str(df.Close.iloc[-1]), pnl, roi ))
-    print(f'PNL: {pnl} USDT')
-    print(f'ROI: {roi}%')
+    ##  SPOT ->>  df.Close.iloc[-1]
+    current_price = get_current_price_futures(TRADE_SYMBOL)
+    # Calculate PNL and ROI Spot
+    # pnl, roi = calculate_open_position_pnl_roi_spot(df.Close.iloc[-1], entry_price, amountQtySpot)
+    
+    # Calculate PNL and ROI Futures
+    # pnl, roi = calculate_open_position_pnl_roi_future(df.Close.iloc[-1], entry_price, volume, ACTION_BUY)
+    
+    pnl = calculate_pnl_futures(entry_price, current_price, volume, ACTION_BUY)
+    # roi = calculate_roi_futures(entry_price, df.Close.iloc[-1], volume, ACTION_BUY)
+    roi = calculate_roi_with_imr(entry_price, current_price, volume, ACTION_BUY, SYMBOL_LEVERAGE)
+    ## With SPOT
+    # logger.info("MACD-BOT SPOT: {} Buy Price {} Qty {:f} Volume {} Target Profit {}  Stop Loss {} Current Price {} PNL: {} USDT ROI: {}%".format (pair, str(entry_price), amountQtySpot, str(volume), str(round(entry_price * profit_perc, DECIMAL_CALC)), str(round(entry_price * losses_perc, DECIMAL_CALC)), str(df.Close.iloc[-1]), pnl, roi ))
+    
+    ## Only Futures 
+    logger.info("MACD-BOT SPOT: {} Buy Price {} Volume {} Target Profit {}  Stop Loss {} Current Price {} PNL: {} USDT ROI: {}%".format (pair, str(entry_price), str(volume), str(round(entry_price * profit_perc, DECIMAL_CALC)), str(round(entry_price * losses_perc, DECIMAL_CALC)), str(current_price), pnl, roi ))
+    # print(f'PNL: {pnl} USDT')
+    # print(f'ROI: {roi}%')
+    
+    if pnl is not None:
+      print("Profit/Loss: ${:.2f} USDT".format(pnl))
+    if roi is not None:
+      print("Return on Investment (ROI): {:.2f}%".format(roi))
+    
     # Stop Loss
-    if float(df.Close.iloc[-1]) <= float(round(buyprice * losses_perc, DECIMAL_CALC)) or float(df.Close.iloc[-1]) >= float(round(profit_perc * buyprice, DECIMAL_CALC)):
-      soldDesc = "Sell !!! Sell !!! Sell !!! Stop Lossed" if float(df.Close.iloc[-1]) <= buyprice else "Sell !!! Sell !!! Sell !!! PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
+    if (float(roi) > 0.15) or float(current_price) <= float(round(entry_price * losses_perc, DECIMAL_CALC)) or float(current_price) >= float(round(profit_perc * entry_price, DECIMAL_CALC)):
+      soldDesc = "Sell !!! Sell !!! Sell !!! Stop Lossed" if float(current_price) <= entry_price else "Sell !!! Sell !!! Sell !!! PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
       if not BLOCK_ORDER:
-        orderSell(SIDE_SELL,
-                        pair,
-                        int(math.trunc(amountQty)),
-                        ORDER_TYPE_MARKET,soldDesc)
-        logger.info(order)
+        # SPOT CLOSE ORDER
+        # orderSpot = orderSell(SIDE_SELL,
+        #                 pair,
+        #                 int(math.trunc(amountQtySpot)),
+        #                 ORDER_TYPE_MARKET,soldDesc)
+        # logger.info(orderSpot)
         open_position = False
+        
+        # FUTURES CLOSE BY REDUCING 100% THE ORDER
+        # if ACTION_BUY and (PROFIT_WHEN_BUY <= float(close) or LOSSES_WHEN_BUY >= float(close)): # TakeProfit
+        if ACTION_BUY: # TakeProfit
+              orderFuture = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+              orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
+              # ACTION_BUY = not ACTION_BUY # INVERSE OF TRADING
+              in_position = False
+        # elif not ACTION_BUY and (PROFIT_WHEN_SELL >= float(close) or LOSSES_WHEN_SELL <= float(close)):  # TakeProfit 
+        elif not ACTION_BUY:  # TakeProfit 
+            orderFuture = order_future_cancel_REDUCE_only('BUY', TRADE_SYMBOL, volume,  'BOTH', 'MARKET')
+            orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
+            # ACTION_BUY = not ACTION_BUY # INVERSE OF TRADING
+            in_position = False
+      
+        
       else:
          logger.info("SIMULATED Sell !!! Sell !!! Sell !!!" + soldDesc)
       break
@@ -218,7 +490,7 @@ while True:
   # strategy('ALTUSDT', 10, 1.055) # Runs One Time
   # strategy('ALTUSDT', 10, 1.005) # Runs One Time
   # strategy('OMUSDT', 10, 1.005) # Runs One Time
-  strategy(TRADE_SYMBOL, QTY_BUY, LOSSES, PROFIT, SIGNAL) # Runs One Time
+  strategy(TRADE_SYMBOL, QTY_BUY, LOSSES, PROFIT, SIGNAL, ACTION_BUY) # Runs One Time
   time.sleep(0.5) 
   
   

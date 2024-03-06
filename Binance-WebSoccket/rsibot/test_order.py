@@ -276,6 +276,11 @@ def on_message(ws, message):
     LOSS_CALC = 0.99813     # BTCUSDT
     # PROFIT_CALC = 1.0002   # CFXUSDT
     # LOSS_CALC = 0.9998     # CFXUSDT
+    
+    # trades = client.futures_account_trades(symbol=TRADE_SYMBOL,
+    #                                        recvWindow = 60000)
+    
+    # print(trades)      
        
     
     # order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, 449, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)

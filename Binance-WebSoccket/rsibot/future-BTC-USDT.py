@@ -221,7 +221,7 @@ def order_future_cancel_all_open_order(symbol):
         print("an exception occured - {}".format(e))
     return order
 
-def order_future_cancel_REDUDE_only(side, symbol, quantity, positionSide, order_type):
+def order_future_cancel_REDUCE_only(side, symbol, quantity, positionSide, order_type):
     try:
         print("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
         # dualSidePosition='false', 
@@ -278,20 +278,20 @@ def on_message(ws, message):
     # LOSS_CALC = 0.9998     # CFXUSDT
        
     
-    # order = order_future_cancel_REDUDE_only(SIDE_SELL, TRADE_SYMBOL, close, 449, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
+    # order = order_future_cancel_REDUCE_only(SIDE_SELL, TRADE_SYMBOL, close, 449, 'BOTH', FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET)
     # {"symbol":"CFXUSDT","type":"MARKET","side":"SELL","positionSide":"BOTH","quantity":783,"reduceOnly":true,"placeType":"order-form"}
-    # order = order_future_cancel_REDUDE_only(SIDE_BUY, TRADE_SYMBOL, 450, 'BOTH', 'MARKET')  # SHOULD WORK
+    # order = order_future_cancel_REDUCE_only(SIDE_BUY, TRADE_SYMBOL, 450, 'BOTH', 'MARKET')  # SHOULD WORK
     
     # Watcher Dog / Cancel / Reduce Position
     if in_position:
         try:
             if ACTION_BUY and (PROFIT_WHEN_BUY <= float(close) or LOSSES_WHEN_BUY >= float(close)): # TakeProfit
-                order = order_future_cancel_REDUDE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                order = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
                 order = order_future_cancel_all_open_order(TRADE_SYMBOL)
                 # ACTION_BUY = not ACTION_BUY # INVERSE OF TRADING
                 in_position = False
             elif not ACTION_BUY and (PROFIT_WHEN_SELL >= float(close) or LOSSES_WHEN_SELL <= float(close)):  # TakeProfit 
-                order = order_future_cancel_REDUDE_only('BUY', TRADE_SYMBOL, volume,  'BOTH', 'MARKET')
+                order = order_future_cancel_REDUCE_only('BUY', TRADE_SYMBOL, volume,  'BOTH', 'MARKET')
                 order = order_future_cancel_all_open_order(TRADE_SYMBOL)
                 # ACTION_BUY = not ACTION_BUY # INVERSE OF TRADING
                 in_position = False

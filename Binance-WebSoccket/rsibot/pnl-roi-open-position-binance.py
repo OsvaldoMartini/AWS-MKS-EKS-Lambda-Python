@@ -9,10 +9,15 @@ import time
 
 client = Client(config.API_KEY, config.API_SECRET)
 
-# Function to fetch current market price
+# SPOT Function to fetch current market price
 def get_current_price(symbol):
     ticker = client.get_ticker(symbol=symbol)
     return float(ticker['lastPrice'])
+
+# FUTURES Function to fetch current market price
+def get_current_price_futures(symbol):
+    print(client.futures_symbol_ticker(symbol=symbol)) 
+    return float(client.futures_symbol_ticker(symbol=symbol)['price'])
 
 # Function to calculate PNL and ROI for an open position
 def calculate_open_position_pnl_roi(symbol, entry_price, quantity, current_price=False):
@@ -44,6 +49,8 @@ targetPrice = 43600
 while True:
     pnlLong, roiLong, pnlShort = calculate_open_position_pnl_roi(symbol, entry_price, quantity, targetPrice)
 
+
+    print(f'Current Market Price Futures: {get_current_price_futures(symbol)} USDT')
     print(f'Current Market Price: {get_current_price(symbol)} USDT')
     print(f'PNL Long: {pnlLong} USDT')
     print(f'ROI Long: {roiLong}%')
