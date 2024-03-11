@@ -152,7 +152,7 @@ class Signals:
 # inst.decide()
 
 # df[df.Buy == 1]
-# print(df)
+# logger.info(df)
 
 
 def orderBuy(side, symbol, quoteOrderQty, order_type):
@@ -234,7 +234,7 @@ def calculate_roi_with_imr(entry_price, exit_price, quantity, action_buy, imr=1)
     # Calculate the profit or loss
     pnl = total_exit_value - total_entry_value
     
-    print("FUTURES PNL {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(pnl, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
+    logger.info("FUTURES PNL {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(pnl, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
 
     # Calculate the ROI considering IMR
     roi = (pnl / (total_entry_value / imr)) * 100
@@ -254,14 +254,14 @@ def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, imr=1):
     # total_entry_value = entry_price * quantity
     # total_exit_value = exit_price * quantity
     
-    # logging.info("entry_price {}".format(entry_price)) 
-    # logging.info("exit_price {}".format(exit_price)) 
-    # logging.info("quantity {}".format(quantity)) 
-    # logging.info("imr {}".format(imr)) 
+    # logger.info("entry_price {}".format(entry_price)) 
+    # logger.info("exit_price {}".format(exit_price)) 
+    # logger.info("quantity {}".format(quantity)) 
+    # logger.info("imr {}".format(imr)) 
     
     roi = (((exit_price - entry_price) * imr ) / entry_price)
 
-    # logging.info("FUTURES ROI {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(roi, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
+    # logger.info("FUTURES ROI {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(roi, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
 
     # Calculate the profit or loss
     # pnl = total_exit_value - total_entry_value
@@ -299,7 +299,7 @@ def calculate_roi_futures(entry_price, exit_price, quantity, action_buy):
 # FUTURES
 def order_future_create_order(side, symbol, quantity, positionSide, order_type):
     try:
-        print("FUTURES sending order  SIDE {} QTD {} ".format( side, quantity))
+        logger.info("FUTURES sending order  SIDE {} QTD {} ".format( side, quantity))
         # dualSidePosition='false', 
         order = client.futures_create_order(symbol=symbol, 
                                             side=side, 
@@ -307,26 +307,26 @@ def order_future_create_order(side, symbol, quantity, positionSide, order_type):
                                             type=order_type, 
                                             quantity=quantity, 
                                             recvWindow = 60000)
-        print(order)
+        logger.info(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        logger.info("an exception occured - {}".format(e))
     return order
   
 def order_future_cancel_all_open_order(symbol):
     try:
-        # print("Cancel All open Orders / Closing All  {} ".format( symbol))
+        # logger.info("Cancel All open Orders / Closing All  {} ".format( symbol))
         # cleardualSidePosition='false', 
         order = client.futures_cancel_all_open_orders(symbol=symbol, 
                                             timeInForce='GTC',  # GTC (Good 'Til Canceled)
                                             recvWindow = 60000)
-        # print(order)
+        # logger.info(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        logger.info("an exception occured - {}".format(e))
     return order
 
 def order_future_cancel_REDUCE_only(side, symbol, quantity, positionSide, order_type):
     try:
-        print("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
+        logger.info("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
         # dualSidePosition='false', 
         order = client.futures_create_order(side='BUY', 
                                             symbol=symbol,
@@ -335,15 +335,15 @@ def order_future_cancel_REDUCE_only(side, symbol, quantity, positionSide, order_
                                             type='MARKET', 
                                             reduceOnly=True, 
                                             recvWindow = 60000)        
-        print(order)
+        logger.info(order)
     except Exception as e:
-        print("an exception occured - {}".format(e))
+        logger.info("an exception occured - {}".format(e))
     return order
 
 def get_entry_price(symbol):
     trades = client.futures_account_trades(symbol=symbol,
                                            recvWindow = 60000)        
-    # print("My Trades: {} ".format(trades))
+    # logger.info("My Trades: {} ".format(trades))
     
     # Sort trades by timestamp in descending order
     sorted_trades = sorted(trades, key=lambda x: x['time'], reverse=True)
@@ -358,7 +358,7 @@ def get_entry_price(symbol):
   
 def get_current_price_futures(symbol):
     ticker = client.futures_symbol_ticker(symbol=symbol)
-    print("TICKER {}".format(ticker))
+    logger.info("TICKER {}".format(ticker))
     return float(ticker['price'])  
 
 def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
@@ -366,7 +366,7 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
   applytechnicals(df)
   inst = Signals(df, signal)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
-  # print(f'current Close is '+str(current_price) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
+  # logger.info(f'current Close is '+str(current_price) + ' RSI: ' + str(round(df.rsi.iloc[-1], 2)) + ' Buy MACD: ' + str(df.Buy.iloc[-1]))
   # logger.info("current Close is {}  RSI: {}  By MACD: {} ".format(str(current_price), str(round(df.rsi.iloc[-1], 2)), str(df.Buy.iloc[-1])))
   logger.info("1st SIGNALS MACD SPOT/FUTURE: {} RSI: {} Close {}   Buy MACD {} Sell MACD {}".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.Buy.iloc[-1]), str(df.Sell.iloc[-1])))
   logger.info("2st SIGNALS MACD SPOT/FUTURE: {} RSI: {} Close {}   Buy TaLib {} Sell TaLib {}".format (pair, str(round(df.rsi.iloc[-1], 2)), str(df.Close.iloc[-1]), str(df.BuyTaLib.iloc[-1]), str(df.SellTaLib.iloc[-1])))
@@ -378,20 +378,15 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
   volume = qty #round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  BTC-USDT "quantity":0.003   
   # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(df.Close.iloc[-1]), 3) #  BTC-USDT "quantity":0.003   
   # volume = round((QTY_BUY * SYMBOL_LEVERAGE) / float(close), 1)  # CFX-USDT "quantity":410   
-  print("Volume Actual: {}".format(volume))
-  # print("BuyVolumelume: {}".format(buyVolume))
+  logger.info("Volume Actual: {}".format(volume))
+  # logger.info("BuyVolumelume: {}".format(buyVolume))
     
-  df.Sell.iloc[-1] = 1  
-  # df.Buy.iloc[-1] = 1  
+  # df.Sell.iloc[-1] = 1  
+  df.Buy.iloc[-1] = 1  
   if df.Buy.iloc[-1] or df.Sell.iloc[-1]:
     # Estimative
     if df.Buy.iloc[-1]:
       ACTION_BUY = True
-      logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("Buy !!! Buy !!! Buy !!!") 
-      logger.info("Buy !!! Buy !!! Buy !!!") 
       logger.info("Buy !!! Buy !!! Buy !!!") 
       logger.info("Buy !!! Buy !!! Buy !!!") 
       logger.info("Buy !!! Buy !!! Buy !!!") 
@@ -401,13 +396,7 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
       logger.info("Sell !!! Sell !!! Sell !!!")
       logger.info("Sell !!! Sell !!! Sell !!!")
       logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-      logger.info("Sell !!! Sell !!! Sell !!!")
-    
+      
     if not BLOCK_ORDER:
       
       open_position = True
@@ -431,18 +420,18 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
       else:
         orderFuture = order_future_create_order(SIDE_SELL, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
         
-      print("Order FUTURE  {}".format(orderFuture))    
+      logger.info("Order FUTURE  {}".format(orderFuture))    
       orderId = orderFuture['orderId']
       clientOrderId = orderFuture['clientOrderId']
       orderStatus = orderFuture['status']
       origQty = orderFuture['origQty']
-      print("OrderId  {}  clientOrderId {} status {} origQty {}".format(orderId, clientOrderId, orderStatus, origQty))  
+      logger.info("OrderId  {}  clientOrderId {} status {} origQty {}".format(orderId, clientOrderId, orderStatus, origQty))  
       
       entry_price = get_entry_price(TRADE_SYMBOL)
       if entry_price:
-          print("Entry Price:", entry_price)
+          logger.info("Entry Price:", entry_price)
       else:
-          print("No entry price found.")
+          logger.info("No entry price found.")
     
       if ACTION_BUY:
         logger.info("BOUGHT ENTRY PRICE:" + str(entry_price))
@@ -452,34 +441,28 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
       
     else:
       entry_price = float(df.Close.iloc[-1])
-      logging.info("SPOT Entry Price {}".format(str(entry_price)))
+      logger.info("SPOT Entry Price {}".format(str(entry_price)))
     
       open_position = True
       
       futures_entry_price = get_current_price_futures(TRADE_SYMBOL)
-      logging.info("FUTURE Entry Price {}".format(str(futures_entry_price)))
+      logger.info("FUTURE Entry Price {}".format(str(futures_entry_price)))
     
       # entry_price = get_entry_price(TRADE_SYMBOL)
       # if entry_price:
-      #     logging.info("Entry Price:", entry_price)
+      #     logger.info("Entry Price:", entry_price)
       # else:
-      #     logging.info("No entry price found.")
+      #     logger.info("No entry price found.")
     
       # Spot
       # close = df.Close.iloc[-1]
       
       if ACTION_BUY:
         logger.info("SIMULATED BOUGHT PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED BOUGHT PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED BOUGHT PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED BOUGHT PRICE:" + str(futures_entry_price))
         
       if not ACTION_BUY:
         logger.info("SIMULATED SELL PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED SELL PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED SELL PRICE:" + str(futures_entry_price))
-        logger.info("SIMULATED SELL PRICE:" + str(futures_entry_price))
-      
+        
           #Futures Prices Profit & Loss When Buy
       PROFIT_WHEN_BUY = round(float(futures_entry_price) * BUY_PROFIT_CALC, PRECISION_PROFIT_LOSS)  
       LOSSES_WHEN_BUY = round(float(futures_entry_price) * BUY_LOSS_CALC, PRECISION_PROFIT_LOSS)  
@@ -500,29 +483,26 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
       pnlLossSell = calculate_pnl_futures(futures_entry_price, LOSSES_WHEN_SELL, volume, False)
       roiLossSell = mine_calculate_roi_with_imr(LOSSES_WHEN_SELL, futures_entry_price, volume, SYMBOL_LEVERAGE)
       
-      logging.info("----------------------------------            CALCULUS  TOTAL  PROFIT AND LOSS            ----------------------------------|")
-      logging.info("                                                                                                                            |")
-      logging.info("FUTURE Volume {} --->  Quantity USD: {}".format(volume, round(futures_entry_price * volume, 2)))
-      logging.info("                                                                                                                            |")
-      logging.info("--------------------------------------------------   BUY    BUY    BUY    --------------------------------------------------|")
-      logging.info("                                                                                                                            |")
-      logging.info("BUY  ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(PROFIT_WHEN_BUY), round(roiProfitBuy, 2), round(pnlProfitBuy, 2)))
-      logging.info("BUY  ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(LOSSES_WHEN_BUY), round(roiLossBuy, 2), round(pnlLossBuy, 2)))
-      logging.info("                                                                                                                            |")
-      logging.info("--------------------------------------------------   SELL   SELL   SELL   --------------------------------------------------")
-      logging.info("                                                                                                                            |")
-      logging.info("SELL ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(PROFIT_WHEN_SELL), round(roiProfitSell, 2), round(pnlProfitSell, 2)))
-      logging.info("SELL ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(LOSSES_WHEN_SELL), round(roiLossSell, 2), round(pnlLossSell, 2)))
-      logging.info("                                                                                                                            |")
-      logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+      logger.info("----------------------------------            CALCULUS  ENTRY PRICE                       ----------------------------------|")
+      logger.info("                                                                                                                            |")
+      logger.info("FUTURE Volume {} --->  Quantity USD: {}".format(volume, round(futures_entry_price * volume, 2)))
+      logger.info("----------------------------------------------------------------------------------------------------------------------------|")
+      logger.info("                                                                                                                            |")
+      logger.info("BUY  ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(PROFIT_WHEN_BUY), round(roiProfitBuy, 2), round(pnlProfitBuy, 2)))
+      logger.info("BUY  ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(LOSSES_WHEN_BUY), round(roiLossBuy, 2), round(pnlLossBuy, 2)))
+      logger.info("                                                                                                                            |")
+      logger.info("SELL ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(PROFIT_WHEN_SELL), round(roiProfitSell, 2), round(pnlProfitSell, 2)))
+      logger.info("SELL ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(str(futures_entry_price), str(LOSSES_WHEN_SELL), round(roiLossSell, 2), round(pnlLossSell, 2)))
+      logger.info("                                                                                                                            |")
+      logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
      
-      logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
-      logging.info("----------------------------------            TOTAL  PROFIT AND LOSS                      ----------------------------------|")
-      logging.info("                                                                                                                            |")
-      logging.info("PROFITS BUY  {} LOSSES BUY  {}   TOTAL {}".format(round(TOTALS['TOTAL_PROFITS_BUY'], 2), round(TOTALS['TOTAL_LOSSES_BUY'], 2), round(TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']), 2)))
-      logging.info("PROFITS SELL {} LOSSES SELL {}   TOTAL {}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2), round(TOTALS['TOTAL_LOSSES_SELL'], 2), round(TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']), 2)))
-      logging.info("                                                                                                                            |")
-      logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+      logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+      logger.info("----------------------------------            TOTAL  PROFIT AND LOSS                      ----------------------------------|")
+      logger.info("                                                                                                                            |")
+      logger.info("PROFITS BUY  {} LOSSES BUY  {}   TOTAL {}".format(round(TOTALS['TOTAL_PROFITS_BUY'], 2), round(TOTALS['TOTAL_LOSSES_BUY'], 2), round(TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']), 2)))
+      logger.info("PROFITS SELL {} LOSSES SELL {}   TOTAL {}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2), round(TOTALS['TOTAL_LOSSES_SELL'], 2), round(TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']), 2)))
+      logger.info("                                                                                                                            |")
+      logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
      
     
   while open_position:
@@ -551,25 +531,25 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
     if not ACTION_BUY:
       logger.info("MACD-BOT FUTURE: {} Sell Entry Price {} Volume {} Target Profit {}  Stop Loss {} Current Price {} PNL: {} USDT ROI: {}%".format (pair, str(futures_entry_price), str(round(volume * futures_entry_price, 2)), str(round(PROFIT_WHEN_SELL, DECIMAL_CALC)), str(round(LOSSES_WHEN_SELL, DECIMAL_CALC)), str(futures_current_price), round(pnlProfitSell, 2), round(roiProfitSell, 2)  ))
     
-    # print(f'PNL: {pnl} USDT')
-    # print(f'ROI: {roi}%')
+    # logger.info(f'PNL: {pnl} USDT')
+    # logger.info(f'ROI: {roi}%')
     
     if ACTION_BUY and roiProfitBuy is not None:
-      print("Return on Investment (ROI): {:.2f}%".format(roiProfitBuy))
+      logger.info("Return on Investment (ROI): {:.2f}%".format(roiProfitBuy))
     if ACTION_BUY and pnlProfitBuy is not None:
-      print("Profit/Loss: ${:.2f} USDT".format(pnlProfitBuy))
+      logger.info("Profit/Loss: ${:.2f} USDT".format(pnlProfitBuy))
     
     if not ACTION_BUY and roiProfitSell is not None:
-      print("Return on Investment (ROI): {:.2f}%".format(roiProfitSell))
-    if ACTION_BUY and pnlProfitSell is not None:
-      print("Profit/Loss: ${:.2f} USDT".format(pnlProfitSell))
+      logger.info("Return on Investment (ROI): {:.2f}%".format(roiProfitSell))
+    if not ACTION_BUY and pnlProfitSell is not None:
+      logger.info("Profit/Loss: ${:.2f} USDT".format(pnlProfitSell))
     
     if ACTION_BUY:
       # Stop Losses or Take Profits
-      if (float(roiProfitSell) < -1.27) or (float(roiProfitBuy) > 0.45) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)):
+      if (float(roiProfitBuy) < float(-0.45)) or (float(roiProfitBuy) > float(2.0)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)):
         # FUTURE
         # soldDesc = "STOP LOSSES CLOSE ORDER!!! STOP LOSSES!!!" if float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) else "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {}  Profits At: {} ROI: {}% PNL: {}".format(float(futures_current_price), float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)), round(roiProfitBuy, 2), round(pnlProfitBuy, 2))  
-        if float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)): 
+        if (float(roiProfitBuy) < float(-0.45)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)): 
           soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {}".format(float(futures_current_price))
           soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {} ROI: {}% PNL: {}".format(float(futures_current_price), float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)), round(roiProfitBuy, 2), round(pnlProfitBuy, 2)) 
         else:
@@ -582,37 +562,37 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
           orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
           open_position = False
           
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
-          logging.info("                                     TOTAL  PROFIT AND LOSS                                ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("                                     TOTAL  PROFIT AND LOSS                                ----------------------------------|")
           logger.info(soldDesc1)
           logger.info(soldDesc2)
-          logging.info("                                                                                           ----------------------------------|")
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("                                                                                           ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
           
           if float(pnlProfitBuy) >= 0:
             TOTALS['TOTAL_PROFITS_BUY'] += pnlProfitBuy
           else:
-            TOTALS['TOTAL_LOSSES_BUY'] -= pnlProfitBuy
+            TOTALS['TOTAL_LOSSES_BUY'] -= abs(pnlProfitBuy)
         
         else:
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
-          logging.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
           logger.info(soldDesc1)
           logger.info(soldDesc2)
-          logging.info("SIMULATED                                                                                 ----------------------------------|")
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("SIMULATED                                                                                 ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
           
           if float(pnlProfitBuy) >= 0:
             TOTALS['TOTAL_PROFITS_BUY'] += pnlProfitBuy
           else:
-            TOTALS['TOTAL_LOSSES_BUY'] -= pnlProfitBuy
+            TOTALS['TOTAL_LOSSES_BUY'] -= abs(pnlProfitBuy)
       
         break
     if not ACTION_BUY:
       # Stop Losses or Take Profits
-      if (float(roiProfitSell) < -1.27) or (float(roiProfitSell) > 0.45) or float(futures_current_price) >= float(round(LOSSES_WHEN_SELL, DECIMAL_CALC)) or float(futures_current_price) <= float(round(PROFIT_WHEN_SELL, DECIMAL_CALC)):
+      if (float(roiProfitSell) < float(-0.45)) or (float(roiProfitSell) > 2.0) or float(futures_current_price) >= float(round(LOSSES_WHEN_SELL, DECIMAL_CALC)) or float(futures_current_price) <= float(round(PROFIT_WHEN_SELL, DECIMAL_CALC)):
         # FUTURE
-        if float(futures_current_price) >= float(round(LOSSES_WHEN_SELL, DECIMAL_CALC)):
+        if (float(roiProfitSell) < float(-0.45)) or float(futures_current_price) >= float(round(LOSSES_WHEN_SELL, DECIMAL_CALC)):
           soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {}".format(float(futures_current_price))
           soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {} ROI: {}% PNL: {}".format(float(round(PROFIT_WHEN_SELL, DECIMAL_CALC)), round(roiProfitSell, 2), round(pnlProfitSell, 2)) 
         else:
@@ -624,30 +604,30 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
           orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
           open_position = False        
 
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
-          logging.info("                                     TOTAL  PROFIT AND LOSS                                ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("                                     TOTAL  PROFIT AND LOSS                                ----------------------------------|")
           logger.info(soldDesc1)
           logger.info(soldDesc2)
-          logging.info("                                                                                           ----------------------------------|")
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("                                                                                           ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
 
           if float(pnlProfitSell) >= 0:
             TOTALS['TOTAL_PROFITS_SELL'] += round(pnlProfitSell, 2)
           else:
-            TOTALS['TOTAL_LOSSES_SELL'] -= round(pnlProfitSell, 2)
+            TOTALS['TOTAL_LOSSES_SELL'] -= abs(round(pnlProfitSell, 2))
 
         else:
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
-          logging.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
           logger.info(soldDesc1)
           logger.info(soldDesc2)
-          logging.info("SIMULATED                                                                                 ----------------------------------|")
-          logging.info("----------------------------------------------------------------------------------------------------------------------------|")    
+          logger.info("SIMULATED                                                                                 ----------------------------------|")
+          logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
 
           if float(pnlProfitSell) >= 0:
             TOTALS['TOTAL_PROFITS_SELL'] += round(pnlProfitSell, 2)
           else:
-            TOTALS['TOTAL_LOSSES_SELL'] -= round(pnlProfitSell, 2)
+            TOTALS['TOTAL_LOSSES_SELL'] -= abs(round(pnlProfitSell, 2))
           
         break
   
