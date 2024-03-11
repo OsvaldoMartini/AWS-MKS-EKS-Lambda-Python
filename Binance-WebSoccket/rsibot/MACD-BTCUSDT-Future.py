@@ -382,7 +382,7 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
   # logger.info("BuyVolumelume: {}".format(buyVolume))
     
   # df.Sell.iloc[-1] = 1  
-  df.Buy.iloc[-1] = 1  
+  # df.Buy.iloc[-1] = 1  
   if df.Buy.iloc[-1] or df.Sell.iloc[-1]:
     # Estimative
     if df.Buy.iloc[-1]:
