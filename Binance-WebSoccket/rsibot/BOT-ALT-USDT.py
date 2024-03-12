@@ -49,6 +49,17 @@ from datetime import datetime, timezone, timedelta
 # balance = 78.44214068
 # balance = 78.51556829
 # balance = 78.10052908
+# balance = 60.30221175
+# balance = 60.26690514
+# balance = 60.15021606
+# balance = 60.08925408
+# balance = 62.11620258
+# balance = 62.11620258
+# balance = 61.63380193
+# balance = 56.40977667
+# balance = 56.90652933
+# balance = 56.41419003
+# balance = 56.18852165
 
 
 
@@ -76,15 +87,17 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
-PROFIT = 1.0055
+PROFIT_SELL = 1.0006
+LOSS_SELL = 0.9995
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
-RSI_OVERSOLD = 25
+RSI_OVERSOLD = 40
 TRADE_SYMBOL = 'ALTUSDT'
 QTY_BUY = 20 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 0.33455
 ByPass = True
+BlockOrder = True
 
 logger = logging.getLogger()
 loggin_setup("./logs/" + TRADE_SYMBOL)
@@ -111,6 +124,7 @@ def order(side, symbol, quoteOrderQty, order_type):
     try:
         logger.info("sending order  SIDE {} QTY {} ".format( side, quoteOrderQty ))
         order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
+        logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
     return order
@@ -119,6 +133,7 @@ def orderSell(side, symbol, quantity, order_type, soldDesc):
     try:
         logger.info("sending order  SIDE {} QTY {} SOLD MOTIVE: {}".format(side, quantity , soldDesc))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
+        logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
         order = False
@@ -136,7 +151,7 @@ def on_close(ws):
     logger.info('closed connection')
 
 def on_message(ws, message):
-    global closes, in_position, buyprice, amountQty
+    global closes, in_position, buyprice, amountQty, volume
     
     # print('received message')
     json_message = json.loads(message)
@@ -168,25 +183,33 @@ def on_message(ws, message):
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
-                logger.info("RSI: {}  current Close is {}  {}".format (round(last_rsi, 2),  close, buyPassWhen))
+                logger.info("current Close is {} BY PASS WHEN {}    RSI: {}".format (close, buyPassWhen, round(last_rsi, 2)))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                logger.info("SPOT: {} RSI: {}  Buy Price {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  ".format (TRADE_SYMBOL, round(last_rsi, 2), str(buyprice), amountQty, str(buyprice * PROFIT), str(buyprice * 0.995), close ))
-                if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
+                logger.info("SPOT: {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, str(buyprice), volume, amountQty, str(buyprice * PROFIT_SELL), str(buyprice * 0.995), close, round(last_rsi, 2)))
+                if float(close) <= buyprice * LOSS_SELL or float(close) >= PROFIT_SELL * buyprice:
                     soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
-                    order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                    in_position = False        
-                    logger.info(order_succeeded)
+                    if not BlockOrder:
+                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
+                        in_position = False        
+                        logger.info(order_succeeded)
+                    else:
+                        logger.info("SIMULATED" + soldDesc)
+                        in_position = False                             
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT * buyprice))
-                     if float(close) <= buyprice * 0.995 or float(close) >= PROFIT * buyprice:
-                        soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
-                        logger.info("Overbought! Sell! Sell! Sell!")
-                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                        logger.info(order_succeeded)
+                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
+                     if float(close) <= buyprice * 0.995 or float(close) >= PROFIT_SELL * buyprice:
+                        soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
                         in_position = False
+                        if not BlockOrder:  
+                            logger.info("Overbought! Sell! Sell! Sell!")
+                            order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
+                            logger.info(order_succeeded)
+                        else:
+                            logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
+                              
                 else:
                     logger.info("It is overbought, but we don't own any. Nothing to do.")
             
@@ -197,13 +220,22 @@ def on_message(ws, message):
                     logger.info("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
                     if float(close) <= float(ONLY_BY_WHEN) or ByPass:
-                        order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
-                        if order_succeeded:
-                            logger.info(order)
-                            buyprice = float(order_succeeded['fills'][0]['price'])
-                            amountQty = float(order_succeeded['fills'][0]['qty'])
-                            in_position = True
-                            logger.info("BOUGHT PRICE:" + str(buyprice)) 
+                        if not BlockOrder:
+                            order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
+                            if order_succeeded:
+                                logger.info(order)
+                                buyprice = float(order_succeeded['fills'][0]['price'])
+                                amountQty = float(order_succeeded['fills'][0]['qty'])
+                                in_position = True
+                                logger.info("BOUGHT PRICE:" + str(buyprice))
+                        else:
+                           logger.info("SIMULATED BOUGHT PRICE:" + str(close))
+                           amountQty = QTY_BUY
+                           buyprice = float(close)
+                           volume = round(float(close) * float(QTY_BUY), 2)
+                           in_position = True
+                                
+                                     
                 
 ws = websocket.WebSocketApp(SOCKET_SPOT, on_open=on_open, on_close=on_close, on_message=on_message)
 ws.run_forever()
