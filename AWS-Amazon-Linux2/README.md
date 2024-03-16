@@ -248,6 +248,28 @@ sudo ./autogen.sh --enable-opencl
 ```
 
 ## NVIDIA  Detect
+
+## Official  Debian
+[NVIDIA Official](https://wiki.debian.org/NvidiaGraphicsDrivers)
+
+```bash
+sudo apt install linux-headers-amd64 
+
+```
+1 ) Add "contrib", "non-free" and "non-free-firmware" components to /etc/apt/sources.list, for example:
+```bash
+# Debian Sid
+deb http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware
+
+```
+2 ) Update the list of available packages, then we can install the nvidia-driver package, plus the necessary firmware:
+```bash
+sudo apt update
+
+sudo apt install nvidia-driver firmware-misc-nonfree
+
+```
+
 [INSTALL DRIVERS](https://unix.stackexchange.com/questions/320384/how-to-install-nvidia-driver-on-debian-and-switch-between-drivers)
 
 [NVIDIA](https://linuxconfig.org/how-to-install-nvidia-driver-on-debian-12-bookworm-linux)
@@ -422,7 +444,7 @@ ls -l demo*
 sudo apt install gnome
 ```
 
-## NVIDIA or Cideo Vard Versionadn Model and Name
+## NVIDIA or video card Versionadn Model and Name
 ```bash
 ubuntu-drivers devices
 
