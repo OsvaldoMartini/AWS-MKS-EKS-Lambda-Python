@@ -4,6 +4,11 @@ import websocket
 # socket='wss://stream.binance.com:9443/ws'
 socket='wss://stream.binance.com:9443/ws/bonkusdt@depth10@100ms'
 
+TOTALS = {}
+TOTALS['BIDS'] = 0 
+TOTALS['ASKS']= 0
+
+
 def on_open(self):
     print("opened")
     subscribe_message = {
@@ -18,15 +23,17 @@ def on_open(self):
     ws.send(json.dumps(subscribe_message))
 
 def on_message(self, message):
-    print("received a message")
+    # print("received a message")
 
     ###### depths of bid/ask ######
     d = json.loads(message)
     for k, v in d.items():
         if k == "b":
-            print(f"bid depth : {len(v)}")
+           TOTALS['BIDS'] = TOTALS['BIDS'] + len(v) 
+           print(f"bid depth : {TOTALS['BIDS']}")
         if k == "a":
-            print(f"ask depth : {len(v)}")
+           TOTALS['ASKS'] = TOTALS['ASKS'] + len(v) 
+           print(f"ask depth : {TOTALS['ASKS']}")
 
 def on_close(self):
     print("closed connection")

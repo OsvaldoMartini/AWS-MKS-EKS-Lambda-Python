@@ -10,60 +10,6 @@ import sys
 from datetime import datetime, timezone, timedelta
 # import ccxt
 
-# balance = 17.25099083
-# balance = 17.25452794
-# balance = 17.557742498
-# balance = 34.11620543
-# balance = 34.07442870
-# balance = 33.94533986
-# balance = 33.916637855
-# balance = 33.87617461
-# balance = 33.80694975
-# balance = 33.79699856
-# balance = 33.52835663
-# balance = 33.45275975
-# balance = 33.49762823
-# balance = 33.65854172
-# balance = 33.54358782
-# balance = 33.350
-# balance = 33.30836479
-# balance = 33.26055656
-# balance = 33.19435273
-# balance = 32.89885495
-# balance = 32.77350370
-# balance = 32.55632435
-# balance = 32.26410725
-# balance = 32.48765925
-# balance = 35.33248501
-# balance = 33.85719541
-# balance = 33.504457359
-# balance = 33.35608892
-# balance = 33.30454215
-# balance = 28.28391263
-# balance = 27.97146840
-# balance = 28.09037416
-# balance = 76.58375102
-# balance = 78.62466593
-# balance = 78.55509714
-# balance = 78.55920142
-# balance = 78.44214068
-# balance = 78.51556829
-# balance = 78.10052908
-# balance = 60.30221175
-# balance = 60.26690514
-# balance = 60.15021606
-# balance = 60.08925408
-# balance = 62.11620258
-# balance = 62.11620258
-# balance = 61.63380193
-# balance = 56.40977667
-# balance = 56.90652933
-# balance = 56.41419003
-# balance = 56.18852165
-
-
-
-
 def aware_utcnow():
     return datetime.now(timezone.utc)
     # return datetime.now(tz=timezone(timedelta(hours=1)))

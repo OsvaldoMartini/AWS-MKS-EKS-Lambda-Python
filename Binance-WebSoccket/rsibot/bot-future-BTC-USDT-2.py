@@ -3,66 +3,13 @@ import websocket, json, pprint, talib, numpy
 import config
 from binance.client import Client
 from binance.enums import *
+import pandas as pd
 import numpy as np
 import math
 import logging
 import sys
 from datetime import datetime, timezone, timedelta
 # import ccxt
-
-# balance = 17.25099083
-# balance = 17.25452794
-# balance = 17.557742498
-# balance = 34.11620543
-# balance = 34.07442870
-# balance = 33.94533986
-# balance = 33.916637855
-# balance = 33.87617461
-# balance = 33.80694975
-# balance = 33.79699856
-# balance = 33.52835663
-# balance = 33.45275975
-# balance = 33.49762823
-# balance = 33.65854172
-# balance = 33.54358782
-# balance = 33.350
-# balance = 33.30836479
-# balance = 33.26055656
-# balance = 33.19435273
-# balance = 32.89885495
-# balance = 32.77350370
-# balance = 32.55632435
-# balance = 32.26410725
-# balance = 32.48765925
-# balance = 35.33248501
-# balance = 33.85719541
-# balance = 33.504457359
-# balance = 33.35608892
-# balance = 33.30454215
-# balance = 28.28391263
-# balance = 27.97146840
-# balance = 28.09037416
-# balance = 76.58375102
-# balance = 78.62466593
-# balance = 78.55509714
-# balance = 78.55920142
-# balance = 78.44214068
-# balance = 78.51556829
-# balance = 78.10052908
-# balance = 60.30221175
-# balance = 60.26690514
-# balance = 60.15021606
-# balance = 60.08925408
-# balance = 62.11620258
-# balance = 62.11620258
-# balance = 61.63380193
-# balance = 56.40977667
-# balance = 56.90652933
-# balance = 56.41419003
-# balance = 56.18852165
-
-
-
 
 def aware_utcnow():
     return datetime.now(timezone.utc)
@@ -90,17 +37,17 @@ def loggin_setup(filename):
 PROFIT_SELL = 1.0006
 LOSS_SELL = 0.9995
 RSI_PERIOD = 14
-RSI_OVERBOUGHT = 70
-RSI_OVERSOLD = 25
-TRADE_SYMBOL = '1000SATSUSDT'
-QTY_BUY = 20 # USDT
+RSI_OVERBOUGHT = 80
+RSI_OVERSOLD = 30
+TRADE_SYMBOL = 'BTCUSDT'
+QTY_BUY = 10 # USDT
 QTY_SELL = 1000 # It Forces to Sell 100%
-ONLY_BY_WHEN = 0.0004516
+ONLY_BY_WHEN = 41180
 ByPass = True
 BlockOrder = True
 
 logger = logging.getLogger()
-loggin_setup("./logs/" + TRADE_SYMBOL)
+loggin_setup("./logs/bot_FUTURE_{}_mcda_rsi".format(TRADE_SYMBOL))
 
 SOCKET_SPOT = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
 
@@ -111,6 +58,14 @@ buyprice = 0
 # forceSell = 39800.94000000
 
 
+
+# Initialize DataFrame for keeping track of historical data
+historical_data = []
+timeframe = '1m'  # adjust timeframe as needed
+
+# Parameters for moving averages
+short_window = 20
+long_window = 50
 
 
 client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
@@ -151,7 +106,16 @@ def on_close(ws):
     logger.info('closed connection')
 
 def on_message(ws, message):
-    global closes, in_position, buyprice, amountQty, volume
+    global closes, in_position, buyprice, amountQty, volume, historical_data 
+    
+    # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+    # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    # df.set_index('timestamp', inplace=True)
+    # df['close'] = pd.to_numeric(df['close'])
+    # print(df)
+    
+    
+    print(message)
     
     # print('received message')
     json_message = json.loads(message)
@@ -162,7 +126,29 @@ def on_message(ws, message):
     is_candle_closed = candle['x']
     close = candle['c']
 
+    historical_data.append(close) # -> current_close
+    if len(historical_data) > long_window:
+            # Calculate moving averages
+            short_ma = pd.Series(historical_data).rolling(window=short_window, min_periods=1).mean().iloc[-1]
+            long_ma = pd.Series(historical_data).rolling(window=long_window, min_periods=1).mean().iloc[-1]
+            # Check for buy signal
+            if short_ma > long_ma:
+                print("Buy signal detected!")
+                print("Buy signal detected!")
+                print("Buy signal detected!")
+                print("Buy signal detected!")
+                print("Buy signal detected!")
+    
     if is_candle_closed:
+  
+  
+        # Initialize MACD
+        # if init_MACD: 
+        #   macd = MACD(close=binance.fetch_ohlcv(symbol, timeframe)[-100:], window_fast=12, window_slow=26, window_sign=9)
+        #   init_MACD = False
+
+  
+  
         # print("candle closed at {}".format(close))
         closes.append(float(close))
         
@@ -209,6 +195,8 @@ def on_message(ws, message):
                             logger.info(order_succeeded)
                         else:
                             logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
+                            logger.info("SIMULATED {}".format(soldDesc))
+                            
                               
                 else:
                     logger.info("It is overbought, but we don't own any. Nothing to do.")

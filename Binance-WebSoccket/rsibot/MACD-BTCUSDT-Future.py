@@ -363,6 +363,7 @@ def get_current_price_futures(symbol):
 
 def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
   df = getminutedata(pair, Client.KLINE_INTERVAL_1MINUTE,'100')
+  logger.info("DATA FRAME {}".format(df))
   applytechnicals(df)
   inst = Signals(df, signal)  # Be Aware the Legs Quantity  like 25  THIS PROVE TRADES IT SHOUL TAKE MUCH LESS THAN 25
   inst.decide()
