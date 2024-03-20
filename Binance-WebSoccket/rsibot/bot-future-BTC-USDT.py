@@ -221,16 +221,6 @@ def process_kline_message(kline_ws, message):
         closes.append(float(close))
         
         if len(closes) > RSI_PERIOD:
-            print("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]), end="\r");
-            print(move_down + clear_line, end="")
-            print("SIGNAL VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] ), end="\r")
-            print(move_down + clear_line, end="")
-            print("SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"]), end="\r")
-            print(move_up + clear_line, end="")
-            print(move_up + clear_line, end="")
-                    
-            
-            
             # Calculates Buy or Sell Based on Volume
             previous_volume = calculate_by_volume(current_volume, previous_volume)
 
@@ -250,6 +240,19 @@ def process_kline_message(kline_ws, message):
         
             last_rsi = rsi[-1]
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
+            
+            
+            print("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]), end="\r");
+            print(move_down + clear_line, end="")
+            print("SIGNAL VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] ), end="\r")
+            print(move_down + clear_line, end="")
+            print("SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"]), end="\r")
+            print(move_down + clear_line, end="")
+            print("SMA : {:.2f}     RSI: {:.2f}".format(round(last_sma, 2), round(last_rsi, 2)), end="\r")
+            print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
+            
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
