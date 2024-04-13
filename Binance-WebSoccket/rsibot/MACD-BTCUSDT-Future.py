@@ -464,7 +464,7 @@ def strategy(pair, qty, signal, TOTALS, ACTION_BUY, open_position=False, ):
       if not ACTION_BUY:
         logger.info("SIMULATED SELL PRICE:" + str(futures_entry_price))
         
-          #Futures Prices Profit & Loss When Buy
+      #Futures Prices Profit & Loss When Buy
       PROFIT_WHEN_BUY = round(float(futures_entry_price) * BUY_PROFIT_CALC, PRECISION_PROFIT_LOSS)  
       LOSSES_WHEN_BUY = round(float(futures_entry_price) * BUY_LOSS_CALC, PRECISION_PROFIT_LOSS)  
 
