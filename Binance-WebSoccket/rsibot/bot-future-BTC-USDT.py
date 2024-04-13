@@ -75,6 +75,16 @@ LOSSES_WHEN_BUY = 0
 PROFIT_WHEN_SELL = 0
 LOSSES_WHEN_SELL = 0
 
+pnlProfitBuy = 0
+roiProfitBuy = 0
+pnlLossBuy = 0
+roiLossBuy = 0
+        
+pnlProfitSell = 0
+roiProfitSell = 0
+pnlLossSell = 0
+roiLossSell = 0
+
 
 logger = logging.getLogger()
 loggin_setup("./logs/bot_FUTURE_{}_mcda_rsi".format(TRADE_SYMBOL))
@@ -354,14 +364,14 @@ def process_kline_message(kline_ws, message):
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             
             # SPOT Entry Price
-            spot_entry_price = float(close)
-            logger.info("SPOT   Entry Price {:.2f}".format(float(spot_entry_price)))
+            spot_current_price = float(close)
+            # logger.info("SPOT   Entry Price {:.2f}".format(float(spot_current_price)))
 
             # FUTURE Entry
             ticker_future = get_current_price_futures(TRADE_SYMBOL)
             # logger.info("TICKER {}".format(ticker_future))
-            future_entry_price = ticker_future['price']
-            logger.info("FUTURE Entry Price {:.2f}".format(float(future_entry_price)))
+            future_current_price = ticker_future['price']
+            # logger.info("FUTURE Entry Price {:.2f}".format(float(future_current_price)))
 
             
             print("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]), end="\r");
@@ -372,9 +382,9 @@ def process_kline_message(kline_ws, message):
             print(move_down + clear_line, end="")
             print("SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi)), end="\r")
             print(move_down + clear_line, end="")
-            print("SPOT   Entry Price {:.2f}".format(float(spot_entry_price)), end="\r")
+            print("SPOT   Current Price {:.2f}".format(float(spot_current_price)), end="\r")
             print(move_down + clear_line, end="")
-            print("FUTURE Entry Price {:.2f}".format(float(future_entry_price)), end="\r")
+            print("FUTURE Current Price {:.2f}".format(float(future_current_price)), end="\r")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
@@ -386,18 +396,21 @@ def process_kline_message(kline_ws, message):
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
-                logger.info("SPOT Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(spot_entry_price), buyPassWhen, float(last_rsi)))
+                logger.info("SPOT   Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(spot_current_price), buyPassWhen, float(last_rsi)))
+                logger.info("FUTURE Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(future_current_price), buyPassWhen, float(last_rsi)))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 logger.info("SPOT: {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(buyprice), volume, amountQty, float(buyprice * PROFIT_SELL), float(buyprice * 0.995), float(close), float(last_rsi)))
-                if float(spot_entry_price) <= buyprice * LOSS_SELL or float(spot_entry_price) >= PROFIT_SELL * buyprice:
-                    soldDesc = "SPOT Stop Lossed" if float(spot_entry_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
+                if float(future_current_price) <= buyprice * LOSS_SELL or float(future_current_price) >= PROFIT_SELL * buyprice:
+                    soldDesc = "SPOT Stop Losses" if float(future_current_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                     if not BlockOrder:
                         order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
                         in_position = False        
                         logger.info(order_succeeded)
                     else:
                         logger.info("SIMULATED {}".format(soldDesc))
+                        logger.info("SPOT   Current Price {:.2f}".format(float(spot_current_price)))
+                        logger.info("FUTURE Current Price {:.2f}".format(float(future_current_price)))
                         in_position = False                             
 
             if last_rsi > RSI_OVERBOUGHT:
@@ -405,8 +418,8 @@ def process_kline_message(kline_ws, message):
                      logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
                     
                     
-                     if float(spot_entry_price) <= buyprice * 0.995 or float(spot_entry_price) >= PROFIT_SELL * buyprice:
-                        soldDesc = "SPOT Stop Lossed" if float(spot_entry_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
+                     if float(future_current_price) <= buyprice * 0.995 or float(future_current_price) >= PROFIT_SELL * buyprice:
+                        soldDesc = "SPOT Stop Losses" if float(future_current_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
                         in_position = False
                         if not BlockOrder:  
                             logger.info("Overbought! Sell! Sell! Sell!")
@@ -415,6 +428,11 @@ def process_kline_message(kline_ws, message):
                         else:
                             logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
                             logger.info("SIMULATED SELL {}".format(soldDesc))
+                            
+                            if float(pnlProfitBuy) >= 0:
+                                TOTALS['TOTAL_PROFITS_BUY'] += pnlProfitBuy
+                            else:
+                                TOTALS['TOTAL_LOSSES_BUY'] -= abs(pnlProfitBuy)
                             
                               
                 else:
@@ -427,7 +445,7 @@ def process_kline_message(kline_ws, message):
                     
                     logger.info("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    if float(spot_entry_price) <= float(ONLY_BY_WHEN) or ByPass:
+                    if float(future_current_price) <= float(ONLY_BY_WHEN) or ByPass:
                         if not BlockOrder:
                             order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
                             if order_succeeded:
@@ -437,13 +455,13 @@ def process_kline_message(kline_ws, message):
                                 in_position = True
                                 logger.info("BOUGHT PRICE: {:.2f}".format(float(buyprice)))
                         else:
-                           logger.info("SIMULATED SPOT BOUGHT PRICE: {:.2f}".format(float(spot_entry_price)))
+                           logger.info("SIMULATED SPOT BOUGHT PRICE: {:.2f}".format(float(future_current_price)))
                            amountQty = QTY_BUY
-                           buyprice = float(spot_entry_price)
-                           # volume = round(float(spot_entry_price) * float(QTY_BUY), 2)
+                           buyprice = float(future_current_price)
+                           # volume = round(float(future_current_price) * float(QTY_BUY), 2)
                            volume = amountQty
                            in_position = True
-                           profit_calculus(ACTION_BUY, float(future_entry_price), float(volume))
+                           profit_calculus(ACTION_BUY, float(future_current_price), float(volume))
                                 
 # Function to process Depth WebSocket messages
 def process_depth_message(depth_ws, message):
