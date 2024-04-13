@@ -9,6 +9,7 @@ import math
 import logging
 import sys
 from datetime import datetime, timezone, timedelta
+import time
 import threading
 import signal
 # import ccxt
@@ -75,6 +76,13 @@ SINAIS["MSG_1"] = ""
 SINAIS["MSG_2"] = "" 
 SINAIS["MSG_3"] = "" 
 
+TOTALS = {}
+TOTALS['TOTAL_PROFITS_BUY'] = 0 
+TOTALS['TOTAL_LOSSES_BUY']= 0
+TOTALS['TOTAL_PROFITS_SELL'] = 0
+TOTALS['TOTAL_LOSSES_SELL'] = 0
+
+
 # Initialize DataFrame for keeping track of historical data
 historical_data = []
 timeframe = '1m'  # adjust timeframe as needed
@@ -110,11 +118,11 @@ client = Client(config.API_KEY, config.API_SECRET) #, tld='us'
 def calculate_by_volume(current_volume, previous_volume):
     if previous_volume is not None:
         # Check for buy signal based on volume increase
-        logger.info("Current Volume: {} / Previous Volume {}".format(current_volume, previous_volume))
+        # logger.info("Current Volume: {} / Previous Volume {}".format(current_volume, previous_volume))
         if previous_volume > 0 and current_volume > 0: 
             volume_increase = current_volume / previous_volume
 
-            logger.info("Previous Volume: {} / Current Volume: {}".format(previous_volume, current_volume))
+            # logger.info("Previous Volume: {} / Current Volume: {}".format(previous_volume, current_volume))
             volume_decrease = previous_volume / current_volume
             if volume_increase >= volume_threshold_buy:
                 SINAIS["BUY_VOL_INC"] = SINAIS["BUY_VOL_INC"]  + 1 
@@ -178,7 +186,13 @@ def orderSell(side, symbol, quantity, order_type, soldDesc):
             order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
     return order
 
-    
+def get_current_price_futures(symbol):
+    ticker = client.futures_symbol_ticker(symbol=symbol)
+    # date = datetime(ticker['time'])
+    # ticker['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ticker['time']))
+    # logger.info("TICKER {}".format(ticker))
+    return ticker     
+
 def on_open(kline_ws):
     logger.info('opened connection')
 
@@ -241,6 +255,16 @@ def process_kline_message(kline_ws, message):
             last_rsi = rsi[-1]
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             
+            # SPOT Entry Price
+            entry_price = float(close)
+            logger.info("SPOT   Entry Price {:.2f}".format(float(entry_price)))
+
+            # FUTURE Entry
+            ticker_future = get_current_price_futures(TRADE_SYMBOL)
+            # logger.info("TICKER {}".format(ticker_future))
+            future_entry_price = ticker_future['price']
+            logger.info("FUTURE Entry Price {:.2f}".format(float(future_entry_price)))
+
             
             print("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]), end="\r");
             print(move_down + clear_line, end="")
@@ -248,18 +272,26 @@ def process_kline_message(kline_ws, message):
             print(move_down + clear_line, end="")
             print("SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"]), end="\r")
             print(move_down + clear_line, end="")
-            print("SMA : {:.2f}     RSI: {:.2f}".format(round(last_sma, 2), round(last_rsi, 2)), end="\r")
+            print("SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi)), end="\r")
+            print(move_down + clear_line, end="")
+            print("SPOT   Entry Price {:.2f}".format(float(entry_price)), end="\r")
+            print(move_down + clear_line, end="")
+            print("FUTURE Entry Price {:.2f}".format(float(future_entry_price)), end="\r")
+            print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             
+
+
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
-                logger.info("current Close is {} BY PASS WHEN {}    RSI: {}".format (close, buyPassWhen, round(last_rsi, 2)))
+                logger.info("current Close is {:.2f}  {}  RSI: {:.2f}".format (float(close), buyPassWhen, float(last_rsi)))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                logger.info("SPOT: {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, str(buyprice), volume, amountQty, str(buyprice * PROFIT_SELL), str(buyprice * 0.995), close, round(last_rsi, 2)))
+                logger.info("SPOT: {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(buyprice), volume, amountQty, float(buyprice * PROFIT_SELL), float(buyprice * 0.995), float(close), float(last_rsi)))
                 if float(close) <= buyprice * LOSS_SELL or float(close) >= PROFIT_SELL * buyprice:
                     soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
                     if not BlockOrder:
@@ -267,12 +299,14 @@ def process_kline_message(kline_ws, message):
                         in_position = False        
                         logger.info(order_succeeded)
                     else:
-                        logger.info("SIMULATED" + soldDesc)
+                        logger.info("SIMULATED {}".format(soldDesc))
                         in_position = False                             
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                     logger.info("Overbought! Witing Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
+                     logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
+                    
+                    
                      if float(close) <= buyprice * 0.995 or float(close) >= PROFIT_SELL * buyprice:
                         soldDesc = "Stop Lossed" if float(close) <= buyprice else "PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
                         in_position = False
@@ -292,6 +326,7 @@ def process_kline_message(kline_ws, message):
                 if in_position:
                     logger.info("It is oversold, but you already own it, nothing to do.")
                 else:
+                    
                     logger.info("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
                     if float(close) <= float(ONLY_BY_WHEN) or ByPass:
@@ -302,9 +337,9 @@ def process_kline_message(kline_ws, message):
                                 buyprice = float(order_succeeded['fills'][0]['price'])
                                 amountQty = float(order_succeeded['fills'][0]['qty'])
                                 in_position = True
-                                logger.info("BOUGHT PRICE:" + str(buyprice))
+                                logger.info("BOUGHT PRICE: {:.2f}".format(float(buyprice)))
                         else:
-                           logger.info("SIMULATED BOUGHT PRICE:" + str(close))
+                           logger.info("SIMULATED BOUGHT PRICE: {:.2f}".format(float(close)))
                            amountQty = QTY_BUY
                            buyprice = float(close)
                            volume = round(float(close) * float(QTY_BUY), 2)
@@ -338,7 +373,7 @@ def process_depth_message(depth_ws, message):
     # Check for sell signal based on order book imbalance and significant buy volume
     if imbalance_sell >= imbalance_threshold and total_buy_volume >= volume_threshold_depth:
         # print("Sell signal detected! Order book imbalance:", imbalance_sell, "Total buy volume:", total_buy_volume)
-        logger.info("Sell signal detected! Order book imbalance SELL: {} Total buy volume: {}".format(imbalance_sell, total_buy_volume))
+        logger.info("Depth Thread: Sell signal detected! Order book imbalance SELL: {:.2f} Total buy volume: {:.2f}".format(imbalance_sell, total_buy_volume))
         SINAIS["SELL_VOL_IMB"] = SINAIS["SELL_VOL_IMB"] + 1
         SINAIS["MSG_3"] = "SELL IMBALANCE"  
          
@@ -349,7 +384,7 @@ def process_depth_message(depth_ws, message):
     # Check for buy signal based on order book imbalance and significant buy volume
     if imbalance_buy >= imbalance_threshold and total_sell_volume  >= volume_threshold_depth:
         # print("Buy signal detected! Order book imbalance:", imbalance_buy, "Total buy volume:", total_buy_volume)
-        logger.info("Buy signal detected! Order book imbalance BUY: {} Total buy volume: {}".format(imbalance_buy, total_sell_volume))
+        logger.info("Depth Thread: Buy  signal detected! Order book imbalance BUY: {:.2f} Total buy volume: {:.2f}".format(imbalance_buy, total_sell_volume))
         SINAIS["BUY_VOL_IMB"] = SINAIS["BUY_VOL_IMB"] + 1 
         SINAIS["MSG_3"] = "BUY IMBALANCE"  
             
