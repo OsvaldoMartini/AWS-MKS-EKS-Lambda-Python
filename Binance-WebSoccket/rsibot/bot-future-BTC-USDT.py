@@ -50,6 +50,8 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
+
+DECIMAL_CALC = 2
 # QTY_BUY = 10 # USDT
 QTY_BUY = 0.05 # USDT 0.005
 QTY_SELL = 1000 # It Forces to Sell 100%
@@ -79,6 +81,9 @@ pnlProfitBuy = 0
 roiProfitBuy = 0
 pnlLossBuy = 0
 roiLossBuy = 0
+
+curr_roiProfitBuy = 0
+curr_roiProfitSell = 0
         
 pnlProfitSell = 0
 roiProfitSell = 0
@@ -91,8 +96,8 @@ loggin_setup("./logs/bot_FUTURE_{}_mcda_rsi".format(TRADE_SYMBOL))
 
 closes = []
 in_position = False
-# buyprice = 39570.01 
-buyprice = 0
+# futures_entry_price = 39570.01 
+futures_entry_price = 0
 # forceSell = 39800.94000000
 
 SINAIS = {}
@@ -308,7 +313,7 @@ def on_close(kline_ws):
     logger.info('closed connection')
 
 def process_kline_message(kline_ws, message):
-    global closes, in_position, buyprice, amountQty, volume, historical_data, previous_volume 
+    global closes, in_position, curr_roiProfitBuy, futures_entry_price, amountQty, volume, historical_data, previous_volume 
     
     # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -370,21 +375,20 @@ def process_kline_message(kline_ws, message):
             # FUTURE Entry
             ticker_future = get_current_price_futures(TRADE_SYMBOL)
             # logger.info("TICKER {}".format(ticker_future))
-            future_current_price = ticker_future['price']
-            # logger.info("FUTURE Entry Price {:.2f}".format(float(future_current_price)))
+            futures_current_price = float(ticker_future['price'])
+            # logger.info("FUTURE Entry Price {:.2f}".format(float(futures_current_price)))
 
-            
-            print("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]), end="\r");
-            print(move_down + clear_line, end="")
-            print("SIGNAL VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] ), end="\r")
-            print(move_down + clear_line, end="")
-            print("SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"]), end="\r")
-            print(move_down + clear_line, end="")
-            print("SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi)), end="\r")
-            print(move_down + clear_line, end="")
-            print("SPOT   Current Price {:.2f}".format(float(spot_current_price)), end="\r")
-            print(move_down + clear_line, end="")
-            print("FUTURE Current Price {:.2f}".format(float(future_current_price)), end="\r")
+            line1  = "SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"])
+            line2  = "SIGNAL VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] )
+            line3  = "SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"])
+            line4  = "SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi))
+            line5  = "SPOT   Current Price {:.2f}".format(float(spot_current_price))
+            line6  = "FUTURE Current Price {:.2f}".format(float(futures_current_price))
+            line7  = "Return on Investment (ROI): {:.2f}%".format(float(curr_roiProfitBuy))
+            lines = line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7
+            print(lines)
+            print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
@@ -397,29 +401,108 @@ def process_kline_message(kline_ws, message):
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
                 logger.info("SPOT   Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(spot_current_price), buyPassWhen, float(last_rsi)))
-                logger.info("FUTURE Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(future_current_price), buyPassWhen, float(last_rsi)))
+                logger.info("FUTURE Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(futures_current_price), buyPassWhen, float(last_rsi)))
             if in_position:
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                logger.info("SPOT: {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(buyprice), volume, amountQty, float(buyprice * PROFIT_SELL), float(buyprice * 0.995), float(close), float(last_rsi)))
-                if float(future_current_price) <= buyprice * LOSS_SELL or float(future_current_price) >= PROFIT_SELL * buyprice:
-                    soldDesc = "SPOT Stop Losses" if float(future_current_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
-                    if not BlockOrder:
-                        order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                        in_position = False        
-                        logger.info(order_succeeded)
-                    else:
-                        logger.info("SIMULATED {}".format(soldDesc))
-                        logger.info("SPOT   Current Price {:.2f}".format(float(spot_current_price)))
-                        logger.info("FUTURE Current Price {:.2f}".format(float(future_current_price)))
-                        in_position = False                             
+                # logger.info("SPOT:   {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
+                if ACTION_BUY:
+                    curr_pnlProfitBuy = calculate_pnl_futures(futures_current_price, futures_entry_price, volume, True)
+                    curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
+                    
+                if not ACTION_BUY:        
+                    curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, False)
+                    curr_roiProfitSell = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
+                    
+                # if ACTION_BUY and curr_roiProfitBuy is not None and curr_roiProfitBuy > 0:
+                #     print(move_down + clear_line, end="")
+                #     print("Return on Investment (ROI): {:.2f}%".format(curr_roiProfitBuy), end="\r")
+                # if ACTION_BUY and curr_pnlProfitBuy is not None:
+                #     print(move_down + clear_line, end="")
+                #     print("Profit/Loss: ${:.2f} USDT".format(curr_pnlProfitBuy), end="\r")
+                
+                # if not ACTION_BUY and curr_roiProfitSell is not None and curr_roiProfitSell > 0:
+                #     print(move_down + clear_line, end="")
+                #     print("Return on Investment (ROI): {:.2f}%".format(curr_roiProfitSell), end="\r")
+                # if not ACTION_BUY and curr_pnlProfitSell is not None:
+                #     print(move_down + clear_line, end="")
+                #     print("Profit/Loss: ${:.2f} USDT".format(curr_pnlProfitSell), end="\r")
+                    
+                
+                
+                ## Only Futures 
+                # if ACTION_BUY:
+                #     logger.info("MACD-BOT FUTURE: {:.2f} Buy Entry Price {:.2f} Volume {:.2f} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f} PNL: {:.2f} USDT ROI: {:.2f}%".format (TRADE_SYMBOL, futures_entry_price, volume * futures_entry_price, round(PROFIT_WHEN_BUY, DECIMAL_CALC), round(LOSSES_WHEN_BUY, DECIMAL_CALC), futures_current_price, pnlProfitBuy, roiProfitBuy))
+                # if not ACTION_BUY:
+                #     logger.info("MACD-BOT FUTURE: {:.2f} Sell Entry Price {:.2f} Volume {:.2f} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f} PNL: {:.2f} USDT ROI: {:.2f}%".format (TRADE_SYMBOL, futures_entry_price, volume * futures_entry_price, round(PROFIT_WHEN_SELL, DECIMAL_CALC), round(LOSSES_WHEN_SELL, DECIMAL_CALC), futures_current_price, pnlProfitSell, roiProfitSell ))
+                    
+                # logger.info(f'PNL: {pnl} USDT')
+                # logger.info(f'ROI: {roi}%')
+                
+                # if ACTION_BUY and roiProfitBuy is not None:
+                #     logger.info("Return on Investment (ROI): {:.2f}%".format(float(roiProfitBuy)))
+                # if ACTION_BUY and pnlProfitBuy is not None:
+                #     logger.info("Profit/Loss: ${:.2f} USDT".format(float(pnlProfitBuy)))
+                
+                # if not ACTION_BUY and roiProfitSell is not None:
+                #     logger.info("Return on Investment (ROI): {:.2f}%".format(float(roiProfitSell)))
+                # if not ACTION_BUY and pnlProfitSell is not None:
+                #     logger.info("Profit/Loss: ${:.2f} USDT".format(float(pnlProfitSell)))                
+                
+                if ACTION_BUY:
+                   # Stop Losses or Take Profits
+                    if (float(curr_roiProfitBuy) < float(-0.45)) or (float(curr_roiProfitBuy) > float(2.0)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)):
+                        if (float(curr_roiProfitBuy) < float(-0.45)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)):
+                          soldDesc = "FUTURE Stop Losses"
+                        #   soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
+                        #   soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFIT_WHEN_BUY, DECIMAL_CALC), roiProfitBuy, pnlProfitBuy) 
+                        if (float(curr_roiProfitBuy) > float(2.0)) or float(futures_current_price) >= float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)):
+                            soldDesc = "FUTURE PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
+                            # soldDesc1 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
+                            # soldDesc2 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFIT_WHEN_BUY, DECIMAL_CALC), roiProfitBuy, pnlProfitBuy)  
+                    
+                        # FUTURE
+                        # soldDesc = "STOP LOSSES CLOSE ORDER!!! STOP LOSSES!!!" if float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) else "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {}  Profits At: {} ROI: {}% PNL: {}".format(float(futures_current_price), float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)), round(roiProfitBuy, 2), round(pnlProfitBuy, 2))  
+                        # if (float(roiProfitBuy) < float(-0.45)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)): 
+                        #     soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
+                        #     soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFIT_WHEN_BUY, DECIMAL_CALC), roiProfitBuy, pnlProfitBuy) 
+                        # else:
+                        #     soldDesc1 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
+                        #     soldDesc2 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFIT_WHEN_BUY, DECIMAL_CALC), roiProfitBuy, pnlProfitBuy)  
+                    
+                   
+                        # logger.info("FUTURE: {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(futures_entry_price * 0.995), float(futures_current_price), float(last_rsi)))
+                        # if float(futures_current_price) <= futures_entry_price * LOSS_SELL or float(futures_current_price) >= PROFIT_SELL * futures_entry_price:
+                            #if (float(roiProfitBuy) < float(-0.45)) or (float(roiProfitBuy) > float(2.0)) or float(futures_current_price) <= float(round(LOSSES_WHEN_BUY, DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFIT_WHEN_BUY, DECIMAL_CALC)):
+                        # soldDesc = "FUTURE Stop Losses" if float(futures_current_price) < futures_entry_price else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"  
+                        if not BlockOrder:
+                            order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
+                            in_position = False        
+                            logger.info(order_succeeded)
+                        else:
+                            logger.info("SIMULATED {}".format(soldDesc))
+                            logger.info("SPOT   Current Price {:.2f}".format(float(spot_current_price)))
+                            logger.info("FUTURE Current Price {:.2f}".format(float(futures_current_price)))
+                            in_position = False           
+                            
+                            logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+                            logger.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
+                            # logger.info(soldDesc1)
+                            # logger.info(soldDesc2)
+                            logger.info("SIMULATED                                                                                 ----------------------------------|")
+                            logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
+                            
+                            if float(curr_pnlProfitBuy) >= 0:
+                                TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                            else:
+                                TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)                  
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                     logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * buyprice))
+                     logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFIT_SELL * futures_entry_price))
                     
                     
-                     if float(future_current_price) <= buyprice * 0.995 or float(future_current_price) >= PROFIT_SELL * buyprice:
-                        soldDesc = "SPOT Stop Losses" if float(future_current_price) <= buyprice else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
+                     if float(futures_current_price) <= futures_entry_price * 0.995 or float(futures_current_price) >= PROFIT_SELL * futures_entry_price:
+                        soldDesc = "SPOT Stop Losses" if float(futures_current_price) <= futures_entry_price else "SPOT PROFIT PROFIT PROFIT PROFIT PROFIT PROFIT"
                         in_position = False
                         if not BlockOrder:  
                             logger.info("Overbought! Sell! Sell! Sell!")
@@ -429,10 +512,10 @@ def process_kline_message(kline_ws, message):
                             logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
                             logger.info("SIMULATED SELL {}".format(soldDesc))
                             
-                            if float(pnlProfitBuy) >= 0:
-                                TOTALS['TOTAL_PROFITS_BUY'] += pnlProfitBuy
+                            if float(curr_pnlProfitBuy) >= 0:
+                                TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
                             else:
-                                TOTALS['TOTAL_LOSSES_BUY'] -= abs(pnlProfitBuy)
+                                TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
                             
                               
                 else:
@@ -445,23 +528,24 @@ def process_kline_message(kline_ws, message):
                     
                     logger.info("Oversold! Buy! Buy! Buy!")
                     # put binance buy order logic here
-                    if float(future_current_price) <= float(ONLY_BY_WHEN) or ByPass:
+                    if float(futures_current_price) <= float(ONLY_BY_WHEN) or ByPass:
                         if not BlockOrder:
                             order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
                             if order_succeeded:
                                 logger.info(order)
-                                buyprice = float(order_succeeded['fills'][0]['price'])
+                                futures_entry_price = float(order_succeeded['fills'][0]['price'])
                                 amountQty = float(order_succeeded['fills'][0]['qty'])
                                 in_position = True
-                                logger.info("BOUGHT PRICE: {:.2f}".format(float(buyprice)))
+                                logger.info("BOUGHT PRICE: {:.2f}".format(float(futures_entry_price)))
                         else:
-                           logger.info("SIMULATED SPOT BOUGHT PRICE: {:.2f}".format(float(future_current_price)))
+                           logger.info("SIMULATED SPOT    BOUGHT PRICE: {:.2f}".format(float(spot_current_price)))
+                           logger.info("SIMULATED FUTURES BOUGHT PRICE: {:.2f}".format(float(futures_current_price)))
                            amountQty = QTY_BUY
-                           buyprice = float(future_current_price)
-                           # volume = round(float(future_current_price) * float(QTY_BUY), 2)
+                           futures_entry_price = float(futures_current_price)
+                           # volume = round(float(futures_current_price) * float(QTY_BUY), 2)
                            volume = amountQty
                            in_position = True
-                           profit_calculus(ACTION_BUY, float(future_current_price), float(volume))
+                           profit_calculus(ACTION_BUY, float(futures_entry_price), float(volume))
                                 
 # Function to process Depth WebSocket messages
 def process_depth_message(depth_ws, message):
