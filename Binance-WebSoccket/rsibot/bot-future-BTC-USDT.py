@@ -487,13 +487,11 @@ def process_kline_message(kline_ws, message):
                    # Stop Losses or Take Profits
                     if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (float(curr_roiProfitBuy) > float(ROI_PROFIT)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
                         if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)):
-                            soldDesc = "FUTURE Stop Losses Stop Losses (Curr Losses ROI Buy {:.2f}% < {:.2f}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) else "FUTURE Stop Losses Stop Losses  (Curr Price {:.2f} <= Losses Price {:.2f})".format(futures_current_price,  float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)))
-                            soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
-                            soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy) 
+                            soldDesc = "FUTURE LOSSES LOSSES LOSSES (Curr Losses ROI Buy {:.2f}% < {:.2f}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) else "FUTURE Stop Losses Stop Losses  (Curr Price {:.2f} <= Losses Price {:.2f})".format(futures_current_price,  float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)))
+                            soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy) 
                         elif (float(curr_roiProfitBuy) > float(ROI_PROFIT)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
                             soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(curr_roiProfitBuy, ROI_PROFIT) if (float(curr_roiProfitBuy) > float(ROI_PROFIT)) else "FUTURE PROFIT PROFIT PROFIT (Curr Price {:.2f} > Profit Price {:.2f})".format(futures_current_price,  float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)))
-                            soldDesc1 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
-                            soldDesc2 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)  
+                            soldDesc1 = "Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)  
                     
                         # FUTURE
                         # soldDesc = "STOP LOSSES CLOSE ORDER!!! STOP LOSSES!!!" if float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) else "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {}  Profits At: {} ROI: {}% PNL: {}".format(float(futures_current_price), float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)), round(roiProfitBuy, 2), round(pnlProfitBuy, 2))  
@@ -522,7 +520,6 @@ def process_kline_message(kline_ws, message):
                             logger.info(soldDesc)                             
                             logger.info("Return on Investment (ROI): {:.2f}%".format(float(curr_roiProfitBuy)))
                             logger.info(soldDesc1)
-                            logger.info(soldDesc2)
                             logger.info("SIGNAL     BUY: {}     SELL: {}  SIGNAL: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"]))
                             logger.info("SIGNAL VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] ))
                             logger.info("SIGNAL IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"]))
@@ -566,7 +563,7 @@ def process_kline_message(kline_ws, message):
                 else:
                     logger.info("It is overbought, but we don't own any. Nothing to do.")
             
-            if last_rsi < RSI_OVERSOLD:
+            if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"]:
                 if in_position:
                     logger.info("It is oversold, but you already own it, nothing to do.")
                 else:
