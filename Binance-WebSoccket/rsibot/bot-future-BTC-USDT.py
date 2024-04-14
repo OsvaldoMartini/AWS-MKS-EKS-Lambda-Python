@@ -63,6 +63,9 @@ ACTION_BUY = True
 
 SYMBOL_LEVERAGE = 75
 
+roiProfit = 2.0
+roiStopLoss = -0.45
+
 # PRECISION_PROFIT_LOSS = 7 # CFXUSDT
 PRECISION_PROFIT_LOSS = 1 # BTCUSDT
 
@@ -318,7 +321,7 @@ def on_close(kline_ws):
     logger.info('closed connection')
 
 def process_kline_message(kline_ws, message):
-    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES 
+    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, roiProfit, roiStopLoss 
     
     # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -391,7 +394,9 @@ def process_kline_message(kline_ws, message):
             line6  = "FUTURE Current Price {:.2f}".format(float(futures_current_price))
             line7  = "Return on Investment BUY  (ROI): {:.2f}%  Profit/Loss: ${:.2f} USDT".format(float(curr_roiProfitBuy), float(curr_pnlProfitBuy))
             line8  = "Return on Investment SELL (ROI): {:.2f}%  Profit/Loss: ${:.2f} USDT".format(float(curr_roiProfitSell), float(curr_pnlProfitSell))
-            lines = line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8
+            line9  = "PROFITS BUY  {:.2f} LOSSES BUY  {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_BUY'], 2), TOTALS['TOTAL_LOSSES_BUY'], TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']))
+            line10 = "PROFITS SELL {:.2f} LOSSES SELL {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2),TOTALS['TOTAL_LOSSES_SELL'], TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
+            lines = line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10
             print(lines)
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
@@ -401,9 +406,9 @@ def process_kline_message(kline_ws, message):
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
+            print(move_up + clear_line, end="")
             
-
-
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
@@ -457,13 +462,13 @@ def process_kline_message(kline_ws, message):
                 
                 if ACTION_BUY:
                    # Stop Losses or Take Profits
-                    if (float(curr_roiProfitBuy) < float(-0.45)) or (float(curr_roiProfitBuy) > float(2.0)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
-                        if (float(curr_roiProfitBuy) < float(-0.45)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)):
-                            soldDesc = "FUTURE Stop Losses Stop Losses (Curr ROI Losses Buy {:.2f} < -0.45)".format(curr_roiProfitBuy) if (float(curr_roiProfitBuy) < float(-0.45)) else "FUTURE Stop Losses Stop Losses  (Curr Price {:.2f} <= Losses Price {:.2f})".format(futures_current_price,  float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)))
+                    if (float(curr_roiProfitBuy) < float(roiStopLoss)) or (float(curr_roiProfitBuy) > float(roiProfit)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
+                        if (float(curr_roiProfitBuy) < float(roiStopLoss)) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)):
+                            soldDesc = "FUTURE Stop Losses Stop Losses (Curr Losses ROI Buy {:.2f}% < {:.2f}%)".format(curr_roiProfitBuy, roiStopLoss) if (float(curr_roiProfitBuy) < float(roiStopLoss)) else "FUTURE Stop Losses Stop Losses  (Curr Price {:.2f} <= Losses Price {:.2f})".format(futures_current_price,  float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)))
                             soldDesc1 = "STOP LOSSES CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
                             soldDesc2 = "STOP LOSSES CLOSE ORDER!!! Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy) 
-                        if (float(curr_roiProfitBuy) > float(2.0)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
-                            soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr ROI Profit Buy {:.2f} > 2.0)".format(curr_roiProfitBuy) if (float(curr_roiProfitBuy) > float(2.0)) else "FUTURE PROFIT PROFIT PROFIT (Curr Price {:.2f} > Profit Price {:.2f})".format(futures_current_price,  float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)))
+                        if (float(curr_roiProfitBuy) > float(roiProfit)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)):
+                            soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(curr_roiProfitBuy, roiProfit) if (float(curr_roiProfitBuy) > float(roiProfit)) else "FUTURE PROFIT PROFIT PROFIT (Curr Price {:.2f} > Profit Price {:.2f})".format(futures_current_price,  float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)))
                             soldDesc1 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Current price: {:.2f}".format(futures_current_price)
                             soldDesc2 = "PROFITS!!! PROFITS!!! CLOSE ORDER!!! Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)  
                     
@@ -492,8 +497,8 @@ def process_kline_message(kline_ws, message):
                             in_position = False           
                             
                             logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
-                            logger.info("SIMULATED                             TOTAL  PROFIT AND LOSS                              ----------------------------------|")
-                            logger.info(soldDesc)
+                            logger.info("SIMULATED                                                                                 ----------------------------------|")
+                            logger.info(soldDesc)                             
                             logger.info("Return on Investment (ROI): {:.2f}%".format(float(curr_roiProfitBuy)))
                             logger.info(soldDesc1)
                             logger.info(soldDesc2)
