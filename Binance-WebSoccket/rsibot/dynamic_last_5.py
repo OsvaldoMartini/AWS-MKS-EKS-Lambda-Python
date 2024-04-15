@@ -21,6 +21,10 @@ class LastFiveStack:
 
     def get_values(self):
         return self.stack
+    
+    def get_size(self):
+        return len(self.stack)
+  
 
 # Example usage:
 last_five = LastFiveStack()
