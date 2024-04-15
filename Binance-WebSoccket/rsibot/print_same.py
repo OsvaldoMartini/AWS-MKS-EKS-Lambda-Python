@@ -58,3 +58,4 @@ for i in range(100):
     print(move_up + clear_line, end="")
             
     time.sleep(1)  # Just to pause briefly
+  
