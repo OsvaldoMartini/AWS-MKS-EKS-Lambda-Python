@@ -2,6 +2,9 @@ class LastFiveStack:
     def __init__(self):
         self.stack = []
 
+    def restart(self):
+        self.stack = []
+        
     def push(self, value):
         if len(self.stack) >= 5:
             self.pop_until(value)
@@ -21,17 +24,30 @@ class LastFiveStack:
 
     def get_values(self):
         return self.stack
-    
+
     def get_size(self):
         return len(self.stack)
-  
 
+    def average_percentage_growth(self):
+        percentage_growths = []
+        for i in range(len(self.stack) - 1):
+            growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
+            percentage_growths.append(growth)
+        return sum(percentage_growths) / len(percentage_growths)
+  
 # Example usage:
 last_five = LastFiveStack()
-values = [5, 2, 7, 3, 1, 4, 6]
+values = [5, 2]
+
+if (last_five.get_size() > 1):
+    print(last_five.average_percentage_growth())
 
 for value in values:
     last_five.push(value)
 
+if (last_five.get_size() > 0):
+    print(last_five.average_percentage_growth())
+
+
 print("Last five values in ascending order:", last_five.get_values())
-print("Last :", last_five.get_values()[-2])
+print("Last :", last_five.get_values()[0])
