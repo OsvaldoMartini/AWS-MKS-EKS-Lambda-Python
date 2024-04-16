@@ -596,6 +596,7 @@ def process_kline_message(kline_ws, message):
                             
                             logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
                             logger.info("SIMULATED                                                                                 ----------------------------------|")
+                            logger.info("                                                                                                                            |")
                             logger.info("    " + soldDesc)                             
                             logger.info("    Return on Investment (ROI): {:.2f}%".format(float(curr_roiProfitBuy)))
                             logger.info("    " + soldDesc1)
@@ -619,9 +620,9 @@ def process_kline_message(kline_ws, message):
                                 
                             curr_roiProfitBuy = 0
                             curr_pnlProfitBuy = 0
-                            logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
-                            time.sleep(SLEEP_CLOSED)
-                            logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                            # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                            # time.sleep(SLEEP_CLOSED)
+                            # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
                             # Forcing the Condition to read again from beggining
                             # last_rsi = RSI_OVERSOLD
 
