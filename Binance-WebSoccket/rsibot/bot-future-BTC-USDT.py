@@ -233,7 +233,7 @@ def calculate_by_volume(current_volume, previous_volume):
                 
             # Check for sell signal based on volume decrease
             elif volume_decrease >= volume_threshold_sell:
-                SINAIS["SELL_VOL_DEC"] = SINAIS["SELL_VOL_DEC"] = 1  
+                SINAIS["SELL_VOL_DEC"] = SINAIS["SELL_VOL_DEC"] + 1  
                 SINAIS["MSG_2"] = "Volume DECREASED !  Sell signal detected"
                 # print("Volume decreased significantly!  Sell signal detected!")
                 # print("Volume decreased significantly!  Sell signal detected!")
