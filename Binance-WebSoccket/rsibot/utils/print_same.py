@@ -1,9 +1,24 @@
+import os
+from datetime import datetime, timezone, timedelta
 import time
 
 # ANSI escape codes for moving cursor
 move_up = '\x1b[1A'  # Move cursor up one line
 clear_line = '\x1b[2K'  # Clear the entire line
 move_down = '\x1b[1B'  # Move cursor down one line
+
+def aware_utcnow():
+    return datetime.now(timezone.utc)
+    # return datetime.now(tz=timezone(timedelta(hours=1)))
+
+def print_file_status_name(lines):
+  os.makedirs(os.path.dirname(profit_stat_filename), exist_ok=True)
+  with open(profit_stat_filename, "w") as f:
+      # Redirect print output to the file
+      print(lines, file=f)
+  
+TRADE_SYMBOL = 'BTCUSDT'  
+profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + str(aware_utcnow().strftime('%d_%m_%Y_%I_%M_%S')) + '.md'
 
 SINAIS = {}
 SINAIS["BUY_HIST"] = 0 
@@ -59,3 +74,6 @@ for i in range(100):
             
     time.sleep(1)  # Just to pause briefly
   
+    # Open a file in write mode
+    print_file_status_name(lines)
+
