@@ -90,6 +90,13 @@ def loggin_setup(filename):
   logging.info('Initialization Logging')
   # logger.error('This is an error message.')
 
+def print_file_status_name(lines):
+  os.makedirs(os.path.dirname(profit_stat_filename), exist_ok=True)
+  with open(profit_stat_filename, "w") as f:
+      # Redirect print output to the file
+      print(lines, file=f)
+
+
 # Flag to indicate if threads should stop
 should_stop = False
 # PROFIT_SELL = 1.0006
@@ -99,6 +106,7 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
+profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + str(aware_utcnow().strftime('%d_%m_%Y_%I_%M_%S')) + '.md'
 
 DECIMAL_CALC = 2
 # QTY_BUY = 10 # USDT
@@ -114,8 +122,17 @@ SYMBOL_LEVERAGE = 75
 
 ROI_PROFIT = 2.0
 ROI_STOP_LOSS = -0.45
-ROI_PERC_GROWS = 200 # PERCENTAGE AVARAGE BETWEEN TWO NUMBERS (MORE INTELIGENTTELY)
-ROI_AVG_GROWS = 50 # PERCENTAGE AVARAGE GROWS FOR ALL ITEMS OF THE ARRAY
+
+# PERCENTAGE AVARAGE BETWEEN TWO NUMBERS (MORE INTELIGENTTELY)
+ROI_PERC_GROWS = 200 
+ROI_PERC_GROWS_ATTEMPTS = 1
+ROI_PERC_MAX_ATTEMPTS = 5
+
+# PERCENTAGE AVARAGE GROWS FOR ALL ITEMS OF THE ARRAY
+ROI_AVG_GROWS = 50 
+ROI_AVG_GROWS_ATTEMPTS = 1
+ROI_AVG_MAX_ATTEMPTS = 5
+
 roi_stack_size = 6
 sorted_roi = LastFiveStack(roi_stack_size)
 sorted_roi.push(ROI_PROFIT)
@@ -387,7 +404,7 @@ def on_close(kline_ws):
     logger.info('closed connection')
 
 def process_kline_message(kline_ws, message):
-    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_AVG_GROWS 
+    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_GROWS_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS 
     
     # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -464,7 +481,16 @@ def process_kline_message(kline_ws, message):
             line10 = "    PROFITS SELL {:.2f} LOSSES SELL {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2),TOTALS['TOTAL_LOSSES_SELL'], TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
             line11 = "    TRAILING STOP ROI  BUY {:.2f}".format(PROFITS["TRAIL_STOP_ROI_BUY"])
             line12 = "    TRAILING LAST ROI  BUY {:.2f}".format(PROFITS["TRAIL_LAST_ROI_BUY"])
+            
+            
             lines = line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10 +"\n" + line11  +"\n" + line12
+            
+            ## Only Futures 
+            if in_position:
+                openPos = "    OPEN BUY {} Entry Price: {:.2F}" if ACTION_BUY else "    OPEN SELL {} Entry Price: {:.2F}"  
+                line13 = openPos.format (TRADE_SYMBOL, futures_entry_price)
+                lines = lines +"\n" + line13
+            
             print(lines)
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
@@ -478,6 +504,11 @@ def process_kline_message(kline_ws, message):
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
+            if in_position:
+                print(move_up + clear_line, end="")
+            
+            # Open a file in write mode
+            print_file_status_name(lines)
             
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
@@ -516,13 +547,19 @@ def process_kline_message(kline_ws, message):
                 ## Verifies the AVG between Initial and Last Added above 200% triggers
                 ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
                 if (calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1]) > ROI_PERC_GROWS):
-                    logger.info("ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
-                    PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                    logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_GROWS_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
+                    ROI_PERC_GROWS_ATTEMPTS = ROI_PERC_GROWS_ATTEMPTS + 1
+                    if (ROI_PERC_GROWS_ATTEMPTS >= ROI_PERC_MAX_ATTEMPTS):
+                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                        ROI_PERC_GROWS_ATTEMPTS = 1
                 
                 ## Verifies the AVG between All ROIs within the array Above 50% triggers
                 if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
-                    logger.info("ROI_AVG_GROWS {}% GROWS {:.2F}% LAST ROI {:.2F}".format(ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
-                    PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                    logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {:.2F}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
+                    ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
+                    if ROI_AVG_GROWS_ATTEMPTS >= ROI_AVG_MAX_ATTEMPTS:
+                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                        ROI_AVG_GROWS_ATTEMPTS = 1
                 
                     
                 # if ACTION_BUY and curr_roiProfitBuy is not None and curr_roiProfitBuy > 0:
@@ -628,7 +665,7 @@ def process_kline_message(kline_ws, message):
 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                     logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(SELL_PROFIT_CALC * futures_entry_price))
+                     logger.info("Overbought! Waiting Profit Target {:.2f}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
                     
                     
                      if float(futures_current_price) <= futures_entry_price * 0.995 or float(futures_current_price) >= SELL_PROFIT_CALC * futures_entry_price:
