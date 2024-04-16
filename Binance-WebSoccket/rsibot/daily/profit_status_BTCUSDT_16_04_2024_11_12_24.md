@@ -1,0 +1,13 @@
+    SIG BUY: 0 SIG SELL: 1  SELL SIGNAL
+    VOL BUY: 1137 VOL SELL: 1578
+    IMB BUY: 76 IMB SELL: 616  ACTION: Volume DECREASED !  Sell signal detected  SELL IMBALANCE
+    SMA : 63079.18     RSI: 52.88
+    SPOT   Current Price 63092.45
+    FUTURE Current Price 63050.00
+    Return on Investment BUY  (ROI): 1.75%  Profit/Loss: $0.73 USDT
+    Return on Investment SELL (ROI): 0.00%  Profit/Loss: $0.00 USDT
+    PROFITS BUY  59.09 LOSSES BUY  -20.46   TOTAL 38.63
+    PROFITS SELL 0.00 LOSSES SELL 0.00   TOTAL 0.00
+    TRAILING STOP ROI  BUY 2.00
+    TRAILING LAST ROI  BUY 6.87
+    OPEN BUY BTCUSDT Entry Price: 63062.20

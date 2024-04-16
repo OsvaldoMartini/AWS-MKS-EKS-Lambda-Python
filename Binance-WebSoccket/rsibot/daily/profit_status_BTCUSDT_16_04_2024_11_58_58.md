@@ -1,0 +1,12 @@
+    SIG BUY: 1 SIG SELL: 0  BUY  SIGNAL
+    VOL BUY: 284 VOL SELL: 423
+    IMB BUY: 16 IMB SELL: 153  ACTION: Volume DECREASED !  Sell signal detected  SELL IMBALANCE
+    SMA : 63057.27     RSI: 57.10
+    SPOT   Current Price 63058.43
+    FUTURE Current Price 63026.10
+    Return on Investment BUY  (ROI): 0.00%  Profit/Loss: $0.00 USDT
+    Return on Investment SELL (ROI): 0.00%  Profit/Loss: $0.00 USDT
+    PROFITS BUY  15.46 LOSSES BUY  -12.97   TOTAL 2.49
+    PROFITS SELL 0.00 LOSSES SELL 0.00   TOTAL 0.00
+    TRAILING STOP ROI  BUY 2.00
+    TRAILING LAST ROI  BUY 9.05
