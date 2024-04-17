@@ -67,12 +67,12 @@ class LastFiveStack():
             percentage_growths.append(growth)
         return sum(percentage_growths) / len(percentage_growths)
 
-def aware_utcnow():
-    return datetime.now(timezone.utc)
-    # return datetime.now(tz=timezone(timedelta(hours=1)))
+def aware_cetnow():
+    # return datetime.now(timezone.utc) # uct
+    return datetime.now(tz=timezone(timedelta(hours=2)))
 
 def loggin_setup(filename):
-  log_filename = filename.lower() + "_" + str(aware_utcnow().strftime('%d_%m_%Y_%I_%M_%S')) + '.log'
+  log_filename = filename.lower() + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.log'
   os.makedirs(os.path.dirname(log_filename), exist_ok=True)
   logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
@@ -99,6 +99,7 @@ def print_file_status_name(lines):
 
 # Flag to indicate if threads should stop
 should_stop = False
+initial_procces_date = str(aware_cetnow().strftime('%d %m %Y %I:%M:%S'))
 # PROFIT_SELL = 1.0006
 # LOSS_SELL = 0.9995
 trail_percent = 2    # Trailing stop percentage (2% in this example)
@@ -106,7 +107,7 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
-profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + str(aware_utcnow().strftime('%d_%m_%Y_%I_%M_%S')) + '.md'
+profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.md'
 
 DECIMAL_CALC = 2
 # QTY_BUY = 10 # USDT
@@ -468,7 +469,7 @@ def process_kline_message(kline_ws, message):
             # logger.info("TICKER {}".format(ticker_future))
             futures_current_price = float(ticker_future['price'])
             # logger.info("FUTURE Entry Price {:.2f}".format(float(futures_current_price)))
-
+            init   = "    Initiate at: {} - utc".format(initial_procces_date)
             line1  = "    SIG BUY: {} SIG SELL: {}  {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"])
             line2  = "    VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] )
             line3  = "    IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"])
@@ -483,7 +484,7 @@ def process_kline_message(kline_ws, message):
             line12 = "    TRAILING LAST ROI  BUY {:.2f}".format(PROFITS["TRAIL_LAST_ROI_BUY"])
             
             
-            lines = line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10 +"\n" + line11  +"\n" + line12
+            lines = init + "\n" + line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10 +"\n" + line11  +"\n" + line12
             
             ## Only Futures 
             if in_position:
@@ -492,6 +493,7 @@ def process_kline_message(kline_ws, message):
                 lines = lines +"\n" + line13
             
             print(lines)
+            print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
             print(move_up + clear_line, end="")
