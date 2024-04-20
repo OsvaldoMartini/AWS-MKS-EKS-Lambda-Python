@@ -35,14 +35,20 @@ def calculate_percentage_positive_negative(positive_value, negative_value):
         return -1 * percentage_change
 
 def calculate_percentage_change(old_value, new_value):
-    return ((new_value - old_value) / old_value) * 100
+    if old_value > 0:
+        return ((new_value - old_value) / old_value) * 100
+    else:
+        return 0
 
 def average_percentage_growth(arr):
     percentage_growths = []
     for i in range(len(arr) - 1):
         growth = ((arr[i+1] - arr[i]) / arr[i]) * 100
         percentage_growths.append(growth)
-    return sum(percentage_growths) / len(percentage_growths)
+    if percentage_growths > 0:    
+        return sum(percentage_growths) / len(percentage_growths)
+    else:
+        return 0
 
 class LastFiveStack():
     def __init__(self, stack_size):
@@ -76,14 +82,20 @@ class LastFiveStack():
         return len(self.stack)
     
     def average_percentage_growth(self):
+        if len(self.stack) < 2:
+            return 0  # If there's not enough data, return 0 or handle it accordingly
         percentage_growths = []
-        if (len(self.stack)) > 1:
-            for i in range(len(self.stack) - 1):
-                growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
-                percentage_growths.append(growth)
-            return sum(percentage_growths) / len(percentage_growths) if len(percentage_growths) > 0 else 0
-        else:
-            return 0
+        count = 0  # Count of valid growth calculations
+        for i in range(len(self.stack) - 1):
+            if self.stack[i] == 0:
+                continue  # Skip calculation if the denominator is zero
+            growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
+            percentage_growths.append(growth)
+            count += 1
+            
+        if count == 0:
+            return 0  # If there were no valid growth calculations, return 0    
+        return sum(percentage_growths) / len(percentage_growths) 
 
 def aware_cetnow():
     # return datetime.now(timezone.utc) # uct
@@ -92,7 +104,7 @@ def aware_cetnow():
 def loggin_setup(filename):
   log_filename = filename.lower() + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.log'
   os.makedirs(os.path.dirname(log_filename), exist_ok=True)
-  logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+  logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %H:%M:%S %p', level=logging.DEBUG)
 
   formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
@@ -117,7 +129,7 @@ def print_file_status_name(lines):
 
 # Flag to indicate if threads should stop
 should_stop = False
-initial_procces_date = str(aware_cetnow().strftime('%d %m %Y %I:%M:%S'))
+initial_procces_date = str(aware_cetnow().strftime('%d %m %Y %H:%M:%S'))
 # PROFIT_SELL = 1.0006
 # LOSS_SELL = 0.9995
 trail_percent = 2    # Trailing stop percentage (2% in this example)
@@ -355,7 +367,10 @@ def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, imr=1):
     # logger.info("quantity {}".format(quantity)) 
     # logger.info("imr {}".format(imr)) 
 
-    roi = (((exit_price - entry_price) * imr ) / entry_price)
+    if entry_price > 0:
+        roi = (((exit_price - entry_price) * imr ) / entry_price)
+    else:
+        roi = 0    
 
     # logger.info("FUTURES ROI {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(roi, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
 
@@ -822,7 +837,10 @@ def process_depth_message(depth_ws, message):
 
     # Calculate Signal order book imbalance to sell
     total_volume = total_buy_volume + total_sell_volume
-    imbalance_sell = total_buy_volume / total_volume if total_volume > 0 else 0
+    if total_volume > 0:
+        imbalance_sell = total_buy_volume / total_volume
+    else:
+        imbalance_sell = 0
 
     # Check for sell signal based on order book imbalance and significant buy volume
     if imbalance_sell >= imbalance_threshold and total_buy_volume >= volume_threshold_depth:
@@ -833,7 +851,11 @@ def process_depth_message(depth_ws, message):
          
 
     # Calculate Signal order book imbalance to buy
-    imbalance_buy = total_sell_volume / total_volume if total_volume > 0 else 0
+    if total_volume > 0:
+        imbalance_buy = total_sell_volume / total_volume
+    else:
+        imbalance_buy = 0
+
 
     # Check for buy signal based on order book imbalance and significant buy volume
     if imbalance_buy >= imbalance_threshold and total_sell_volume  >= volume_threshold_depth:
