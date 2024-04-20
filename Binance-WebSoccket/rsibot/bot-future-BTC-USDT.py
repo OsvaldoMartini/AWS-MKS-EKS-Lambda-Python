@@ -618,78 +618,80 @@ def process_kline_message(kline_ws, message):
                     curr_pnlProfitBuy = calculate_pnl_futures(futures_current_price, futures_entry_price, volume, True)
                     curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
                     
+                    # Trailing Stop ROI Buy
+                    if float(curr_roiProfitBuy) > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
+                        # sorted_roi.push(round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC))
+                        PROFITS["TRAIL_STOP_ROI_BUY"] = round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC)
+                        sorted_roi.push(round(curr_roiProfitBuy, DECIMAL_CALC))
+                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                        logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
+                        logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
+                        logger.info("NEW TRAILING STOP ROI {:.2f}".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
+                        logger.info("NEW TRAILING LAST ROI {:.2f}".format(sorted_roi.get_values()[-1]))
+                    else:
+                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                    
+                    # Condition where ROI 100% ABOVE INITIAL ROI
+                    ## Verifies the AVG between Initial and Last Added above 200% triggers
+                    ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
+                    if (calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1]) > ROI_PERC_GROWS):
+                        logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
+                        logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
+                        logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
+                        print_signals(futures_current_price, spot_current_price)
+                        ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
+                        if (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS):
+                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                    
+                    ## Verifies the AVG between All ROIs within the array Above 50% triggers
+                    if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
+                        logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
+                        logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
+                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {:.2F}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
+                        print_signals(futures_current_price, spot_current_price)
+                        ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
+                        if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
+                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+
+
+                        # Stop Losses or Take Profits
+                        if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (float(round(curr_roiProfitBuy, DECIMAL_CALC)) > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                            
+                            soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+
+                            if not BlockOrder:
+                                order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
+                                in_position = False        
+                                logger.info(order_succeeded)
+                            else:
+                                
+                                in_position = False           
+                                
+                                print_logger_results(soldDesc, soldDesc1, curr_roiProfitBuy, last_sma, last_rsi, spot_current_price, futures_current_price)
+                                
+                                if float(curr_pnlProfitBuy) >= 0:
+                                    TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                    last_profits.push(curr_pnlProfitBuy)
+                                else:
+                                    TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                    last_losses.push(curr_pnlProfitBuy)
+                                    
+                                curr_roiProfitBuy = 0
+                                curr_pnlProfitBuy = 0
+                                ROI_PERC_ATTEMPTS = 1
+                                ROI_AVG_GROWS_ATTEMPTS = 1
+                                # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                                # time.sleep(SLEEP_CLOSED)
+                                # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                                # Forcing the Condition to read again from beggining
+                                # last_rsi = RSI_OVERSOLD
+
+
                 if not ACTION_BUY:        
                     curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, False)
                     curr_roiProfitSell = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
                 
-                # Trailing Stop ROI Buy
-                if float(curr_roiProfitBuy) > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
-                    # sorted_roi.push(round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC))
-                    PROFITS["TRAIL_STOP_ROI_BUY"] = round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC)
-                    sorted_roi.push(round(curr_roiProfitBuy, DECIMAL_CALC))
-                    PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
-                    logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
-                    logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                    logger.info("NEW TRAILING STOP ROI {:.2f}".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
-                    logger.info("NEW TRAILING LAST ROI {:.2f}".format(sorted_roi.get_values()[-1]))
-                else:
-                    PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
                 
-                # Condition where ROI 100% ABOVE INITIAL ROI
-                ## Verifies the AVG between Initial and Last Added above 200% triggers
-                ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
-                if (calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1]) > ROI_PERC_GROWS):
-                    logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
-                    logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                    logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
-                    print_signals(futures_current_price, spot_current_price)
-                    ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
-                    if (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS):
-                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
-                
-                ## Verifies the AVG between All ROIs within the array Above 50% triggers
-                if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
-                    logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
-                    logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                    logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {:.2F}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
-                    print_signals(futures_current_price, spot_current_price)
-                    ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
-                    if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
-                        PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
-                
-                if ACTION_BUY:
-                    # Stop Losses or Take Profits
-                    if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (float(round(curr_roiProfitBuy, DECIMAL_CALC)) > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
-                        
-                        soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-
-                        if not BlockOrder:
-                            order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                            in_position = False        
-                            logger.info(order_succeeded)
-                        else:
-                            
-                            in_position = False           
-                            
-                            print_logger_results(soldDesc, soldDesc1, curr_roiProfitBuy, last_sma, last_rsi, spot_current_price, futures_current_price)
-                            
-                            if float(curr_pnlProfitBuy) >= 0:
-                                TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
-                                last_profits.push(curr_pnlProfitBuy)
-                            else:
-                                TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
-                                last_losses.push(curr_pnlProfitBuy)
-                                
-                            curr_roiProfitBuy = 0
-                            curr_pnlProfitBuy = 0
-                            ROI_PERC_ATTEMPTS = 1
-                            ROI_AVG_GROWS_ATTEMPTS = 1
-                            # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
-                            # time.sleep(SLEEP_CLOSED)
-                            # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
-                            # Forcing the Condition to read again from beggining
-                            # last_rsi = RSI_OVERSOLD
-
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
                      logger.info("Overbought! Waiting Profit Target {:.2f}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
@@ -719,7 +721,7 @@ def process_kline_message(kline_ws, message):
                 else:
                     logger.info("It is overbought, but we don't own any. Nothing to do.")
             
-            if last_rsi < RSI_OVERSOLD: # and SINAIS["MSG_3"] == "SELL IMBALANCE":             
+            if last_rsi < RSI_OVERSOLD: # and SINAIS["MSG_3"] == "BUY IMBALANCE":             
                 if in_position:
                     logger.info("It is oversold, but you already own it, nothing to do.")
                 else:
