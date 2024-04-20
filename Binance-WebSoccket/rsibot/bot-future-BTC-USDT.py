@@ -19,6 +19,21 @@ move_up = '\x1b[1A'  # Move cursor up one line
 move_down = '\x1b[1B'  # Move cursor down one line
 clear_line = '\x1b[2K'  # Clear the entire line
 
+def calculate_percentage_positive_negative(positive_value, negative_value):
+    absolute_positive = abs(positive_value)
+    absolute_negative = abs(negative_value)
+    
+    total_change = absolute_positive + absolute_negative
+    if absolute_positive > 0:
+        percentage_change = (total_change / absolute_positive) * 100
+    else:
+        percentage_change = 0
+    
+    if positive_value - abs(negative_value) > 0:
+        return percentage_change
+    else:
+        return -1 * percentage_change
+
 def calculate_percentage_change(old_value, new_value):
     return ((new_value - old_value) / old_value) * 100
 
@@ -62,10 +77,13 @@ class LastFiveStack():
     
     def average_percentage_growth(self):
         percentage_growths = []
-        for i in range(len(self.stack) - 1):
-            growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
-            percentage_growths.append(growth)
-        return sum(percentage_growths) / len(percentage_growths)
+        if (len(self.stack)) > 1:
+            for i in range(len(self.stack) - 1):
+                growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
+                percentage_growths.append(growth)
+            return sum(percentage_growths) / len(percentage_growths)
+        else:
+            return 0
 
 def aware_cetnow():
     # return datetime.now(timezone.utc) # uct
@@ -137,6 +155,11 @@ ROI_AVG_MAX_ATTEMPTS = 5
 roi_stack_size = 6
 sorted_roi = LastFiveStack(roi_stack_size)
 sorted_roi.push(ROI_PROFIT)
+
+
+last_profits = LastFiveStack(10)
+last_losses = LastFiveStack(10)
+
 
 # PRECISION_PROFIT_LOSS = 7 # CFXUSDT
 PRECISION_PROFIT_LOSS = 1 # BTCUSDT
@@ -392,8 +415,9 @@ def profit_calculus(action_buy, entry_price, volume):
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
     logger.info("----------------------------------            TOTAL  PROFIT AND LOSS                      ----------------------------------|")
     logger.info("                                                                                                                            |")
-    logger.info("PROFITS BUY  {:.2f} LOSSES BUY  {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_BUY'], 2), TOTALS['TOTAL_LOSSES_BUY'], TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY'])))
-    logger.info("PROFITS SELL {:.2f} LOSSES SELL {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2),TOTALS['TOTAL_LOSSES_SELL'], TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
+    perc_profit = last_profits.average_percentage_growth() - abs(last_losses.average_percentage_growth())
+    logger.info("PROFITS BUY  {:.2f}({:.2f}%) LOSSES BUY  {:.2f}({:.2f}%)  {:.2f}%   TOTAL {:.2f}".format(TOTALS['TOTAL_PROFITS_BUY'], last_profits.average_percentage_growth(), TOTALS['TOTAL_LOSSES_BUY'], last_losses.average_percentage_growth(), perc_profit, TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY'])))
+    logger.info("PROFITS SELL {:.2f} LOSSES SELL {:.2f}  {:.2f}%   TOTAL {:.2f}".format(TOTALS['TOTAL_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], 0,  TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
     logger.info("                                                                                                                            |")
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")   
          
@@ -405,7 +429,7 @@ def on_close(kline_ws):
     logger.info('closed connection')
 
 def process_kline_message(kline_ws, message):
-    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_GROWS_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS 
+    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_GROWS_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS, sorted_roi, last_profits, last_losses 
     
     # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -469,19 +493,20 @@ def process_kline_message(kline_ws, message):
             # logger.info("TICKER {}".format(ticker_future))
             futures_current_price = float(ticker_future['price'])
             # logger.info("FUTURE Entry Price {:.2f}".format(float(futures_current_price)))
-            init   = "    Initiate at: {} - utc".format(initial_procces_date)
+            init   = "    Initiate at: {} - cet".format(initial_procces_date)
             line1  = "    SIG BUY: {} SIG SELL: {}  {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"])
             line2  = "    VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] )
             line3  = "    IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"])
             line4  = "    SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi))
             line5  = "    SPOT   Current Price {:.2f}".format(float(spot_current_price))
             line6  = "    FUTURE Current Price {:.2f}".format(float(futures_current_price))
-            line7  = "    Return on Investment BUY  (ROI): {:.2f}%  Profit/Loss: ${:.2f} USDT".format(float(curr_roiProfitBuy), float(curr_pnlProfitBuy))
-            line8  = "    Return on Investment SELL (ROI): {:.2f}%  Profit/Loss: ${:.2f} USDT".format(float(curr_roiProfitSell), float(curr_pnlProfitSell))
-            line9  = "    PROFITS BUY  {:.2f} LOSSES BUY  {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_BUY'], 2), TOTALS['TOTAL_LOSSES_BUY'], TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']))
-            line10 = "    PROFITS SELL {:.2f} LOSSES SELL {:.2f}   TOTAL {:.2f}".format(round(TOTALS['TOTAL_PROFITS_SELL'], 2),TOTALS['TOTAL_LOSSES_SELL'], TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
-            line11 = "    TRAILING STOP ROI  BUY {:.2f}".format(PROFITS["TRAIL_STOP_ROI_BUY"])
-            line12 = "    TRAILING LAST ROI  BUY {:.2f}".format(PROFITS["TRAIL_LAST_ROI_BUY"])
+            line7  = "    Return on Investment BUY  (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitBuy), float(curr_pnlProfitBuy))
+            line8  = "    Return on Investment SELL (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitSell), float(curr_pnlProfitSell))
+            perc_profit = last_profits.average_percentage_growth() - abs(last_losses.average_percentage_growth())
+            line9  = "    PROFITS BUY  $ {:.2f}({:.2f}%) LOSSES BUY  $ {:.2f}({:.2f}%)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_BUY'], last_profits.average_percentage_growth(), TOTALS['TOTAL_LOSSES_BUY'], last_losses.average_percentage_growth(), perc_profit, TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']))
+            line10 = "    PROFITS SELL $ {:.2f} LOSSES SELL $ {:.2f}  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'],TOTALS['TOTAL_LOSSES_SELL'], 0, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
+            line11 = "    TRAILING STOP ROI  BUY {:.2f}%".format(PROFITS["TRAIL_STOP_ROI_BUY"])
+            line12 = "    TRAILING LAST ROI  BUY {:.2f}%".format(PROFITS["TRAIL_LAST_ROI_BUY"])
             
             
             lines = init + "\n" + line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10 +"\n" + line11  +"\n" + line12
@@ -549,6 +574,7 @@ def process_kline_message(kline_ws, message):
                 ## Verifies the AVG between Initial and Last Added above 200% triggers
                 ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
                 if (calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1]) > ROI_PERC_GROWS):
+                    logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
                     logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_GROWS_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
                     ROI_PERC_GROWS_ATTEMPTS = ROI_PERC_GROWS_ATTEMPTS + 1
                     if (ROI_PERC_GROWS_ATTEMPTS >= ROI_PERC_MAX_ATTEMPTS):
@@ -557,6 +583,7 @@ def process_kline_message(kline_ws, message):
                 
                 ## Verifies the AVG between All ROIs within the array Above 50% triggers
                 if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
+                    logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
                     logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {:.2F}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
                     ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
                     if ROI_AVG_GROWS_ATTEMPTS >= ROI_AVG_MAX_ATTEMPTS:
@@ -654,8 +681,10 @@ def process_kline_message(kline_ws, message):
                             
                             if float(curr_pnlProfitBuy) >= 0:
                                 TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                last_profits.push(curr_pnlProfitBuy)
                             else:
                                 TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                last_losses.push(curr_pnlProfitBuy)
                                 
                             curr_roiProfitBuy = 0
                             curr_pnlProfitBuy = 0
