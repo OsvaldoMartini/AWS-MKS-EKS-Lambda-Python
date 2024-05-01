@@ -1,14 +1,14 @@
     Initiate at: 17 04 2024 01:59:51 - utc
-    SIG BUY: 0 SIG SELL: 0  
-    VOL BUY: 19 VOL SELL: 22
-    IMB BUY: 0 IMB SELL: 4  ACTION: Volume DECREASED !  Sell signal detected  SELL IMBALANCE
-    SMA : 63689.42     RSI: 13.68
-    SPOT   Current Price 63689.42
-    FUTURE Current Price 63660.70
-    Return on Investment BUY  (ROI): 5.09%  Profit/Loss: $2.16 USDT
+    SIG BUY: 0 SIG SELL: 1  SELL SIGNAL
+    VOL BUY: 183 VOL SELL: 256
+    IMB BUY: 7 IMB SELL: 51  ACTION: Volume INCREASED !  Buy signal detected!  BUY IMBALANCE
+    SMA : 63644.37     RSI: 36.99
+    SPOT   Current Price 63653.69
+    FUTURE Current Price 63617.00
+    Return on Investment BUY  (ROI): 0.00%  Profit/Loss: $0.00 USDT
     Return on Investment SELL (ROI): 0.00%  Profit/Loss: $0.00 USDT
-    PROFITS BUY  4.09 LOSSES BUY  0.00   TOTAL 4.09
+    PROFITS BUY  13.63 LOSSES BUY  -2.09   TOTAL 11.54
     PROFITS SELL 0.00 LOSSES SELL 0.00   TOTAL 0.00
     TRAILING STOP ROI  BUY 2.00
-    TRAILING LAST ROI  BUY 6.62
-    OPEN BUY BTCUSDT Entry Price: 63703.80
+    TRAILING LAST ROI  BUY 2.00
+    OPEN BUY BTCUSDT Entry Price: 63611.00

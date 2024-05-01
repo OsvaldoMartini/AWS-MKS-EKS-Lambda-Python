@@ -1,0 +1,13 @@
+    Initiate at: 17 04 2024 10:53:35 - utc
+    SIG BUY: 0 SIG SELL: 1  SELL SIGNAL
+    VOL BUY: 15359 VOL SELL: 22161
+    IMB BUY: 695 IMB SELL: 14215  ACTION: Volume INCREASED !  Buy signal detected!  SELL IMBALANCE
+    SMA : 61198.06     RSI: 56.85
+    SPOT   Current Price 61199.65
+    FUTURE Current Price 61171.30
+    Return on Investment BUY  (ROI): 0.00%  Profit/Loss: $0.00 USDT
+    Return on Investment SELL (ROI): 0.00%  Profit/Loss: $0.00 USDT
+    PROFITS BUY  1141.80 LOSSES BUY  -366.55   TOTAL 775.25
+    PROFITS SELL 0.00 LOSSES SELL 0.00   TOTAL 0.00
+    TRAILING STOP ROI  BUY 2.00
+    TRAILING LAST ROI  BUY 34.14
