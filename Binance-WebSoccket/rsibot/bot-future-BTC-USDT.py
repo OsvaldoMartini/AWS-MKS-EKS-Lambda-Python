@@ -36,7 +36,7 @@ def calculate_percentage_positive_negative(positive_value, negative_value):
 
 def calculate_percentage_change(old_value, new_value):
     if old_value > 0:
-        return ((new_value - old_value) / old_value) * 100
+        return round(float(((new_value - old_value) / old_value) * 100), DECIMAL_CALC)
     else:
         return 0
 
@@ -95,14 +95,15 @@ class LastFiveStack():
             
         if count == 0:
             return 0  # If there were no valid growth calculations, return 0    
-        return sum(percentage_growths) / len(percentage_growths) 
+        return round(float(sum(percentage_growths) / len(percentage_growths)), DECIMAL_CALC) 
 
 def aware_cetnow():
     # return datetime.now(timezone.utc) # uct
     return datetime.now(tz=timezone(timedelta(hours=2)))
 
 def loggin_setup(filename):
-  log_filename = filename.lower() + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.log'
+  log_filename = filename.lower() + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.log'
+#   log_filename = filename.lower() + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.log'
   os.makedirs(os.path.dirname(log_filename), exist_ok=True)
   logging.basicConfig(filename=log_filename, format='%(levelname)s | %(asctime)s | %(message)s', datefmt='%m/%d/%Y %H:%M:%S %p', level=logging.DEBUG)
 
@@ -129,7 +130,7 @@ def print_file_status_name(lines):
 
 # Flag to indicate if threads should stop
 should_stop = False
-initial_procces_date = str(aware_cetnow().strftime('%d %m %Y %H:%M:%S'))
+initial_procces_date = aware_cetnow()
 # PROFIT_SELL = 1.0006
 # LOSS_SELL = 0.9995
 trail_percent = 2    # Trailing stop percentage (2% in this example)
@@ -137,7 +138,8 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
-profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.md'
+profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.md'
+# profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.md'
 
 DECIMAL_CALC = 2
 VOLUME_DEC = 5
@@ -146,11 +148,12 @@ QTY_BUY = 0.05 # USDT 0.005
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 41180
 ByPass = True
-BlockOrder = True
+BLOCK_ORDER = True
 
 ACTION_BUY = True
+ATTEMPT_RATIO = 0.00005
 
-SYMBOL_LEVERAGE = 75
+TRADE_LEVERAGE = 75
 
 ROI_PROFIT = 1.5
 ROI_STOP_LOSS = -0.45
@@ -219,9 +222,10 @@ loggin_setup("./logs/bot_A_FUTURE_{}_mcda_rsi".format(TRADE_SYMBOL))
 
 closes = []
 in_position = False
+
 # futures_entry_price = 39570.01 
 futures_entry_price = 0
-spot_entry_price = 0;
+spot_entry_price = 0
 # forceSell = 39800.94000000
 
 SINAIS = {}
@@ -234,10 +238,9 @@ SINAIS["SELL_VOL_IMB"] = 0
 SINAIS["MSG_1"] = "" 
 SINAIS["MSG_2"] = "" 
 SINAIS["MSG_3"] = "" 
-SINAIS['ENTRY_POINT'] = ""
+SINAIS["ENTRY_POINT"] = "" 
 SINAIS["LAST_SMA"] = ""
 SINAIS["LAST_RSI"] = ""
-            
 
 TOTALS = {}
 TOTALS['TOTAL_PROFITS_BUY'] = 0 
@@ -327,18 +330,66 @@ def calculate_signal_by_historical(close):
             SINAIS["SELL_HIST"] = 0 
             SINAIS["MSG_1"] = "BUY  SIGNAL"  
             # print("Buy signal detected! Buy signal detected!")
-          
-
-def order(side, symbol, quoteOrderQty, order_type):
+      
+      
+# FUTURES
+def order_future_cancel_all_open_order(symbol):
     try:
-        logger.info("sending order  SIDE {} QTY {} ".format( side, quoteOrderQty ))
-        order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
+        # logger.info("Cancel All open Orders / Closing All  {} ".format( symbol))
+        # cleardualSidePosition='false', 
+        order = client.futures_cancel_all_open_orders(symbol=symbol, 
+                                            timeInForce='GTC',  # GTC (Good 'Til Canceled)
+                                            recvWindow = 60000)
+        # logger.info(order)
+    except Exception as e:
+        logger.info("an exception occured - {}".format(e))
+    return order     
+
+# FUTURES
+def order_future_create_order(side, symbol, quantity, positionSide, order_type):
+    try:
+        logger.info("FUTURES sending order  SIDE {} QTD {} ".format( side, quantity))
+        # dualSidePosition='false', 
+        order = client.futures_create_order(symbol=symbol, 
+                                            side=side, 
+                                            positionSide=positionSide,  
+                                            type=order_type, 
+                                            quantity=quantity, 
+                                            recvWindow = 60000)
         logger.info(order)
     except Exception as e:
         logger.info("an exception occured - {}".format(e))
     return order
 
-def orderSell(side, symbol, quantity, order_type, soldDesc):
+# FUTURES
+def order_future_cancel_REDUCE_only(side, symbol, quantity, positionSide, order_type):
+    try:
+        logger.info("reduce 100% Cancel Order / Closing Order  {} QTY {} ".format(symbol, quantity))
+        # dualSidePosition='false', 
+        order = client.futures_create_order(side=side, 
+                                            symbol=symbol,
+                                            quantity=quantity,
+                                            positionSide='BOTH',  
+                                            type='MARKET', 
+                                            reduceOnly=True, 
+                                            recvWindow = 60000)        
+        logger.info(order)
+    except Exception as e:
+        logger.info("an exception occured - {}".format(e))
+    return order
+
+# SPOT
+def order_spot(side, symbol, quoteOrderQty, order_type):
+    try:
+        logger.info("sending order  SIDE {} QTY {} ".format( side, quoteOrderQty ))
+        order = client.create_order(symbol=symbol, side=side, type=order_type, quoteOrderQty=quoteOrderQty, recvWindow = 60000)
+        logger.info(order)
+        return order
+    except Exception as e:
+        logger.info("an exception occured - {}".format(e))
+    return False
+
+def order_sell(side, symbol, quantity, order_type, soldDesc, attemptRatio):
     try:
         logger.info("sending order  SIDE {} QTY {} SOLD MOTIVE: {}".format(side, quantity , soldDesc))
         order = client.create_order(side=side, symbol=symbol, quantity=quantity, type=order_type, recvWindow = 60000)
@@ -347,9 +398,10 @@ def orderSell(side, symbol, quantity, order_type, soldDesc):
         logger.info("an exception occured - {}".format(e))
         order = False
         while str(e).find("Account has insufficient balance for requested") >= 0 and not order:
-            quantity = math.trunc(quantity - 1) 
-            logger.info("Attempt to SELL {}".format(str(quantity)))
-            order = orderSell(side, symbol, math.trunc(quantity) , order_type, soldDesc)    
+            quantity -= attemptRatio
+            # quantity = math.trunc(quantity) 
+            logger.info("Attempt to SELL {}".format(round(quantity, VOLUME_DEC)))
+            order = order_sell(side, symbol, quantity , order_type, soldDesc, attemptRatio)    
     return order
 
 def get_current_price_futures(symbol):
@@ -361,15 +413,24 @@ def get_current_price_futures(symbol):
 
 
 def calculate_pnl_futures(entry_price, exit_price, quantity, action_buy):
+    
     if action_buy:
         pnl = (exit_price - entry_price) * quantity
     elif not action_buy:
         pnl = (entry_price - exit_price) * quantity
     else:
         raise ValueError("Invalid side provided")
-    return pnl   
+    
+    # if action_buy:
+    #     logger.info("BUY  PNL Calc Entry: {}   Current: {}   QTY {}  PNL {}".format(entry_price, exit_price, quantity, pnl))
+    # if not action_buy:    
+    #     logger.info("SELL PNL Calc Entry: {}   Current: {}   QTY {}  PNL {}".format(entry_price, exit_price, quantity, pnl))
+    
+    
+    return round(float(pnl), DECIMAL_CALC)  
 
-def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, imr=1):
+def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, action_buy, imr=1):
+    
     # Calculate the total value at entry and exit
     # total_entry_value = entry_price * quantity
     # total_exit_value = exit_price * quantity
@@ -378,26 +439,32 @@ def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, imr=1):
     # logger.info("exit_price {}".format(exit_price)) 
     # logger.info("quantity {}".format(quantity)) 
     # logger.info("imr {}".format(imr)) 
-
+    
+    
     if entry_price > 0:
-        roi = (((exit_price - entry_price) * imr ) / entry_price)
+        roi = (((exit_price - entry_price) * imr ) / entry_price) * 100
     else:
         roi = 0    
 
+    # if action_buy:
+    #     logger.info("BUY  ROI Calc Entry: {}   Current: {}   QTY {}  Lev: {} ROI: {}".format(entry_price, exit_price, quantity, imr, roi))
+    # if not action_buy:    
+    #     logger.info("SELL ROI Calc Entry: {}   Current: {}   QTY {}  Lev: {} ROI: {}".format(exit_price, entry_price, quantity, imr, roi))
+    
+    
     # logger.info("FUTURES ROI {} TOTAL ENTRY {} TOTAL EXIT {} ".format( round(roi, 2), round(total_entry_value, 1), round(total_exit_value, 1)))
 
     # Calculate the profit or loss
     # pnl = total_exit_value - total_entry_value
 
-    return roi * 100
+    return round(float(roi), DECIMAL_CALC)
 
 def profit_calculus(tradeType, action_buy, spot_entry_price, futures_entry_price, volume):
-    
     # if action_buy:
-    #     logger.info("SIMULATED BOUGHT PRICE: {:.2f}".format(futures_entry_price))
+    #     logger.info("{} BOUGHT PRICE: {}".format(tradeType, entry_price))
 
     # if not action_buy:
-    #     logger.info("SIMULATED SELL   PRICE: {:.2f}".format(futures_entry_price))
+    #     logger.info("{} SELL   PRICE: {}".format(tradeType, entry_price))
 
     #Futures Prices Profit & Loss When Buy
     PROFITS["WHEN_BUY"] = round(float(futures_entry_price) * float(BUY_PROFIT_CALC), PRECISION_PROFIT_LOSS)  
@@ -415,32 +482,32 @@ def profit_calculus(tradeType, action_buy, spot_entry_price, futures_entry_price
 
 
     pnlProfitBuy = calculate_pnl_futures(futures_entry_price, PROFITS["WHEN_BUY"], volume, True)
-    roiProfitBuy = mine_calculate_roi_with_imr(futures_entry_price, PROFITS["WHEN_BUY"], volume, SYMBOL_LEVERAGE)
+    roiProfitBuy = mine_calculate_roi_with_imr(futures_entry_price, PROFITS["WHEN_BUY"], volume, True, TRADE_LEVERAGE)
     pnlLossBuy = calculate_pnl_futures(futures_entry_price, LOSSES["WHEN_BUY"], volume, True)
-    roiLossBuy = mine_calculate_roi_with_imr(futures_entry_price, LOSSES["WHEN_BUY"], volume, SYMBOL_LEVERAGE)
+    roiLossBuy = mine_calculate_roi_with_imr(futures_entry_price, LOSSES["WHEN_BUY"], volume, True, TRADE_LEVERAGE)
             
     pnlProfitSell = calculate_pnl_futures(futures_entry_price, PROFITS["WHEN_SELL"],  volume, False)
-    roiProfitSell = mine_calculate_roi_with_imr(PROFITS["WHEN_SELL"], futures_entry_price, volume, SYMBOL_LEVERAGE)
+    roiProfitSell = mine_calculate_roi_with_imr(PROFITS["WHEN_SELL"], futures_entry_price, volume, False, TRADE_LEVERAGE)
     pnlLossSell = calculate_pnl_futures(futures_entry_price, LOSSES["WHEN_SELL"], volume, False)
-    roiLossSell = mine_calculate_roi_with_imr(LOSSES["WHEN_SELL"], futures_entry_price, volume, SYMBOL_LEVERAGE)
+    roiLossSell = mine_calculate_roi_with_imr(LOSSES["WHEN_SELL"], futures_entry_price, volume, False, TRADE_LEVERAGE)
 
     logger.info("----------------------------------            CALCULUS  ENTRY PRICE                       ----------------------------------|")
     logger.info(tradeType)
     logger.info("                                                                                                                            |")
     logger.info("FUTURE Volume {} --->  Quantity USD: {}".format(volume, round(futures_entry_price * volume, 2)))
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")
-    logger.info("  Entry Price SPOT    {:.2f}".format(float(spot_entry_price)))
-    logger.info("  Entry Price FUTURES {:.2f}".format(float(futures_entry_price)))
+    logger.info("  Entry Price SPOT    {}".format(float(spot_entry_price)))
+    logger.info("  Entry Price FUTURES {}".format(float(futures_entry_price)))
     print_signals(True)
     logger.info("                                                                                                                            |")
-    logger.info("BUY  ENTRY_PRICE {:.2f} TAKE_PROFIT_WHEN   {:.2f} ROI: {}% PNL: {}".format(futures_entry_price, PROFITS["WHEN_BUY"], round(roiProfitBuy, 2), round(pnlProfitBuy, 2)))
-    logger.info("BUY  ENTRY_PRICE {:.2f} REDUCE_LOSSES_WHEN {:.2f} ROI: {}% PNL: {}".format(futures_entry_price, LOSSES["WHEN_BUY"], round(roiLossBuy, 2), round(pnlLossBuy, 2)))
-    #logger.info("BUY  TRAILING STOP PRICE PROFIT {:.2f}".format(PROFITS["TRAIL_STOP_PRICE_BUY"]))
-    logger.info("BUY  TRAILING STOP ROI PROFIT {:.2f}%".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
-    logger.info("BUY  TRAILING LAST ROI PROFIT {:.2f}%".format(PROFITS["TRAIL_LAST_ROI_BUY"]))
+    logger.info("BUY  ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(futures_entry_price, PROFITS["WHEN_BUY"], roiProfitBuy, pnlProfitBuy))
+    logger.info("BUY  ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(futures_entry_price, LOSSES["WHEN_BUY"], roiLossBuy, pnlLossBuy))
+    #logger.info("BUY  TRAILING STOP PRICE PROFIT {}".format(PROFITS["TRAIL_STOP_PRICE_BUY"]))
+    logger.info("BUY  TRAILING STOP ROI PROFIT {}%".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
+    logger.info("BUY  TRAILING LAST ROI PROFIT {}%".format(PROFITS["TRAIL_LAST_ROI_BUY"]))
     logger.info("                                                                                                                            |")
-    logger.info("SELL ENTRY_PRICE {:.2f} TAKE_PROFIT_WHEN   {:.2f} ROI: {}% PNL: {}".format(futures_entry_price, PROFITS["WHEN_SELL"], round(roiProfitSell, 2), round(pnlProfitSell, 2)))
-    logger.info("SELL ENTRY_PRICE {:.2f} REDUCE_LOSSES_WHEN {:.2f} ROI: {}% PNL: {}".format(futures_entry_price, LOSSES["WHEN_SELL"], round(roiLossSell, 2), round(pnlLossSell, 2)))
+    logger.info("SELL ENTRY_PRICE {} TAKE_PROFIT_WHEN   {} ROI: {}% PNL: {}".format(futures_entry_price, PROFITS["WHEN_SELL"], roiProfitSell, pnlProfitSell))
+    logger.info("SELL ENTRY_PRICE {} REDUCE_LOSSES_WHEN {} ROI: {}% PNL: {}".format(futures_entry_price, LOSSES["WHEN_SELL"], roiLossSell, pnlLossSell))
     logger.info("                                                                                                                            |")
     logger.info("----------------------------------            TOTAL  PROFIT AND LOSS                      ----------------------------------|")
     logger.info("                                                                                                                            |")
@@ -448,8 +515,8 @@ def profit_calculus(tradeType, action_buy, spot_entry_price, futures_entry_price
     perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
     perc_losses = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
     
-    logger.info("PROFITS BUY  $ {:.2f}({:.2f}% {} tt) LOSSES BUY  $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_BUY'],  last_profits_buy.average_percentage_growth(),  TOTALS['COUNT_PROFITS_BUY'],  TOTALS['TOTAL_LOSSES_BUY'],  last_losses_buy.average_percentage_growth(),  TOTALS['COUNT_LOSSES_BUY'],   perc_profit, TOTALS['TOTAL_PROFITS_BUY'] -  abs(TOTALS['TOTAL_LOSSES_BUY'])))
-    logger.info("PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
+    logger.info("PROFITS BUY  $ {}({}% {} tt) LOSSES BUY  $ {}({}% {} tt)  {}%  TOTAL {} USDT".format(TOTALS['TOTAL_PROFITS_BUY'],  last_profits_buy.average_percentage_growth(),  TOTALS['COUNT_PROFITS_BUY'],  TOTALS['TOTAL_LOSSES_BUY'],  last_losses_buy.average_percentage_growth(),  TOTALS['COUNT_LOSSES_BUY'],   perc_profit, TOTALS['TOTAL_PROFITS_BUY'] -  abs(TOTALS['TOTAL_LOSSES_BUY'])))
+    logger.info("PROFITS SELL $ {}({}% {} tt) LOSSES SELL $ {}({}% {} tt)  {}%  TOTAL {} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
     logger.info("                                                                                                                            |")
     logger.info(tradeType)
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")   
@@ -463,16 +530,16 @@ def on_close(kline_ws):
   
 def print_signals(entryPoint):
     if entryPoint:
-        SINAIS['ENTRY_POINT'] = "  BUY: {} SELL: {} SIG: {} ACTION: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {:.2f} RSI: {:.2f}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["MSG_3"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"],  SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]) 
+        SINAIS['ENTRY_POINT'] = "  BUY: {} SELL: {} SIG: {} ACTION: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {} RSI: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["MSG_3"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"],  SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]) 
          
-    logger.info("  BUY: {} SELL: {} SIG: {} ACTION: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {:.2f} RSI: {:.2f}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["MSG_3"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"], SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]))
-    
+    logger.info("  BUY: {} SELL: {} SIG: {} ACTION: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {} RSI: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["MSG_3"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"], SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]))
+
 def print_logger_results(tradeType, soldDesc, soldDesc1, curr_roiProfitBuy):
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
     logger.info(tradeType)
     logger.info("                                                                                                                            |")
     logger.info("    " + soldDesc)                             
-    logger.info("    Return on Investment (ROI): {:.2f}%".format(float(curr_roiProfitBuy)))
+    logger.info("    Return on Investment (ROI): {}%".format(curr_roiProfitBuy))
     logger.info("    " + soldDesc1)
     logger.info("-----------------     ENTRY POINT SIGNALS     ------------------------------------------------------------------------------|")    
     logger.info(SINAIS['ENTRY_POINT'])
@@ -486,19 +553,19 @@ def print_logger_results(tradeType, soldDesc, soldDesc1, curr_roiProfitBuy):
 def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
     soldDesc = "Empty"
     soldDesc1 ="Empty"
-    if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)): # STOP LOSS
-        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Losses ROI Buy {:.2f}% < {:.2f}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) 
-        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+    if (curr_roiProfitBuy < float(ROI_STOP_LOSS)): # STOP LOSS
+        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Losses ROI Buy {}% < {}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) 
+        soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 1") 
 
     if (float(current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC))): # STOP LOSS
-        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Price {:.2f} <= Losses Price {:.2f})".format(current_price,  LOSSES["WHEN_BUY"])
-        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy) 
+        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Price {} <= Losses Price {})".format(current_price,  LOSSES["WHEN_BUY"])
+        soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy) 
         logger.info("Reason 2") 
     
     if ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
-        soldDesc1 = "1) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc1 = "1) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 3") 
 
     if ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
@@ -512,7 +579,7 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
         logger.info("Reason 5") 
         
     if (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI_AVG_GROWS_ATTEMPTS {}% > ROI_AVG_MAX_ATTEMPTS {}%)".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI AVG GROWS ATTEMPTS {} > ROI AVG MAX ATTEMPTS {})".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
         soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 6")     
     
@@ -522,6 +589,13 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
         logger.info("Reason 7")
         
     return soldDesc, soldDesc1 
+
+def print_status_negative(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
+    logger.info("LOSSES {} ".format(curr_roiProfitBuy < float(ROI_STOP_LOSS)))
+    logger.info("\n  current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {} \n  ROI_PROFIT {} ROI_STOP_LOSS {} \n  PROFITS {} LOSSES {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
+
+def print_status_positive(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
+    logger.info("\n  current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
 
 def process_kline_message(kline_ws, message):
     global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, spot_entry_price, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS, sorted_roi, last_profits_buy, last_losses_buy, last_profits_sell, last_losses_sell  
@@ -584,37 +658,51 @@ def process_kline_message(kline_ws, message):
             
             # SPOT Entry Price
             spot_current_price = float(close)
-            # logger.info("SPOT   Entry Price {:.2f}".format(float(spot_current_price)))
+            # logger.info("SPOT   Entry Price {}".format(float(spot_current_price)))
 
             # FUTURE Entry
             ticker_future = get_current_price_futures(TRADE_SYMBOL)
             # logger.info("TICKER {}".format(ticker_future))
             futures_current_price = float(ticker_future['price'])
-            # logger.info("FUTURE Entry Price {:.2f}".format(float(futures_current_price)))
-            init   = "    Initiate at: {} - cet".format(initial_procces_date)
+            # logger.info("FUTURE Entry Price {}".format(float(futures_current_price)))
+            # Get the current time
+            current_time = aware_cetnow()
+
+            # Calculate the difference
+            time_difference = current_time - initial_procces_date
+
+            # Extract specific components of the time difference
+            days = time_difference.days
+            hours, remainder = divmod(time_difference.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            # Print the difference in a formatted way
+            # init   = "    Initiate at: {} - cet  Run: {} days, {} hours, {} minutes, {} seconds ".format(initial_procces_date, time_difference)
+            init   = "    Initiate at: {} - cet  Run: {} days, {} hours, {} minutes, {} seconds".format(str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')), days, hours, minutes, seconds)
             line1  = "    SIG BUY: {} SIG SELL: {}  {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"])
             line2  = "    VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] )
             line3  = "    IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"])
-            line4  = "    SMA : {:.2f}     RSI: {:.2f}".format(float(last_sma), float(last_rsi))
-            line5  = "    SPOT   Current Price {:.2f}".format(float(spot_current_price))
-            line6  = "    FUTURE Current Price {:.2f}".format(float(futures_current_price))
-            line7  = "    Return on Investment BUY  (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitBuy), float(curr_pnlProfitBuy))
-            line8  = "    Return on Investment SELL (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitSell), float(curr_pnlProfitSell))
+            line4  = "    SMA : {}     RSI: {}".format(float(last_sma), float(last_rsi))
+            line5  = "    SPOT   Current Price {}".format(float(spot_current_price))
+            line6  = "    FUTURE Current Price {}".format(float(futures_current_price))
+            line7  = "    Return on Investment BUY  (ROI): {}%  Profit/Loss: {} USDT".format(curr_roiProfitBuy, curr_pnlProfitBuy)
+            line8  = "    Return on Investment SELL (ROI): {}%  Profit/Loss: {} USDT".format(curr_roiProfitSell, float(curr_pnlProfitSell))
             
             perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
             perc_losses = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
             
-            line9  = "    PROFITS BUY  $ {:.2f}({:.2f}% {} tt) LOSSES BUY  $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_BUY'], last_profits_buy.average_percentage_growth(), TOTALS['COUNT_PROFITS_BUY'], TOTALS['TOTAL_LOSSES_BUY'], last_losses_buy.average_percentage_growth(), TOTALS['COUNT_LOSSES_BUY'], perc_profit, TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']))
-            line10 = "    PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'],  last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
-            line11 = "    TRAILING STOP ROI  BUY {:.2f}%".format(PROFITS["TRAIL_STOP_ROI_BUY"])
-            line12 = "    TRAILING LAST ROI  BUY {:.2f}%".format(PROFITS["TRAIL_LAST_ROI_BUY"])
+            line9  = "    PROFITS BUY  $ {}({}% {} tt) LOSSES BUY  $ {}({}% {} tt)  {}%  TOTAL {} USDT".format(TOTALS['TOTAL_PROFITS_BUY'], last_profits_buy.average_percentage_growth(), TOTALS['COUNT_PROFITS_BUY'],    TOTALS['TOTAL_LOSSES_BUY'],  last_losses_buy.average_percentage_growth(),  TOTALS['COUNT_LOSSES_BUY'], perc_profit,  TOTALS['TOTAL_PROFITS_BUY']  - abs(TOTALS['TOTAL_LOSSES_BUY']))
+            line10 = "    PROFITS SELL $ {}({}% {} tt) LOSSES SELL $ {}({}% {} tt)  {}%  TOTAL {} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], last_losses_sell.average_percentage_growth(), TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
+            line11 = "    TRAILING STOP ROI  BUY {}%".format(PROFITS["TRAIL_STOP_ROI_BUY"])
+            line12 = "    TRAILING LAST ROI  BUY {}%".format(PROFITS["TRAIL_LAST_ROI_BUY"])
             
             
             lines = init + "\n" + line1 +"\n" + line2 +"\n" + line3 +"\n" + line4 +"\n" + line5 +"\n" + line6 +"\n" + line7 +"\n" + line8 +"\n" + line9 +"\n" + line10 +"\n" + line11  +"\n" + line12
             
             ## Only Futures 
             if in_position:
-                openPos = "    OPEN BUY {} Entry Price: {:.2F}" if ACTION_BUY else "    OPEN SELL {} Entry Price: {:.2F}"  
+                openPos = "    OPEN BUY {} Entry Price: {}" if ACTION_BUY else "    OPEN SELL {} Entry Price: {}"  
+                # line13 = openPos.format (TRADE_SYMBOL, futures_entry_price)
                 line13 = openPos.format (TRADE_SYMBOL, futures_entry_price)
                 lines = lines +"\n" + line13
             
@@ -641,26 +729,32 @@ def process_kline_message(kline_ws, message):
             if not in_position:
                 # print("RSI: {}  current Close is {}  SMA: {}".format (round(last_rsi, 2),  close, last_sma))
                 buyPassWhen = "By Pass Active" if ByPass else "BUY WHEN {}".format(ONLY_BY_WHEN)  
-                # logger.info("SPOT   Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(spot_current_price), buyPassWhen, float(last_rsi)))
-                # logger.info("FUTURE Current Close is {:.2f}  {}  RSI: {:.2f}".format (float(futures_current_price), buyPassWhen, float(last_rsi)))
+                # logger.info("SPOT   Current Close is {}  {}  RSI: {}".format (float(spot_current_price), buyPassWhen, float(last_rsi)))
+                # logger.info("FUTURE Current Close is {}  {}  RSI: {}".format (float(futures_current_price), buyPassWhen, float(last_rsi)))
             if in_position:
+
+                if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
+                    print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
+                    print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+ 
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
-                # logger.info("SPOT:   {} Buy Price {:.2f} Volume {} Qty {} Target Profit {:.2f}  Stop Loss {:.2f} Current Price {:.2f}  RSI: {:.2f}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
+                # logger.info("SPOT:   {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
                 if ACTION_BUY:
                     curr_pnlProfitBuy = calculate_pnl_futures(futures_current_price, futures_entry_price, volume, True)
-                    curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
+                    curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, TRADE_LEVERAGE)
                     
                     # Trailing Stop ROI Buy
-                    if round(curr_roiProfitBuy, DECIMAL_CALC) > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
-                        logger.info("Trailing Stop ROI Buy: curr_roiProfitBuy {}  > ROI (Last 6) {}".format(round(curr_roiProfitBuy, DECIMAL_CALC), float(sorted_roi.get_values()[-1])))
+                    if curr_roiProfitBuy > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
+                        logger.info("Trailing Stop ROI Buy: curr_roiProfitBuy {}  > ROI (Last 6) {}".format(curr_roiProfitBuy, float(sorted_roi.get_values()[-1])))
                         # sorted_roi.push(round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC))
                         PROFITS["TRAIL_STOP_ROI_BUY"] = round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC)
-                        sorted_roi.push(round(curr_roiProfitBuy, DECIMAL_CALC))
+                        sorted_roi.push(curr_roiProfitBuy)
                         PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
-                        logger.info("ROI: {}".format(round(curr_roiProfitBuy, DECIMAL_CALC)))
+                        logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("NEW TRAILING STOP ROI {:.2f}".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
-                        logger.info("NEW TRAILING LAST ROI {:.2f}".format(sorted_roi.get_values()[-1]))
+                        logger.info("NEW TRAILING STOP ROI {}".format(PROFITS["TRAIL_STOP_ROI_BUY"]))
+                        logger.info("NEW TRAILING LAST ROI {}".format(sorted_roi.get_values()[-1]))
                         print_signals(False)
                     else:
                         PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
@@ -671,8 +765,8 @@ def process_kline_message(kline_ws, message):
                     if (ROIS_GROWS_CALC > ROI_PERC_GROWS):
                         logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Calculate Percentage Change: {}  >  ROIS_GROWS_CALC {}".format(ROIS_GROWS_CALC, ROI_PERC_GROWS))
-                        logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
+                        logger.info("Calculate Percentage Change: {}%  >  ROIS_GROWS_CALC {}%".format(ROIS_GROWS_CALC, ROI_PERC_GROWS))
+                        logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {}% LAST ROI {}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
                         if (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS):
@@ -682,31 +776,35 @@ def process_kline_message(kline_ws, message):
                     if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
                         logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Average Percentage Growth: {}  >  ROI_AVG_GROWS {}".format(sorted_roi.average_percentage_growth(), ROI_AVG_GROWS))
-                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
+                        logger.info("Average Percentage Growth: {}%  >  ROI_AVG_GROWS {}%".format(sorted_roi.average_percentage_growth(), ROI_AVG_GROWS))
+                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {} GROWS {} LAST ROI {}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
                         if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
                             PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
 
 
-                        # Stop Losses or Take Profits
-                        if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
-                            
-                            soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                    # Stop Losses or Take Profits
+                    if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                        
+                        soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
-                            if not BlockOrder:
-                                order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                                in_position = False        
-                                logger.info(order_succeeded)
-                            else:
+                        if not BLOCK_ORDER:
+                            # order_spot = order_sell(SIDE_SELL, TRADE_SYMBOL.upper(), round(volume, VOLUME_DEC), ORDER_TYPE_MARKET, soldDesc, ATTEMPT_RATIO)
+                            # logger.info("SPOT Order Closed: {}".format(order_spot))
+                            
+                            # FUTURES CLOSE BY REDUCING 100% THE ORDER
+                            order_future = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                            order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                            logger.info("FUTURE Order Closed: {}".format(order_future))
+                            
+                            if order_future:
+                                in_position = False
                                 
-                                in_position = False           
-                                
-                                print_logger_results("SIMULATED", soldDesc, soldDesc1, curr_roiProfitBuy)
+                                print_logger_results("REAL TRADE", soldDesc, soldDesc1, curr_roiProfitBuy)
                                 SINAIS['ENTRY_POINT'] = ""
                                 
-                                if float(curr_pnlProfitBuy) >= 0:
+                                if curr_pnlProfitBuy >= 0:
                                     TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
                                     TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
                                     last_profits_buy.push(curr_pnlProfitBuy)
@@ -719,84 +817,211 @@ def process_kline_message(kline_ws, message):
                                 curr_pnlProfitBuy = 0
                                 ROI_PERC_ATTEMPTS = 1
                                 ROI_AVG_GROWS_ATTEMPTS = 1
-                                # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
-                                # time.sleep(SLEEP_CLOSED)
-                                # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
-                                # Forcing the Condition to read again from beggining
-                                # last_rsi = RSI_OVERSOLD
-
-
-                if not ACTION_BUY:        
-                    curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, False)
-                    curr_roiProfitSell = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, SYMBOL_LEVERAGE)
-                
-                
-            if last_rsi > RSI_OVERBOUGHT:
-                if in_position:
-                     logger.info("Overbought! Waiting Profit Target {:.2f}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
-                     
-                     if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
-                       
-                        soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
                             
-                        if not BlockOrder:  
-                            logger.info("Overbought! Sell! Sell! Sell!")
-                            order_succeeded = orderSell(SIDE_SELL, TRADE_SYMBOL.upper(), int(math.trunc(amountQty)), ORDER_TYPE_MARKET, soldDesc)
-                            logger.info(order_succeeded)
+                            
                         else:
-                            logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
                             
                             in_position = False
                             
                             print_logger_results("SIMULATED", soldDesc, soldDesc1, curr_roiProfitBuy)
                             SINAIS['ENTRY_POINT'] = ""
-
-                            if float(curr_pnlProfitBuy) >= 0:
+                            
+                            if curr_pnlProfitBuy >= 0:
                                 TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
                                 TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
+                                last_profits_buy.push(curr_pnlProfitBuy)
                             else:
                                 TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
-                                TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1
+                                TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1    
+                                last_losses_buy.push(curr_pnlProfitBuy)
+                                
+                            curr_roiProfitBuy = 0
+                            curr_pnlProfitBuy = 0
+                            ROI_PERC_ATTEMPTS = 1
+                            ROI_AVG_GROWS_ATTEMPTS = 1
+                            # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                            # time.sleep(SLEEP_CLOSED)
+                            # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
+                            # Forcing the Condition to read again from beggining
+                            # last_rsi = RSI_OVERSOLD
+
+
+                if not ACTION_BUY:        
+                    curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, False)
+                    curr_roiProfitSell = mine_calculate_roi_with_imr(futures_current_price, futures_entry_price, volume, TRADE_LEVERAGE)
+                
+                
+            if last_rsi > RSI_OVERBOUGHT:
+                if in_position:
+                    
+                     if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
+                        print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                     if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
+                        print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+
+                     logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
+                     
+                     if ACTION_BUY:  
+                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                        
+                            soldDesc, soldDesc1 = print_decisions(spot_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                                
+                            if not BLOCK_ORDER:  
+                                logger.info("Overbought! Sell! Sell! Sell!")
+                                
+                                # SPOT
+                                # order_spot = order_sell(SIDE_SELL, TRADE_SYMBOL.upper(), round(volume, VOLUME_DEC), ORDER_TYPE_MARKET, soldDesc, ATTEMPT_RATIO)
+                                # logger.info("SPOT Order Closed: {}".format(order_spot))
+                                
+                                order_future = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                                order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                logger.info("FUTURE Order Closed: {}".format(order_future))
+                                
+                                
+                                # FUTURES CLOSE BY REDUCING 100% THE ORDER
+                                # orderFuture = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                                # orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                # logger.info(orderFuture)
+                                
+                                if order_future:
+                                    in_position = False
+                                    
+                                    print_logger_results("REAL TRADE",soldDesc, soldDesc1, curr_roiProfitBuy)
+                                    SINAIS['ENTRY_POINT'] = ""
+
+                                    if curr_pnlProfitBuy >= 0:
+                                        TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                        TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
+                                    else:
+                                        TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                        TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1
+                                        
+                                    curr_roiProfitBuy = 0
+                                    curr_pnlProfitBuy = 0
+                                    ROI_PERC_ATTEMPTS = 1
+                                    ROI_AVG_GROWS_ATTEMPTS = 1
+                                    
+                                
+                            else:
+                                logger.info("SIMULATED Overbought! Sell! Sell! Sell!")
+                                
+                                in_position = False
+                                
+                                print_logger_results("SIMULATED", soldDesc, soldDesc1, curr_roiProfitBuy)
+                                SINAIS['ENTRY_POINT'] = ""
+                                
+                                if curr_pnlProfitBuy >= 0:
+                                    TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                    TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
+                                else:
+                                    TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                    TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1
+                                
+                                curr_roiProfitBuy = 0
+                                curr_pnlProfitBuy = 0
+                                ROI_PERC_ATTEMPTS = 1
+                                ROI_AVG_GROWS_ATTEMPTS = 1
+                                    
+                                    
                               
                 else:
                     logger.info("It is overbought, but we don't own any. Nothing to do.")
             
-            if last_rsi < RSI_OVERSOLD: # and SINAIS["MSG_3"] == "BUY IMBALANCE":             
+            # if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] == "BUY IMBALANCE" and SINAIS["MSG_1"] == "BUY  SIGNAL":             
+            if last_rsi < RSI_OVERSOLD:             
                 if in_position:
                     logger.info("It is oversold, but you already own it, nothing to do.")
                 else:
                     
-                    logger.info("Oversold! Buy! Buy! Buy! QTY: {} Spot Curr  Price: {:.2f}, Futures Curr  Price: {:.2f}".format(round(QTY_BUY, VOLUME_DEC), spot_current_price, futures_current_price))
+                    # logger.info("Oversold! Buy! Buy! Buy! QTY: {} Futures Curr. Price: {}".format(round(QTY_BUY, VOLUME_DEC), futures_current_price))
+                    logger.info("Oversold! Buy! Buy! Buy! QTY: {} Spot Curr  Price: {}, Futures Curr  Price: {}".format(round(QTY_BUY, VOLUME_DEC), spot_current_price, futures_current_price))
                     
                     # put binance buy order logic here
-                    if float(futures_current_price) <= float(ONLY_BY_WHEN) or ByPass:
-                        if not BlockOrder:
-                            order_succeeded = order(SIDE_BUY, TRADE_SYMBOL.upper(), QTY_BUY, ORDER_TYPE_MARKET)
-                            if order_succeeded:
-                                logger.info(order)
-                                futures_entry_price = float(order_succeeded['fills'][0]['price'])
-                                amountQty = float(order_succeeded['fills'][0]['qty'])
-
+                    if float(futures_current_price) > 0:
+                        if ACTION_BUY:  
+                            if not BLOCK_ORDER:
+                                
+                                # SPOT Volume Calc
+                                # volume = QTY_BUY
+                                
+                                # FUTURE Volume Calc
+                                # volume = round(QTY_BUY / futures_current_price, VOLUME_DEC)
+                                volume = QTY_BUY
+                                
+                                # SPOT CREATE ORDER
+                                order_spot = order_spot(SIDE_BUY, TRADE_SYMBOL.upper(), volume, ORDER_TYPE_MARKET)
+                                
+                                # FUTURES CANCEL ALL ORDER 
+                                # order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                
+                                # FUTURE CREATE ORDER
+                                # order_future = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+                                
+                                
+                                # if order_future:
+                                #     # Get open futures positions
+                                #     positions = client.futures_position_information(symbol=TRADE_SYMBOL, timestamp = int(time.time() * 1000), recvWindow = 60000)
+                                #     # Print positions
+                                #     for position in positions:
+                                #         logger.info("Open futures position: {}".format(position))
+                                #         futures_entry_price = float(position['entryPrice']) 
+                                #         unRealizedProfit = float(position['unRealizedProfit'])
+                                #         positionAmt = float(position['positionAmt'])
+                                #         notional = float(position['notional'])
+                                        
+                                #     origQty = positionAmt
+                                    
+                                #     orderId = order_future['orderId']
+                                #     clientOrderId = order_future['clientOrderId']
+                                #     orderStatus = order_future['status']
+                                #     # origQty = order_future['origQty']
+                                #     logger.info("OrderId  {}  clientOrderId {} status {} origQty {} Entry Price {}".format(orderId, clientOrderId, orderStatus, origQty, futures_entry_price))  
+                                    
+                                #     amountQty = origQty
+                                #     volume = origQty
+                                    
+                                if order_spot:
+                                    spot_entry_price = float(order_spot['fills'][0]['price'])
+                                    amountQty = float(order_spot['fills'][0]['qty'])
+                                    volume = amountQty
+                                        
+                                    in_position = True
+                                        
+                                    sorted_roi.restart()
+                                    sorted_roi.push(ROI_PROFIT)
+                                    logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
+                                    PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
+                                    PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                                    profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
+                                    # print_signals(futures_current_price, spot_current_price, True)
+                                    in_position = True
+                                
+                                    
+                                    
+                            else:  # SIMULATED
+                                
+                                volume = QTY_BUY
+                                
+                                # FUTURE Volume Calc
+                                # volume = round(QTY_BUY / futures_current_price, VOLUME_DEC)
+                                    
+                                amountQty = QTY_BUY
+                                futures_entry_price = float(futures_current_price)
+                                spot_entry_price = float(spot_current_price)
+                                    
+                                # volume = round(float(futures_current_price) * float(QTY_BUY), 2)
+                                volume = amountQty
+                                
+                                #  if (sorted_roi.get_size() > (roi_stack_size-1) ):
+                                sorted_roi.restart()
+                                sorted_roi.push(ROI_PROFIT)
+                                logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
+                                PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
+                                PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                                profit_calculus("SIMULATED", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
+                                    
+                                # print_signals(futures_current_price, spot_current_price, True)
                                 in_position = True
-                                
-                                profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
-                        else:
-                            
-                           amountQty = QTY_BUY
-                           spot_entry_price = float(spot_current_price)
-                           futures_entry_price = float(futures_current_price)
-                           # volume = round(float(futures_current_price) * float(QTY_BUY), 2)
-                           volume = amountQty
-                           #  if (sorted_roi.get_size() > (roi_stack_size-1) ):
-                           sorted_roi.restart()
-                           sorted_roi.push(ROI_PROFIT)
-                           logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
-                           PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
-                           PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
-                           profit_calculus("SIMULATED", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
-                                
-                        #    print_signals(futures_current_price, spot_current_price)
-                           in_position = True
                                 
 # Function to process Depth WebSocket messages
 def process_depth_message(depth_ws, message):
@@ -829,7 +1054,7 @@ def process_depth_message(depth_ws, message):
     # Check for sell signal based on order book imbalance and significant buy volume
     if imbalance_sell >= imbalance_threshold and total_buy_volume >= volume_threshold_depth:
         # print("Sell signal detected! Order book imbalance:", imbalance_sell, "Total buy volume:", total_buy_volume)
-        logger.info("Depth Thread: Sell signal detected! Order book imbalance SELL: {:.2f} Total buy volume: {:.2f}".format(imbalance_sell, total_buy_volume))
+        logger.info("Depth Thread: Sell signal detected! Order book imbalance SELL: {} Total buy volume: {}".format(imbalance_sell, total_buy_volume))
         SINAIS["SELL_VOL_IMB"] = SINAIS["SELL_VOL_IMB"] + 1
         SINAIS["MSG_3"] = "SELL IMBALANCE"  
          
@@ -844,7 +1069,7 @@ def process_depth_message(depth_ws, message):
     # Check for buy signal based on order book imbalance and significant buy volume
     if imbalance_buy >= imbalance_threshold and total_sell_volume  >= volume_threshold_depth:
         # print("Buy signal detected! Order book imbalance:", imbalance_buy, "Total buy volume:", total_buy_volume)
-        logger.info("Depth Thread: Buy  signal detected! Order book imbalance BUY: {:.2f} Total buy volume: {:.2f}".format(imbalance_buy, total_sell_volume))
+        logger.info("Depth Thread: Buy  signal detected! Order book imbalance BUY: {} Total buy volume: {}".format(imbalance_buy, total_sell_volume))
         SINAIS["BUY_VOL_IMB"] = SINAIS["BUY_VOL_IMB"] + 1 
         SINAIS["MSG_3"] = "BUY IMBALANCE"  
             
