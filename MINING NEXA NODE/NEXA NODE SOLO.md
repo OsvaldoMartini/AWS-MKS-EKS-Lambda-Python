@@ -14,7 +14,18 @@ nexad.exe -server -printconsole
 # Setup Config Nexa Node IPS Solo Local Mining
 
 ## Mining Mode
-### Allow Firewall 7228/tcp  an 20001/tcp 
+### Allow Firewall 7228/tcp  an 20001/tcp
+
+#  IMPORTANT   IMPORTANT IMPORTANT IMPORTANT
+#  IMPORTANT   IMPORTANT IMPORTANT IMPORTANT
+#  IMPORTANT   IMPORTANT IMPORTANT IMPORTANT
+#  IMPORTANT   IMPORTANT IMPORTANT IMPORTANT
+
+```bash
+  WORKER  = x 
+  
+  PASSWORD = x
+```
 ```bash
 ./nexa-qt -server=1 -rpcallowip=0.0.0.0/0 -printconsole=1 -rpcuser=x -rpcpassword=x
 
