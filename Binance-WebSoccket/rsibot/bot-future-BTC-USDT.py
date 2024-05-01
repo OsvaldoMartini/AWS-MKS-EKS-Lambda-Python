@@ -176,7 +176,6 @@ last_losses_buy = LastFiveStack(10)
 last_profits_sell = LastFiveStack(10)
 last_losses_sell = LastFiveStack(10)
 
-
 # PRECISION_PROFIT_LOSS = 7 # CFXUSDT
 PRECISION_PROFIT_LOSS = 1 # BTCUSDT
 
@@ -216,7 +215,7 @@ roiLossSell = 0
 
 
 logger = logging.getLogger()
-loggin_setup("./logs/bot_A_SPOT_{}_mcda_rsi".format(TRADE_SYMBOL))
+loggin_setup("./logs/bot_A_FUTURE_{}_mcda_rsi".format(TRADE_SYMBOL))
 
 closes = []
 in_position = False
@@ -445,13 +444,12 @@ def profit_calculus(tradeType, action_buy, spot_entry_price, futures_entry_price
     logger.info("                                                                                                                            |")
     logger.info("----------------------------------            TOTAL  PROFIT AND LOSS                      ----------------------------------|")
     logger.info("                                                                                                                            |")
-    if action_buy:
-        perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
-    if not action_buy:
-        perc_profit = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
+
+    perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
+    perc_losses = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
     
     logger.info("PROFITS BUY  $ {:.2f}({:.2f}% {} tt) LOSSES BUY  $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_BUY'],  last_profits_buy.average_percentage_growth(),  TOTALS['COUNT_PROFITS_BUY'],  TOTALS['TOTAL_LOSSES_BUY'],  last_losses_buy.average_percentage_growth(),  TOTALS['COUNT_LOSSES_BUY'],   perc_profit, TOTALS['TOTAL_PROFITS_BUY'] -  abs(TOTALS['TOTAL_LOSSES_BUY'])))
-    logger.info("PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_profit, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
+    logger.info("PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'], last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL'])))
     logger.info("                                                                                                                            |")
     logger.info(tradeType)
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")   
@@ -485,38 +483,43 @@ def print_logger_results(tradeType, soldDesc, soldDesc1, curr_roiProfitBuy):
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")     
 
 
-def print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
+def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
     soldDesc = "Empty"
     soldDesc1 ="Empty"
     if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)): # STOP LOSS
         soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Losses ROI Buy {:.2f}% < {:.2f}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) 
-        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(futures_current_price, float(round(curr_roiProfitBuy, DECIMAL_CALC)), curr_pnlProfitBuy)
+        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 1") 
 
-    if (float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC))): # STOP LOSS
-        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Price {:.2f} <= Losses Price {:.2f})".format(futures_current_price,  LOSSES["WHEN_BUY"])
-        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(futures_current_price, float(round(curr_roiProfitBuy, DECIMAL_CALC)), curr_pnlProfitBuy) 
+    if (float(current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC))): # STOP LOSS
+        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Price {:.2f} <= Losses Price {:.2f})".format(current_price,  LOSSES["WHEN_BUY"])
+        soldDesc1 = "Losses At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy) 
         logger.info("Reason 2") 
     
     if ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(float(round(curr_roiProfitBuy, DECIMAL_CALC)), PROFITS["TRAIL_LAST_ROI_BUY"]) 
-        soldDesc1 = "1) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc1 = "1) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 3") 
 
     if ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {:.2f}% > {:.2f}%)".format(float(round(curr_roiProfitBuy, DECIMAL_CALC)), PROFITS["TRAIL_LAST_ROI_BUY"]) 
-        soldDesc1 = "2) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > Trail Last Roi Buy {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 4") 
     
-    if (float(round(curr_roiProfitBuy, DECIMAL_CALC)) > float(PROFITS["TRAIL_LAST_ROI_BUY"])): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(float(round(curr_roiProfitBuy, DECIMAL_CALC)), PROFITS["TRAIL_LAST_ROI_BUY"]) 
-        soldDesc1 = "3) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+    if (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])): # PROFIT 
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc1 = "3) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 5") 
+        
+    if (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS): # PROFIT 
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI_AVG_GROWS_ATTEMPTS {}% > ROI_AVG_MAX_ATTEMPTS {}%)".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
+        soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+        logger.info("Reason 6")     
     
-    if (float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC))): # PROFIT
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Price {:.2f} >= Profit Price {:.2f})".format(futures_current_price,  PROFITS["WHEN_BUY"])
-        soldDesc1 = "4) Profits At: {:.2f} ROI: {:.2f}% PNL: {:.2f}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)
-        logger.info("Reason 6")
+    if (float(current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC))): # PROFIT
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Price {} >= Profit Price {})".format(current_price,  PROFITS["WHEN_BUY"])
+        soldDesc1 = "4) Profits At: {} ROI: {}% PNL: {}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)
+        logger.info("Reason 7")
         
     return soldDesc, soldDesc1 
 
@@ -597,13 +600,12 @@ def process_kline_message(kline_ws, message):
             line6  = "    FUTURE Current Price {:.2f}".format(float(futures_current_price))
             line7  = "    Return on Investment BUY  (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitBuy), float(curr_pnlProfitBuy))
             line8  = "    Return on Investment SELL (ROI): {:.2f}%  Profit/Loss: {:.2f} USDT".format(float(curr_roiProfitSell), float(curr_pnlProfitSell))
-            if ACTION_BUY:
-                perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
-            if not ACTION_BUY:
-                perc_profit = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
+            
+            perc_profit = last_profits_buy.average_percentage_growth() - abs(last_losses_buy.average_percentage_growth())
+            perc_losses = last_profits_sell.average_percentage_growth() - abs(last_losses_sell.average_percentage_growth())
             
             line9  = "    PROFITS BUY  $ {:.2f}({:.2f}% {} tt) LOSSES BUY  $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_BUY'], last_profits_buy.average_percentage_growth(), TOTALS['COUNT_PROFITS_BUY'], TOTALS['TOTAL_LOSSES_BUY'], last_losses_buy.average_percentage_growth(), TOTALS['COUNT_LOSSES_BUY'], perc_profit, TOTALS['TOTAL_PROFITS_BUY'] - abs(TOTALS['TOTAL_LOSSES_BUY']))
-            line10 = "    PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'],  last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_profit, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
+            line10 = "    PROFITS SELL $ {:.2f}({:.2f}% {} tt) LOSSES SELL $ {:.2f}({:.2f}% {} tt)  {:.2f}%  TOTAL {:.2f} USDT".format(TOTALS['TOTAL_PROFITS_SELL'], last_profits_sell.average_percentage_growth(), TOTALS['COUNT_PROFITS_SELL'], TOTALS['TOTAL_LOSSES_SELL'],  last_losses_sell.average_percentage_growth(),  TOTALS['COUNT_LOSSES_SELL'], perc_losses, TOTALS['TOTAL_PROFITS_SELL'] - abs(TOTALS['TOTAL_LOSSES_SELL']))
             line11 = "    TRAILING STOP ROI  BUY {:.2f}%".format(PROFITS["TRAIL_STOP_ROI_BUY"])
             line12 = "    TRAILING LAST ROI  BUY {:.2f}%".format(PROFITS["TRAIL_LAST_ROI_BUY"])
             
@@ -666,10 +668,10 @@ def process_kline_message(kline_ws, message):
                     # Condition where ROI 100% ABOVE INITIAL ROI
                     ## Verifies the AVG between Initial and Last Added above 200% triggers
                     ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
-                    if (round(ROIS_GROWS_CALC, 2) > ROI_PERC_GROWS):
-                        logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
+                    if (ROIS_GROWS_CALC > ROI_PERC_GROWS):
+                        logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Calculate Percentage Change: {}  >  ROIS_GROWS_CALC {}".format(round(ROIS_GROWS_CALC, 2), ROI_PERC_GROWS))
+                        logger.info("Calculate Percentage Change: {}  >  ROIS_GROWS_CALC {}".format(ROIS_GROWS_CALC, ROI_PERC_GROWS))
                         logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {:.2F}% LAST ROI {:.2F}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
@@ -677,11 +679,11 @@ def process_kline_message(kline_ws, message):
                             PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
                     
                     ## Verifies the AVG between All ROIs within the array Above 50% triggers
-                    if (sorted_roi.get_size() > 1) and round(sorted_roi.average_percentage_growth(), DECIMAL_CALC) > ROI_AVG_GROWS:
-                        logger.info("ROI: {:.2f}".format(curr_roiProfitBuy))
+                    if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
+                        logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Average Percentage Growth: {}  >  ROI_AVG_GROWS {}".format(round(sorted_roi.average_percentage_growth(), DECIMAL_CALC), ROI_AVG_GROWS))
-                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, round( sorted_roi.average_percentage_growth(), DECIMAL_CALC), sorted_roi.get_values()[-1]))
+                        logger.info("Average Percentage Growth: {}  >  ROI_AVG_GROWS {}".format(sorted_roi.average_percentage_growth(), ROI_AVG_GROWS))
+                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {}% LAST ROI {:.2F}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
                         if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
@@ -689,7 +691,7 @@ def process_kline_message(kline_ws, message):
 
 
                         # Stop Losses or Take Profits
-                        if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (float(round(curr_roiProfitBuy, DECIMAL_CALC)) > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                        if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
                             
                             soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
@@ -733,7 +735,7 @@ def process_kline_message(kline_ws, message):
                 if in_position:
                      logger.info("Overbought! Waiting Profit Target {:.2f}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
                      
-                     if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (float(round(curr_roiProfitBuy, DECIMAL_CALC)) > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                     if (float(curr_roiProfitBuy) < float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
                        
                         soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
                             
