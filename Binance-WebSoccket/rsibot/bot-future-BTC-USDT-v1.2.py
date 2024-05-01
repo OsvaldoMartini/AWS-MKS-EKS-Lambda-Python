@@ -582,7 +582,7 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
         logger.info("Reason 5") 
         
     if (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI_AVG_GROWS_ATTEMPTS {}% > ROI_AVG_MAX_ATTEMPTS {}%)".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
+        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI AVG GROWS ATTEMPTS {} > ROI AVG MAX ATTEMPTS {})".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
         soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 6")     
     
@@ -755,7 +755,7 @@ def process_kline_message(kline_ws, message):
                     if (ROIS_GROWS_CALC > ROI_PERC_GROWS):
                         logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Calculate Percentage Change: {}  >  ROIS_GROWS_CALC {}".format(ROIS_GROWS_CALC, ROI_PERC_GROWS))
+                        logger.info("Calculate Percentage Change: {}%  >  ROIS_GROWS_CALC {}%".format(ROIS_GROWS_CALC, ROI_PERC_GROWS))
                         logger.info("ATTEMPTS: {} ROI_PERC_GROWS {}%  ROI {}% LAST ROI {}".format(ROI_PERC_ATTEMPTS, ROI_PERC_GROWS, ROIS_GROWS_CALC, sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
@@ -766,8 +766,8 @@ def process_kline_message(kline_ws, message):
                     if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
                         logger.info("ROI: {}".format(curr_roiProfitBuy))
                         logger.info("ROI (Last {}) {}".format(roi_stack_size, sorted_roi.get_values()))
-                        logger.info("Average Percentage Growth: {}  >  ROI_AVG_GROWS {}".format(sorted_roi.average_percentage_growth(), ROI_AVG_GROWS))
-                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {}% GROWS {}% LAST ROI {}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
+                        logger.info("Average Percentage Growth: {}%  >  ROI_AVG_GROWS {}%".format(sorted_roi.average_percentage_growth(), ROI_AVG_GROWS))
+                        logger.info("ATTEMPTS: {} ROI_AVG_GROWS {} GROWS {} LAST ROI {}".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_GROWS, sorted_roi.average_percentage_growth(), sorted_roi.get_values()[-1]))
                         print_signals(False)
                         ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
                         if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
