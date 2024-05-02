@@ -138,13 +138,19 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
-profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.md'
+profit_stat_filename = "./daily/profit_status_futures_{}".format(TRADE_SYMBOL) + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.md'
 # profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.md'
 
+# Decimals
 DECIMAL_CALC = 2
+DECIMAL_BTCUSDT = 2 # BTC
+
 VOLUME_DEC = 5
 # QTY_BUY = 10 # USDT
+# QTY_BUY = 0.002 # USDT 0.005
 QTY_BUY = 0.05 # USDT 0.005
+# quoteOrderQty = #  7   USDT  SPOT
+# QTY_BUY = 0.00014
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 41180
 ByPass = True
@@ -553,7 +559,7 @@ def print_logger_results(tradeType, soldDesc, soldDesc1, curr_roiProfitBuy):
 def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
     soldDesc = "Empty"
     soldDesc1 ="Empty"
-    if (curr_roiProfitBuy < float(ROI_STOP_LOSS)): # STOP LOSS
+    if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)): # STOP LOSS
         soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Losses ROI Buy {}% < {}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) 
         soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 1") 
@@ -592,10 +598,12 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
 
 def print_status_negative(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
     logger.info("LOSSES {} ".format(curr_roiProfitBuy < float(ROI_STOP_LOSS)))
-    logger.info("\n  current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {} \n  ROI_PROFIT {} ROI_STOP_LOSS {} \n  PROFITS {} LOSSES {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
+    logger.info("NEGATIVE")
+    logger.info("current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {} \n  ROI_PROFIT {} ROI_STOP_LOSS {} \n  PROFITS {} LOSSES {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
 
 def print_status_positive(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES):
-    logger.info("\n  current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
+    logger.info("POSITIVE")
+    logger.info("current_price {} curr_roiProfitBuy {} curr_pnlProfitBuy {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)) 
 
 def process_kline_message(kline_ws, message):
     global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, spot_entry_price, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS, sorted_roi, last_profits_buy, last_losses_buy, last_profits_sell, last_losses_sell  
@@ -646,6 +654,9 @@ def process_kline_message(kline_ws, message):
             rsi = talib.RSI(np_closes, RSI_PERIOD)
             sma = talib.SMA(np_closes, RSI_PERIOD)
             last_sma = sma[-1]
+            
+            
+            
             # print("all rsis calculated so far")
             # np_rsi = numpy.array(rsi)
             # print("Numpy RSIs {}".format(rsi))
@@ -653,8 +664,12 @@ def process_kline_message(kline_ws, message):
             last_rsi = rsi[-1]
             # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
             
-            SINAIS["LAST_SMA"] = last_sma
-            SINAIS["LAST_RSI"] = last_rsi
+            if (TRADE_SYMBOL == 'BTCUSDT'): 
+                SINAIS["LAST_SMA"] = round(last_sma, DECIMAL_BTCUSDT)
+            else:
+                SINAIS["LAST_SMA"] = last_sma
+            
+            SINAIS["LAST_RSI"] = round(last_rsi, DECIMAL_CALC)
             
             # SPOT Entry Price
             spot_current_price = float(close)
@@ -682,7 +697,7 @@ def process_kline_message(kline_ws, message):
             line1  = "    SIG BUY: {} SIG SELL: {}  {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"])
             line2  = "    VOL BUY: {} VOL SELL: {}".format(SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"] )
             line3  = "    IMB BUY: {} IMB SELL: {}  ACTION: {}  {}".format(SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["MSG_2"], SINAIS["MSG_3"])
-            line4  = "    SMA : {}     RSI: {}".format(float(last_sma), float(last_rsi))
+            line4  = "    SMA : {}     RSI: {}".format(float(SINAIS["LAST_SMA"]), float(SINAIS["LAST_RSI"]))
             line5  = "    SPOT   Current Price {}".format(float(spot_current_price))
             line6  = "    FUTURE Current Price {}".format(float(futures_current_price))
             line7  = "    Return on Investment BUY  (ROI): {}%  Profit/Loss: {} USDT".format(curr_roiProfitBuy, curr_pnlProfitBuy)
@@ -732,12 +747,12 @@ def process_kline_message(kline_ws, message):
                 # logger.info("SPOT   Current Close is {}  {}  RSI: {}".format (float(spot_current_price), buyPassWhen, float(last_rsi)))
                 # logger.info("FUTURE Current Close is {}  {}  RSI: {}".format (float(futures_current_price), buyPassWhen, float(last_rsi)))
             if in_position:
-
+                
                 if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
                     print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
                 if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
                     print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
- 
+
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 # logger.info("SPOT:   {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
                 if ACTION_BUY:
@@ -806,10 +821,12 @@ def process_kline_message(kline_ws, message):
                                 
                                 if curr_pnlProfitBuy >= 0:
                                     TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                    TOTALS['TOTAL_PROFITS_BUY'] = round(TOTALS['TOTAL_PROFITS_BUY'], DECIMAL_CALC)
                                     TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
                                     last_profits_buy.push(curr_pnlProfitBuy)
                                 else:
                                     TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                    TOTALS['COUNT_LOSSES_BUY'] = round(TOTALS['COUNT_LOSSES_BUY'], DECIMAL_CALC)
                                     TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1    
                                     last_losses_buy.push(curr_pnlProfitBuy)
                                     
@@ -828,10 +845,12 @@ def process_kline_message(kline_ws, message):
                             
                             if curr_pnlProfitBuy >= 0:
                                 TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                TOTALS['TOTAL_PROFITS_BUY'] = round(TOTALS['TOTAL_PROFITS_BUY'], DECIMAL_CALC)
                                 TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
                                 last_profits_buy.push(curr_pnlProfitBuy)
                             else:
                                 TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
+                                TOTALS['COUNT_LOSSES_BUY'] = round(TOTALS['COUNT_LOSSES_BUY'], DECIMAL_CALC)
                                 TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1    
                                 last_losses_buy.push(curr_pnlProfitBuy)
                                 
@@ -853,7 +872,7 @@ def process_kline_message(kline_ws, message):
                 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
-                    
+
                      if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
                         print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
                      if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
@@ -864,8 +883,8 @@ def process_kline_message(kline_ws, message):
                      if ACTION_BUY:  
                         if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
                         
-                            soldDesc, soldDesc1 = print_decisions(spot_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-                                
+                            soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+
                             if not BLOCK_ORDER:  
                                 logger.info("Overbought! Sell! Sell! Sell!")
                                 
@@ -891,10 +910,14 @@ def process_kline_message(kline_ws, message):
 
                                     if curr_pnlProfitBuy >= 0:
                                         TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                        TOTALS['TOTAL_PROFITS_BUY'] = round(TOTALS['TOTAL_PROFITS_BUY'], DECIMAL_CALC)
                                         TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
+                                        last_profits_buy.push(curr_pnlProfitBuy)
                                     else:
                                         TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
-                                        TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1
+                                        TOTALS['COUNT_LOSSES_BUY'] = round(TOTALS['COUNT_LOSSES_BUY'], DECIMAL_CALC)
+                                        TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1    
+                                        last_losses_buy.push(curr_pnlProfitBuy)
                                         
                                     curr_roiProfitBuy = 0
                                     curr_pnlProfitBuy = 0
@@ -912,10 +935,14 @@ def process_kline_message(kline_ws, message):
                                 
                                 if curr_pnlProfitBuy >= 0:
                                     TOTALS['TOTAL_PROFITS_BUY'] += curr_pnlProfitBuy
+                                    TOTALS['TOTAL_PROFITS_BUY'] = round(TOTALS['TOTAL_PROFITS_BUY'], DECIMAL_CALC)
                                     TOTALS['COUNT_PROFITS_BUY'] = TOTALS['COUNT_PROFITS_BUY'] + 1
+                                    last_profits_buy.push(curr_pnlProfitBuy)
                                 else:
                                     TOTALS['TOTAL_LOSSES_BUY'] -= abs(curr_pnlProfitBuy)
-                                    TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1
+                                    TOTALS['COUNT_LOSSES_BUY'] = round(TOTALS['COUNT_LOSSES_BUY'], DECIMAL_CALC)
+                                    TOTALS['COUNT_LOSSES_BUY'] = TOTALS['COUNT_LOSSES_BUY'] + 1    
+                                    last_losses_buy.push(curr_pnlProfitBuy)
                                 
                                 curr_roiProfitBuy = 0
                                 curr_pnlProfitBuy = 0
