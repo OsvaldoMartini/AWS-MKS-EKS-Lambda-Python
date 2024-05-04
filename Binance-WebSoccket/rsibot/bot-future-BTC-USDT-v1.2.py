@@ -799,6 +799,16 @@ def process_kline_message(kline_ws, message):
                 if ACTION_BUY:
                     curr_pnlProfitBuy = calculate_pnl_futures(spot_entry_price, spot_current_price, volume, True)
                     curr_roiProfitBuy = mine_calculate_roi_with_imr(spot_entry_price, spot_current_price, volume, True, TRADE_LEVERAGE)
+
+					# Triggers Low Prices
+                    if (curr_roiProfitBuy < 0) or (curr_pnlProfitBuy < 0):
+                        sorted_roi.restart()
+                        sorted_roi.push(ROI_PROFIT)
+                        logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
+                        PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
+                        PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                        ROI_PERC_ATTEMPTS = 0
+                        ROI_AVG_GROWS_ATTEMPTS = 0
                     
                     # Trailing Stop ROI Buy
                     if curr_roiProfitBuy > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
@@ -841,7 +851,7 @@ def process_kline_message(kline_ws, message):
 
 
                     # Stop Losses or Take Profits
-                    if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                    if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
                         
                         soldDesc, soldDesc1 = print_decisions(spot_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
@@ -922,7 +932,7 @@ def process_kline_message(kline_ws, message):
                      logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
                      
                      if ACTION_BUY:  
-                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) or (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS):
+                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(spot_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(spot_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
                         
                             soldDesc, soldDesc1 = print_decisions(spot_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
@@ -1060,6 +1070,8 @@ def process_kline_message(kline_ws, message):
                                     logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
                                     PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
                                     PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                                    ROI_PERC_ATTEMPTS = 0
+                                    ROI_AVG_GROWS_ATTEMPTS = 0
                                     profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
                                     # print_signals(futures_current_price, spot_current_price, True)
                                     in_position = True
@@ -1086,6 +1098,8 @@ def process_kline_message(kline_ws, message):
                                 logger.info("Initial Sorted ROI: {}".format(sorted_roi.get_values())) 
                                 PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
                                 PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                                ROI_PERC_ATTEMPTS = 0
+                                ROI_AVG_GROWS_ATTEMPTS = 0
                                 profit_calculus("SIMULATED", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
                                     
                                 # print_signals(futures_current_price, spot_current_price, True)
