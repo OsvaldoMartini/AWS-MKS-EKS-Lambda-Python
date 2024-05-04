@@ -789,16 +789,16 @@ def process_kline_message(kline_ws, message):
                 # logger.info("FUTURE Current Close is {}  {}  RSI: {}".format (float(futures_current_price), buyPassWhen, float(last_rsi)))
             if in_position:
                 
-                if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
-                    print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-                if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
-                    print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-
                 # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                 # logger.info("SPOT:   {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
                 if ACTION_BUY:
                     curr_pnlProfitBuy = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, True)
                     curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_entry_price, futures_current_price, volume, True, TRADE_LEVERAGE)
+
+                    if (curr_roiProfitBuy < 0 or curr_pnlProfitBuy < 0):
+                        print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                    if (curr_roiProfitBuy > 0 or curr_pnlProfitBuy > 0):
+                        print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
 					# Triggers Low Prices
                     if (curr_roiProfitBuy < 0) or (curr_pnlProfitBuy < 0):
@@ -919,19 +919,20 @@ def process_kline_message(kline_ws, message):
                 if not ACTION_BUY:        
                     curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, False)
                     curr_roiProfitSell = mine_calculate_roi_with_imr(futures_entry_price, futures_current_price, volume, False, TRADE_LEVERAGE)
+                    
+                    if (curr_roiProfitBuy < 0 or curr_pnlProfitBuy < 0):
+                        print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                    if (curr_roiProfitBuy > 0 or curr_pnlProfitBuy > 0):
+                        print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+
                 
                 
             if last_rsi > RSI_OVERBOUGHT:
                 if in_position:
 
-                     if (curr_roiProfitBuy < 0 or  curr_pnlProfitBuy < 0):
-                        print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-                     if (curr_roiProfitBuy > 0 or  curr_pnlProfitBuy > 0):
-                        print_status_positive(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
-
                      logger.info("Overbought! Waiting Profit Target {}  to  Sell! Sell! Sell!".format(PROFITS["WHEN_SELL"]))
                      
-                     if ACTION_BUY:  
+                     if ACTION_BUY:
                         if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
                         
                             soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
