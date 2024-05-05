@@ -138,7 +138,9 @@ RSI_PERIOD = 14
 RSI_OVERBOUGHT = 80
 RSI_OVERSOLD = 30
 TRADE_SYMBOL = 'BTCUSDT'
-profit_stat_filename = "./daily/profit_status_spot_{}".format(TRADE_SYMBOL) + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.md'
+TRADE_TYPE = "SPOT"
+
+profit_stat_filename = "./daily/profit_status_{}_{}".format(TRADE_TYPE, TRADE_SYMBOL) + "_" + str(initial_procces_date.strftime('%d %m %Y %H:%M:%S')).replace(' ','_').replace(':','-') + '.md'
 # profit_stat_filename = "./daily/profit_status_{}".format(TRADE_SYMBOL) + "_" + initial_procces_date.replace(' ','_').replace(':','-') + '.md'
 
 # Decimals
@@ -223,7 +225,7 @@ roiLossSell = 0
 
 
 logger = logging.getLogger()
-loggin_setup("./logs/bot_A_SPOT_{}_mcda_rsi".format(TRADE_SYMBOL))
+loggin_setup("./logs/bot_A_{}_{}_mcda_rsi".format(TRADE_TYPE, TRADE_SYMBOL))
 
 closes = []
 in_position = False
@@ -432,9 +434,9 @@ def calculate_pnl_futures(entry_price, exit_price, quantity, action_buy):
         raise ValueError("Invalid side provided")
     
     if action_buy:
-        logger.info("TRADE BUY  Entry Price {} Exit Price {} QTD {} PNL {}".format(entry_price, exit_price, quantity, pnl))
+        logger.info("TRADE BUY  Entry Price {} Exit Price {} QTD {} PNL {}".format(entry_price, exit_price, quantity, round(pnl, DECIMAL_CALC)))
     if not action_buy:
-        logger.info("TRADE SELL Entry Price {} Exit Price {} QTD {} PNL {}".format(entry_price, exit_price, quantity, pnl))
+        logger.info("TRADE SELL Entry Price {} Exit Price {} QTD {} PNL {}".format(entry_price, exit_price, quantity, round(pnl, DECIMAL_CALC)))
 
     
     # if action_buy:
@@ -463,9 +465,9 @@ def mine_calculate_roi_with_imr(entry_price, exit_price, quantity, action_buy, i
         roi = 0    
 
     if action_buy:
-        logger.info("TRADE BUY  Entry Price {} Exit Price {} QTD {} Leverage {} ROI {}".format(entry_price, exit_price, quantity, imr, roi))
+        logger.info("TRADE BUY  Entry Price {} Exit Price {} QTD {} Leverage {} ROI {}".format(entry_price, exit_price, quantity, imr, round(roi, DECIMAL_CALC)))
     if not action_buy:
-        logger.info("TRADE SELL Entry Price {} Exit Price {} QTD {} Leverage {} ROI {}".format(entry_price, exit_price, quantity, imr, roi))
+        logger.info("TRADE SELL Entry Price {} Exit Price {} QTD {} Leverage {} ROI {}".format(entry_price, exit_price, quantity, imr, round(roi, DECIMAL_CALC)))
     
 
     # if action_buy:
@@ -516,7 +518,7 @@ def profit_calculus(tradeType, action_buy, spot_entry_price, futures_entry_price
     logger.info("----------------------------------            CALCULUS  ENTRY PRICE                       ----------------------------------|")
     logger.info(tradeType)
     logger.info("                                                                                                                            |")
-    logger.info("FUTURE Volume {} --->  Quantity USD: {}".format(volume, round(spot_entry_price * volume, 2)))
+    logger.info("FUTURE Volume {} --->  Quantity USD: {}".format(TRADE_TYPE, volume, round(spot_entry_price * volume, 2)))
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")
     logger.info("  Entry Price SPOT    {}".format(float(spot_entry_price)))
     logger.info("  Entry Price FUTURES {}".format(float(futures_entry_price)))
@@ -586,42 +588,42 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
     soldDesc = "Empty"
     soldDesc1 ="Empty"
     if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)): # STOP LOSS
-        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Losses ROI Buy {}% < {}%)".format(curr_roiProfitBuy, ROI_STOP_LOSS) 
+        soldDesc = "{} STOP LOSSES LOSSES (Curr Losses ROI Buy {}% < {}%)".format(TRADE_TYPE, curr_roiProfitBuy, ROI_STOP_LOSS) 
         soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 1") 
 
     if (float(current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC))) and curr_pnlProfitBuy > 0: # STOP PROFIT TRIGGERED
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Price {} <= Losses Price {}) ROI {} > 0".format(current_price,  LOSSES["WHEN_BUY"], curr_pnlProfitBuy)
+        soldDesc = "{} PROFIT PROFIT PROFIT (Curr Price {} <= Losses Price {}) ROI {} > 0".format(TRADE_TYPE, current_price,  LOSSES["WHEN_BUY"], curr_pnlProfitBuy)
         soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy) 
         logger.info("Reason 2") 
     
     if (float(current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC))) and curr_pnlProfitBuy < 0: # STOP LOSS TRIGGERED
-        soldDesc = "FUTURE STOP LOSSES LOSSES (Curr Price {} <= Losses Price {}) ROI {} < 0".format(current_price,  LOSSES["WHEN_BUY"], curr_pnlProfitBuy)
+        soldDesc = "{} STOP LOSSES LOSSES (Curr Price {} <= Losses Price {}) ROI {} < 0".format(TRADE_TYPE, current_price,  LOSSES["WHEN_BUY"], curr_pnlProfitBuy)
         soldDesc1 = "Losses At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy) 
         logger.info("Reason 3") 
     
     if ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc = "{} PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(TRADE_TYPE, curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
         soldDesc1 = "1) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 4") 
 
     if ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and float(PROFITS["TRAIL_LAST_ROI_BUY"]) > ROI_PROFIT): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > Trail Last Roi Buy {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc = "{} PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > Trail Last Roi Buy {}%)".format(TRADE_TYPE, curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
         soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 5") 
     
     if (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
+        soldDesc = "{} PROFIT PROFIT PROFIT (Curr Profit ROI Buy {}% > {}%)".format(TRADE_TYPE, curr_roiProfitBuy, PROFITS["TRAIL_LAST_ROI_BUY"]) 
         soldDesc1 = "3) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 6") 
         
     if (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS): # PROFIT 
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (ROI AVG GROWS ATTEMPTS {} > ROI AVG MAX ATTEMPTS {})".format(ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
+        soldDesc = "{} PROFIT PROFIT PROFIT (ROI AVG GROWS ATTEMPTS {} > ROI AVG MAX ATTEMPTS {})".format(TRADE_TYPE, ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
         soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 7")     
     
     if (float(current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC))): # PROFIT
-        soldDesc = "FUTURE PROFIT PROFIT PROFIT (Curr Price {} >= Profit Price {})".format(current_price,  PROFITS["WHEN_BUY"])
+        soldDesc = "{} PROFIT PROFIT PROFIT (Curr Price {} >= Profit Price {})".format(TRADE_TYPE, current_price,  PROFITS["WHEN_BUY"])
         soldDesc1 = "4) Profits At: {} ROI: {}% PNL: {}".format(round(PROFITS["WHEN_BUY"], DECIMAL_CALC), curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info("Reason 8")
         
@@ -711,7 +713,7 @@ def process_kline_message(kline_ws, message):
             ticker_future = get_current_price_futures(TRADE_SYMBOL)
             # logger.info("TICKER {}".format(ticker_future))
             futures_current_price = float(ticker_future['price'])
-            # logger.info("FUTURE Entry Price {}".format(float(futures_current_price)))
+            # logger.info("{} Entry Price {}".format(TRADE_TYPE, float(futures_current_price)))
             # Get the current time
             current_time = aware_cetnow()
 
@@ -862,7 +864,7 @@ def process_kline_message(kline_ws, message):
                             # FUTURES CLOSE BY REDUCING 100% THE ORDER
                             order_future = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
                             order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
-                            logger.info("FUTURE Order Closed: {}".format(order_future))
+                            logger.info("{} Order Closed: {}".format(TRADE_TYPE, order_future))
                             
                             if order_future:
                                 in_position = False
