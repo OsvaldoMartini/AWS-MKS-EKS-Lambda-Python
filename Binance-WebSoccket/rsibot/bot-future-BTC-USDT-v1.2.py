@@ -656,13 +656,13 @@ def on_close(kline_ws):
   
 def print_signals(entryPoint):
     if entryPoint:
-        SINAIS['ENTRY_POINT_1'] = "  BUY: {} SELL: {} SIG: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {} RSI: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"],  SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]) 
-        SINAIS['ENTRY_POINT_2'] = "  SMA: {} OBV: {} OBV SMA: {} ".format(SINAIS["SMA"], SINAIS["OBV"], SINAIS["OBV_SMA"]) 
-        SINAIS['ENTRY_POINT_3'] = "  IMB SELL: {}  BUY VOL: {} / IMB BUY: {} SELL VOL: {}  SIGNAL: {}".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"])
+        SINAIS['ENTRY_POINT_1'] = "  BUY: {} SELL: {} SIG: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"],  SINAIS["LAST_SMA"]) 
+        SINAIS['ENTRY_POINT_2'] = "  SMA: {}   OBV: {}   OBV SMA: {}".format(SINAIS["SMA"], SINAIS["OBV"], SINAIS["OBV_SMA"]) 
+        SINAIS['ENTRY_POINT_3'] = "  IMB SELL: {}  BUY VOL: {} / IMB BUY: {} SELL VOL: {}  SIGNAL: {}   RSI: {}".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"], SINAIS["LAST_RSI"])
 
-    logger.info("  BUY: {} SELL: {} SIG: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {} RSI: {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"], SINAIS["LAST_SMA"], SINAIS["LAST_RSI"]))
-    logger.info("  SMA: {} OBV: {} OBV SMA: {} ".format(SINAIS["SMA"], SINAIS["OBV"], SINAIS["OBV_SMA"]))
-    logger.info("  IMB SELL: {}  BUY VOL: {} / IMB BUY: {} SELL VOL: {}  SIGNAL: {} ".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"]))
+    logger.info("  BUY: {} SELL: {} SIG: {} {} IMB BUY: {} IMB SELL: {} VOL BUY: {} VOL SELL: {} SMA : {}".format(SINAIS["BUY_HIST"], SINAIS["SELL_HIST"], SINAIS["MSG_1"], SINAIS["MSG_2"], SINAIS["BUY_VOL_IMB"], SINAIS["SELL_VOL_IMB"], SINAIS["BUY_VOL_INC"], SINAIS["SELL_VOL_DEC"], SINAIS["LAST_SMA"]))
+    logger.info("  SMA: {}   OBV:   {}   OBV SMA: {}".format(SINAIS["SMA"], SINAIS["OBV"], SINAIS["OBV_SMA"]))
+    logger.info("  IMB SELL: {}  BUY VOL: {} / IMB BUY: {} SELL VOL: {}  SIGNAL: {}   RSI: {}".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"], SINAIS["LAST_RSI"]))
         
 def print_logger_results(tradeType, soldDesc, soldDesc1, curr_roiProfitBuy):
     logger.info("----------------------------------------------------------------------------------------------------------------------------|")    
@@ -1511,7 +1511,7 @@ def process_depth_message(depth_ws, message):
         SINAIS["BUY_VOLUME"] = round(total_buy_volume, DECIMAL_4) 
         SINAIS["SELL_VOL_IMB"] = SINAIS["SELL_VOL_IMB"] + 1
         SINAIS["MSG_3"] = "SELL IMBALANCE"
-        logger.info("Depth Thread: Sell signal detected! Order book imbalance SELL: {} Total buy volume: {}  ->  {}".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["MSG_3"]))
+        logger.info("Depth Thread: Sell signal detected! Order book imbalance SELL: {} Total buy volume: {}  ->  {}   RSI: {}".format(SINAIS["IMB_SELL"], SINAIS["BUY_VOLUME"], SINAIS["MSG_3"], float(SINAIS["LAST_RSI"])))
         
     # Calculate Signal order book imbalance to buy
     if total_volume > 0:
@@ -1526,7 +1526,7 @@ def process_depth_message(depth_ws, message):
         SINAIS["SELL_VOLUME"] = round(total_sell_volume, DECIMAL_4)
         SINAIS["BUY_VOL_IMB"] = SINAIS["BUY_VOL_IMB"] + 1 
         SINAIS["MSG_3"] = "BUY IMBALANCE"
-        logger.info("Depth Thread: Buy  signal detected! Order book imbalance BUY: {} Total sell volume: {}  ->  {}".format(SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"]))
+        logger.info("Depth Thread: Buy  signal detected! Order book imbalance BUY: {} Total sell volume: {}  ->  {}   RSI: {}".format(SINAIS["IMB_BUY"], SINAIS["SELL_VOLUME"], SINAIS["MSG_3"], float(SINAIS["LAST_RSI"])))
         
 
 # Start WebSocket for Kline data
