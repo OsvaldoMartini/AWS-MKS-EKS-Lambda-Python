@@ -50,52 +50,56 @@ def average_percentage_growth(arr):
     else:
         return 0
 
-class LastFiveStack():
-    def __init__(self, stack_size):
-        self.stack_size = stack_size
-        self.stack = []
+class RoiHistory():
+    """
+    Option B — Chronological ring buffer of the last `maxlen` ROI readings.
+    - get_values()[0]  = oldest entry
+    - get_values()[-1] = most recent entry  (use peak() for all-time high)
+    - push() appends in time order; oldest is auto-dropped when full
+    - peak()     = highest ROI ever seen in the buffer
+    - baseline() = oldest ROI in the buffer (growth reference point)
+    - average_percentage_growth() = avg growth across time-ordered samples
+    """
+    from collections import deque
+
+    def __init__(self, maxlen):
+        from collections import deque
+        self._maxlen = maxlen
+        self._data = deque(maxlen=maxlen)
 
     def restart(self):
-        self.stack = []
-        
+        self._data.clear()
+
     def push(self, value):
-        if len(self.stack) >= self.stack_size:
-            self.pop_until(value)
-        else:
-            self.insert_sorted(value)
-
-    def insert_sorted(self, value):
-        index = 0
-        while index < len(self.stack) and self.stack[index] < value:
-            index += 1
-        self.stack.insert(index, value)
-
-    def pop_until(self, value):
-        while self.stack and self.stack[-1] < value and len(self.stack) >= self.stack_size:
-            self.stack.pop()
-        self.insert_sorted(value)
+        """Append value in chronological order. Oldest dropped when full."""
+        self._data.append(value)
 
     def get_values(self):
-        return self.stack
+        """Return list in chronological order (oldest first)."""
+        return list(self._data)
 
     def get_size(self):
-        return len(self.stack)
-    
+        return len(self._data)
+
+    def peak(self):
+        """Highest ROI currently in the buffer."""
+        return max(self._data) if self._data else 0
+
+    def baseline(self):
+        """Oldest ROI in the buffer (used as growth reference)."""
+        return self._data[0] if self._data else 0
+
     def average_percentage_growth(self):
-        if len(self.stack) < 2:
-            return 0  # If there's not enough data, return 0 or handle it accordingly
-        percentage_growths = []
-        count = 0  # Count of valid growth calculations
-        for i in range(len(self.stack) - 1):
-            if self.stack[i] == 0:
-                continue  # Skip calculation if the denominator is zero
-            growth = ((self.stack[i+1] - self.stack[i]) / self.stack[i]) * 100
-            percentage_growths.append(growth)
-            count += 1
-            
-        if count == 0:
-            return 0  # If there were no valid growth calculations, return 0    
-        return round(float(sum(percentage_growths) / len(percentage_growths)), DECIMAL_CALC) 
+        """Average % growth across chronologically ordered samples."""
+        data = list(self._data)
+        if len(data) < 2:
+            return 0
+        growths = [
+            ((data[i+1] - data[i]) / data[i]) * 100
+            for i in range(len(data) - 1)
+            if data[i] != 0
+        ]
+        return round(float(sum(growths) / len(growths)), DECIMAL_CALC) if growths else 0
 
 def aware_cetnow():
     # return datetime.now(timezone.utc) # uct
@@ -197,15 +201,15 @@ ROI_AVG_GROWS_ATTEMPTS = 1
 ROI_AVG_MAX_ATTEMPTS = 8
 
 roi_stack_size = 6
-sorted_roi = LastFiveStack(roi_stack_size)
+sorted_roi = RoiHistory(roi_stack_size)
 sorted_roi.push(ROI_PROFIT)
 
 
-sorted_last_profits_buy = LastFiveStack(10)
-sorted_last_losses_buy = LastFiveStack(10)
+sorted_last_profits_buy = RoiHistory(10)
+sorted_last_losses_buy = RoiHistory(10)
 
-sorted_last_profits_sell = LastFiveStack(10)
-sorted_last_losses_sell = LastFiveStack(10)
+sorted_last_profits_sell = RoiHistory(10)
+sorted_last_losses_sell = RoiHistory(10)
 
 # PRECISION_PROFIT_LOSS = 7 # CFXUSDT
 PRECISION_PROFIT_LOSS = 1 # BTCUSDT
@@ -846,42 +850,42 @@ def process_kline_message(kline_ws, message):
                         if (curr_roiProfitBuy < 0) or (curr_pnlProfitBuy < 0):
                             sorted_roi.restart()
                             sorted_roi.push(ROI_PROFIT)
-                            logger.info(f"[TRAIL] | event=RESET | reason=negative_roi | roi={curr_roiProfitBuy}% | stack={sorted_roi.get_values()}") 
+                            logger.info(f"[TRAIL] | event=RESET | reason=negative_roi | roi={curr_roiProfitBuy}% | history={sorted_roi.get_values()}") 
                             PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
                             PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
                             ROI_PERC_ATTEMPTS = 0
                             ROI_AVG_GROWS_ATTEMPTS = 0
                         
                         # Trailing Stop ROI Buy
-                        if curr_roiProfitBuy > float(sorted_roi.get_values()[-1]) and sorted_roi.get_size() < roi_stack_size:
-                            # sorted_roi.push(round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC))
-                            PROFITS["TRAIL_STOP_ROI_BUY"] = round(max(sorted_roi.get_values()[-1], curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC)
-                            sorted_roi.push(curr_roiProfitBuy)
-                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                        if curr_roiProfitBuy > float(sorted_roi.peak()) and sorted_roi.get_size() < roi_stack_size:
+                            # curr_roiProfitBuy is a new all-time high in the buffer
+                            PROFITS["TRAIL_STOP_ROI_BUY"] = round(max(sorted_roi.peak(), curr_roiProfitBuy * (1 - trail_percent / 100)), DECIMAL_CALC)
+                            sorted_roi.push(curr_roiProfitBuy)          # appended chronologically
+                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.peak()  # peak() scans for max
                             logger.info(
                                 f"[TRAIL] | event=NEW_HIGH | curr_roi={curr_roiProfitBuy}% "
                                 f"| new_trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% "
-                                f"| new_trail_last={sorted_roi.get_values()[-1]}% "
-                                f"| stack={sorted_roi.get_values()}"
+                                f"| new_trail_last={sorted_roi.peak()}% "
+                                f"| history={sorted_roi.get_values()}"
                             )
                             print_signals(False)
                         else:
-                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                            PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.peak()
                         
                         # Condition where ROI 100% ABOVE INITIAL ROI
                         ## Verifies the AVG between Initial and Last Added above 200% triggers
-                        ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.get_values()[0], sorted_roi.get_values()[-1])
+                        ROIS_GROWS_CALC = calculate_percentage_change(sorted_roi.baseline(), sorted_roi.peak())
                         if (ROIS_GROWS_CALC > ROI_PERC_GROWS):
                             logger.info(
                                     f"[TRAIL] | event=PERC_TRIGGER | curr_roi={curr_roiProfitBuy}% "
                                     f"| grows_calc={ROIS_GROWS_CALC}% | grows_threshold={ROI_PERC_GROWS}% "
                                     f"| attempts={ROI_PERC_ATTEMPTS} | max_attempts={ROI_PERC_MAX_ATTEMPTS} "
-                                    f"| stack={sorted_roi.get_values()}"
+                                    f"| history={sorted_roi.get_values()}"
                             )
                             print_signals(False)
                             ROI_PERC_ATTEMPTS = ROI_PERC_ATTEMPTS + 1
                             if (ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS):
-                                PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                                PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.peak()
                         
                         ## Verifies the AVG between All ROIs within the array Above 50% triggers
                         if (sorted_roi.get_size() > 1) and sorted_roi.average_percentage_growth() > ROI_AVG_GROWS:
@@ -889,12 +893,12 @@ def process_kline_message(kline_ws, message):
                                 f"[TRAIL] | event=AVG_TRIGGER | curr_roi={curr_roiProfitBuy}% "
                                 f"| avg_growth={sorted_roi.average_percentage_growth()}% | avg_threshold={ROI_AVG_GROWS}% "
                                 f"| attempts={ROI_AVG_GROWS_ATTEMPTS} | max_attempts={ROI_AVG_MAX_ATTEMPTS} "
-                                f"| stack={sorted_roi.get_values()}"
+                                f"| history={sorted_roi.get_values()}"
                             )
                             print_signals(False)
                             ROI_AVG_GROWS_ATTEMPTS = ROI_AVG_GROWS_ATTEMPTS + 1
                             if ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS:
-                                PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.get_values()[-1]
+                                PROFITS["TRAIL_LAST_ROI_BUY"] = sorted_roi.peak()
 
 
                         # Stop Losses or Take Profits
@@ -1115,7 +1119,7 @@ def process_kline_message(kline_ws, message):
                                             
                                         sorted_roi.restart()
                                         sorted_roi.push(ROI_PROFIT)
-                                        logger.info(f"[TRAIL] | event=INIT | stack={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%")
+                                        logger.info(f"[TRAIL] | event=INIT | history={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%")
                                         PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
                                         PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
                                         ROI_PERC_ATTEMPTS = 0
@@ -1141,7 +1145,7 @@ def process_kline_message(kline_ws, message):
                                     #  if (sorted_roi.get_size() > (roi_stack_size-1) ):
                                     sorted_roi.restart()
                                     sorted_roi.push(ROI_PROFIT)
-                                    logger.info(f"[TRAIL] | event=INIT | stack={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%") 
+                                    logger.info(f"[TRAIL] | event=INIT | history={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%") 
                                     PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
                                     PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
                                     ROI_PERC_ATTEMPTS = 0
