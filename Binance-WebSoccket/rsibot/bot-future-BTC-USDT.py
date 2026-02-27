@@ -187,14 +187,14 @@ ROI_STOP_LOSS = -1.20
 TRADE_LEVERAGE = 75
 
 # PERCENTAGE AVARAGE BETWEEN TWO NUMBERS (MORE INTELIGENTTELY)
-ROI_PERC_GROWS = 20 
+ROI_PERC_GROWS = 200   # was 20 — require 3x growth before counting
 ROI_PERC_ATTEMPTS = 1
-ROI_PERC_MAX_ATTEMPTS = 4
+ROI_PERC_MAX_ATTEMPTS = 8   # was 4 — more patience
 
 # PERCENTAGE AVARAGE GROWS FOR ALL ITEMS OF THE ARRAY
-ROI_AVG_GROWS = 5 
+ROI_AVG_GROWS = 50     # was 5
 ROI_AVG_GROWS_ATTEMPTS = 1
-ROI_AVG_MAX_ATTEMPTS = 4
+ROI_AVG_MAX_ATTEMPTS = 8
 
 roi_stack_size = 6
 sorted_roi = LastFiveStack(roi_stack_size)
@@ -647,6 +647,11 @@ def print_decisions(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PRO
         soldDesc1 = "3) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
         logger.info(f"[TRADE] | event=EXIT_TRIGGER | reason=TRAIL_ROI_EXCEEDED | curr_roi={curr_roiProfitBuy}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%")
         
+    if (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):
+        soldDesc = "{} TRAIL STOP HIT (roi={}% < trail_stop={}%)".format(TRADE_TYPE, curr_roiProfitBuy, PROFITS["TRAIL_STOP_ROI_BUY"])
+        soldDesc1 = "exit_price={} roi={}% pnl={}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
+        logger.info(f"[TRADE] | event=EXIT_TRIGGER | reason=TRAIL_STOP_ROI | curr_roi={curr_roiProfitBuy}% | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}%")    
+        
     if (ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS): # PROFIT 
         soldDesc = "{} PROFIT PROFIT PROFIT (ROI AVG GROWS ATTEMPTS {} > ROI AVG MAX ATTEMPTS {})".format(TRADE_TYPE, ROI_AVG_GROWS_ATTEMPTS, ROI_AVG_MAX_ATTEMPTS)
         soldDesc1 = "2) Profits At: {} ROI: {}% PNL: {}".format(current_price, curr_roiProfitBuy, curr_pnlProfitBuy)
@@ -893,8 +898,8 @@ def process_kline_message(kline_ws, message):
 
 
                         # Stop Losses or Take Profits
-                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
-                            
+                        # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
+                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):    
                             soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
                             if not BLOCK_ORDER:
@@ -975,8 +980,8 @@ def process_kline_message(kline_ws, message):
                         logger.info(f"[SIGNAL] | event=OVERBOUGHT_WAIT | rsi={last_rsi:.2f} | profit_target={PROFITS['WHEN_SELL']} | curr_roi={curr_roiProfitBuy}%")
                         
                         if ACTION_BUY:
-                            if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
-                            
+                            # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
+                            if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):                            
                                 soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
                                 if not BLOCK_ORDER:  
