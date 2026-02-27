@@ -762,33 +762,44 @@ def process_kline_message(kline_ws, message):
                 # Calculate Signal Base on Historical close
                 calculate_signal_by_historical(close)
         
-                np_closes = numpy.array(closes)
-                np.set_printoptions(suppress = True)
-                # print("Numpy tt: {} Closes {}".format(len(np_closes), np_closes))
-            
+                # ───── RSI + EMA (replace SMA) ─────────────────────────
+                # Strategic Note (Professional Level)
+                # EMA50 + EMA100 together means:
+                # When EMA50 > EMA100 → market trending strong
+                # When EMA50 < EMA100 → bearish structure
+                
+                np_closes = numpy.array(closes, dtype=float)
+
+                # RSI
                 rsi = talib.RSI(np_closes, RSI_PERIOD)
-                sma = talib.SMA(np_closes, RSI_PERIOD)
-                last_sma = sma[-1]
-                
-                
-                
-                # print("all rsis calculated so far")
-                # np_rsi = numpy.array(rsi)
-                # print("Numpy RSIs {}".format(rsi))
-            
-                last_rsi = rsi[-1]
-                # print("RSI: {}                SMA: {}".format(round(last_rsi, 2), last_sma))
-                
-                if (TRADE_SYMBOL == 'BTCUSDT'): 
-                    SINAIS["LAST_SMA"] = round(last_sma, DECIMAL_BTCUSDT)
-                else:
-                    SINAIS["LAST_SMA"] = last_sma
-                
+                last_rsi = float(rsi[-1])
+
+                # EMAs (better for 1m futures)
+                ema14  = talib.EMA(np_closes, timeperiod=14)
+                ema50  = talib.EMA(np_closes, timeperiod=50)
+                ema100 = talib.EMA(np_closes, timeperiod=100)
+
+                last_ema14  = float(ema14[-1])
+                last_ema50  = float(ema50[-1])
+                last_ema100 = float(ema100[-1])
+
+                # Store EMA14 in the same print field (keeps UI intact)
+                SINAIS["LAST_SMA"] = round(
+                    last_ema14,
+                    DECIMAL_BTCUSDT if TRADE_SYMBOL == 'BTCUSDT' else DECIMAL_CALC
+                )
+
                 SINAIS["LAST_RSI"] = round(last_rsi, DECIMAL_CALC)
-                
-                # SPOT Entry Price
+
+                # SPOT price (signal price)
                 spot_current_price = float(close)
-                # logger.info("SPOT   Entry Price {}".format(float(spot_current_price)))
+
+                # Strong trend filter (EMA50 + EMA100 alignment)
+                trend_up   = last_ema50 > last_ema100
+                trend_down = last_ema50 < last_ema100
+
+                regime_long_ok  = trend_up and (spot_current_price > last_ema50)
+                regime_short_ok = trend_down and (spot_current_price < last_ema50)
 
                 # FUTURE Entry
                 ticker_future = get_current_price_futures(TRADE_SYMBOL)
@@ -1026,7 +1037,7 @@ def process_kline_message(kline_ws, message):
 
                     
                     
-                if last_rsi > RSI_OVERBOUGHT:
+                if last_rsi > RSI_OVERBOUGHT and regime_short_ok:
                     if in_position:
 
                         logger.info(f"[SIGNAL] | event=OVERBOUGHT_WAIT | rsi={last_rsi:.2f} | profit_target={PROFITS['WHEN_SELL']} | curr_roi={curr_roiProfitBuy}%")
@@ -1319,7 +1330,8 @@ def process_kline_message(kline_ws, message):
                 
                 # if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] == "BUY IMBALANCE" and SINAIS["MSG_1"] == "BUY  SIGNAL":             
                 # if last_rsi < RSI_OVERSOLD:             
-                if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] != "SELL IMBALANCE":
+                # if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] != "SELL IMBALANCE":
+                if (last_rsi < RSI_OVERSOLD and regime_long_ok and SINAIS["MSG_3"] != "SELL IMBALANCE"):    
                     if in_position:
                         logger.debug(f"[SIGNAL] | event=OVERSOLD_SKIP | rsi={last_rsi:.2f} | in_position=True")
                     elif last_close_time is not None and (aware_cetnow() - last_close_time).total_seconds() < COOLDOWN_SECONDS:
@@ -1558,7 +1570,7 @@ def process_depth_message(depth_ws, message):
         
 
 # Start WebSocket for Kline data
-SOCKET_SPOT_KLINE = "wss://stream.binance.com:9443/ws/{}@kline_1s".format(TRADE_SYMBOL.lower())
+SOCKET_SPOT_KLINE = "wss://stream.binance.com:9443/ws/{}@kline_1m".format(TRADE_SYMBOL.lower())
 # Start WebSocket for Depth data
 SOCKET_SPOT_DEPTH = "wss://stream.binance.com:9443/ws/{}@depth".format(TRADE_SYMBOL.lower())
               
