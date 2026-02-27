@@ -1181,63 +1181,93 @@ def process_kline_message(kline_ws, message):
                         curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price_sell, futures_current_price, volume_sell, False)
                         curr_roiProfitSell = mine_calculate_roi_with_imr(futures_entry_price_sell, futures_current_price, volume_sell, False, TRADE_LEVERAGE)
 
-                        if curr_roiProfitSell < 0 or curr_pnlProfitSell < 0:
-                            logger.debug(f"[STATUS] | direction=NEGATIVE | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | stop_loss_roi={ROI_STOP_LOSS}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
-                            # Reset trail when short goes negative
+                        # ─────────────────────────────────────────────────────────────────
+                        # FIX 1: For SHORT positions the PNL sign tells the truth:
+                        #   curr_pnlProfitSell < 0  → price ROSE  → SHORT is LOSING  → reset trail
+                        #   curr_pnlProfitSell >= 0 → price FELL  → SHORT is WINNING → hold trail
+                        # ROI sign from the formula is INVERTED vs LONG, so use pnl only.
+                        # ─────────────────────────────────────────────────────────────────
+                        short_is_losing = curr_pnlProfitSell < 0   # price went UP = bad for short
+                        short_is_winning = curr_pnlProfitSell > 0  # price went DOWN = good for short
+
+                        if short_is_losing:
+                            logger.debug(f"[STATUS] | direction=LOSING | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | stop_loss_roi={ROI_STOP_LOSS}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+                            # Reset trail — price moved against us
                             sorted_roi_sell.restart()
                             sorted_roi_sell.push(ROI_PROFIT)
                             PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = ROI_PROFIT
                             PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = ROI_PROFIT
-                            logger.info(f"[TRAIL] | event=RESET | side=SHORT | reason=negative_roi | roi={curr_roiProfitSell}% | history={sorted_roi_sell.get_values()}")
+                            logger.info(f"[TRAIL] | event=RESET | side=SHORT | reason=price_against_short | pnl={curr_pnlProfitSell} | history={sorted_roi_sell.get_values()}")
+                        elif short_is_winning:
+                            logger.debug(f"[STATUS] | direction=WINNING | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
                         else:
-                            logger.debug(f"[STATUS] | direction=POSITIVE | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+                            logger.debug(f"[STATUS] | direction=BREAKEVEN | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT")
 
-                        # Trailing stop for SHORT (mirrors BUY logic)
-                        if curr_roiProfitSell > float(sorted_roi_sell.peak()) and sorted_roi_sell.get_size() < roi_stack_size:
-                            PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = round(max(sorted_roi_sell.peak(), curr_roiProfitSell * (1 - trail_percent / 100)), DECIMAL_CALC)
-                            sorted_roi_sell.push(curr_roiProfitSell)
+                        # ─────────────────────────────────────────────────────────────────
+                        # Trailing stop for SHORT: track REAL profit = positive pnl
+                        # Use pnl as the metric (not roi) since roi sign is inverted
+                        # FIX 2: Only activate trail stop after minimum 3 data points
+                        #   → prevents 1-second exits on first candle
+                        # ─────────────────────────────────────────────────────────────────
+                        short_real_profit_pct = round(curr_pnlProfitSell / (futures_entry_price_sell * volume_sell / TRADE_LEVERAGE) * 100, DECIMAL_CALC) if futures_entry_price_sell > 0 else 0
+
+                        if short_is_winning and short_real_profit_pct > float(sorted_roi_sell.peak()) and sorted_roi_sell.get_size() < roi_stack_size:
+                            PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = round(max(sorted_roi_sell.peak(), short_real_profit_pct * (1 - trail_percent / 100)), DECIMAL_CALC)
+                            sorted_roi_sell.push(short_real_profit_pct)
                             PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = sorted_roi_sell.peak()
-                            logger.info(f"[TRAIL] | event=NEW_HIGH | side=SHORT | curr_roi={curr_roiProfitSell}% | new_trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | new_trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}% | history={sorted_roi_sell.get_values()}")
+                            logger.info(f"[TRAIL] | event=NEW_HIGH | side=SHORT | pnl={curr_pnlProfitSell} | real_profit_pct={short_real_profit_pct}% | new_trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | new_trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}% | history={sorted_roi_sell.get_values()}")
                         else:
                             PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = sorted_roi_sell.peak()
 
                         ROIS_GROWS_CALC_SELL = calculate_percentage_change(sorted_roi_sell.baseline(), sorted_roi_sell.peak())
                         if ROIS_GROWS_CALC_SELL > ROI_PERC_GROWS:
                             ROI_PERC_ATTEMPTS_SELL += 1
-                            logger.info(f"[TRAIL] | event=PERC_TRIGGER | side=SHORT | curr_roi={curr_roiProfitSell}% | grows_calc={ROIS_GROWS_CALC_SELL}% | attempts={ROI_PERC_ATTEMPTS_SELL}/{ROI_PERC_MAX_ATTEMPTS}")
+                            logger.info(f"[TRAIL] | event=PERC_TRIGGER | side=SHORT | pnl={curr_pnlProfitSell} | grows_calc={ROIS_GROWS_CALC_SELL}% | attempts={ROI_PERC_ATTEMPTS_SELL}/{ROI_PERC_MAX_ATTEMPTS}")
                         if sorted_roi_sell.get_size() > 1 and sorted_roi_sell.average_percentage_growth() > ROI_AVG_GROWS:
                             ROI_AVG_GROWS_ATTEMPTS_SELL += 1
                             logger.info(f"[TRAIL] | event=AVG_TRIGGER | side=SHORT | avg_growth={sorted_roi_sell.average_percentage_growth()}% | attempts={ROI_AVG_GROWS_ATTEMPTS_SELL}/{ROI_AVG_MAX_ATTEMPTS}")
 
                         # ── SHORT EXIT CONDITIONS ─────────────────────────────────────────
+                        # FIX 1+2: All exit conditions use pnl sign (not roi) + trail needs 3+ points
+                        short_trail_active = sorted_roi_sell.get_size() >= 3 and float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) > ROI_PROFIT
+                        short_trail_stop_hit = short_trail_active and short_real_profit_pct < float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"])
+
                         should_close_short = (
-                            curr_roiProfitSell <= float(ROI_STOP_LOSS)                                                                     # stop loss
-                            or curr_roiProfitSell > float(PROFITS_SELL["TRAIL_LAST_ROI_SELL"])                                              # new peak (take profit at trail)
-                            or float(futures_current_price) >= float(round(LOSSES_SELL["WHEN_SELL"], DECIMAL_CALC))                         # price rose to stop level
-                            or float(futures_current_price) <= float(round(PROFITS_SELL["WHEN_SELL"], DECIMAL_CALC))                        # price fell to take profit
-                            or ((ROI_PERC_ATTEMPTS_SELL > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitSell > 0)                                # patience exhausted with profit
-                            or ((ROI_AVG_GROWS_ATTEMPTS_SELL > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitSell > 0)                            # avg growth patience exhausted
-                            or (curr_roiProfitSell < float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) and float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) > ROI_PROFIT)  # trail stop hit
+                            curr_roiProfitSell <= float(ROI_STOP_LOSS)                                                          # stop loss: roi > ROI_STOP_LOSS threshold (price rose too much)
+                            or float(futures_current_price) >= float(round(LOSSES_SELL["WHEN_SELL"], DECIMAL_CALC))             # price rose to absolute stop price
+                            or float(futures_current_price) <= float(round(PROFITS_SELL["WHEN_SELL"], DECIMAL_CALC))            # price fell to take profit price
+                            or ((ROI_PERC_ATTEMPTS_SELL > ROI_PERC_MAX_ATTEMPTS) and short_is_winning)                          # patience exhausted while winning
+                            or ((ROI_AVG_GROWS_ATTEMPTS_SELL > ROI_AVG_MAX_ATTEMPTS) and short_is_winning)                      # avg growth patience while winning
+                            or short_trail_stop_hit                                                                              # trail stop: profit pulled back (3+ points required)
                         )
 
                         if should_close_short:
+                            # ─────────────────────────────────────────────────────────────
+                            # FIX 3: outcome and TOTALS use pnl sign (not roi sign)
+                            #   SHORT PROFIT = pnl > 0 (price fell, we win)
+                            #   SHORT LOSS   = pnl < 0 (price rose, we lose)
+                            # ─────────────────────────────────────────────────────────────
+                            real_outcome_profit = curr_pnlProfitSell >= 0  # True = real profit for short
+
                             # Determine exit reason
                             if curr_roiProfitSell <= float(ROI_STOP_LOSS):
                                 soldDesc_s  = f"{TRADE_TYPE} SHORT STOP LOSS (roi={curr_roiProfitSell}% <= stop={ROI_STOP_LOSS}%)"
-                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
-                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=STOP_LOSS | roi={curr_roiProfitSell}% | threshold={ROI_STOP_LOSS}%")
-                            elif curr_roiProfitSell < float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) and float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) > ROI_PROFIT:
-                                soldDesc_s  = f"{TRADE_TYPE} SHORT TRAIL STOP HIT (roi={curr_roiProfitSell}% < trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%)"
-                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
-                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=TRAIL_STOP | curr_roi={curr_roiProfitSell}% | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%")
+                                soldDesc1_s = f"exit_price={futures_current_price} pnl={curr_pnlProfitSell} USDT"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=STOP_LOSS | roi={curr_roiProfitSell}% | pnl={curr_pnlProfitSell}")
+                            elif short_trail_stop_hit:
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT TRAIL STOP HIT (real_profit={short_real_profit_pct}% < trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%)"
+                                soldDesc1_s = f"exit_price={futures_current_price} pnl={curr_pnlProfitSell} USDT"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=TRAIL_STOP | real_profit={short_real_profit_pct}% | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%")
                             elif float(futures_current_price) <= float(round(PROFITS_SELL["WHEN_SELL"], DECIMAL_CALC)):
                                 soldDesc_s  = f"{TRADE_TYPE} SHORT TAKE PROFIT (price={futures_current_price} <= target={PROFITS_SELL['WHEN_SELL']})"
-                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                                soldDesc1_s = f"exit_price={futures_current_price} pnl={curr_pnlProfitSell} USDT"
                                 logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=TAKE_PROFIT | price={futures_current_price} | target={PROFITS_SELL['WHEN_SELL']}")
                             else:
-                                soldDesc_s  = f"{TRADE_TYPE} SHORT PROFIT (roi={curr_roiProfitSell}%)"
-                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
-                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=PATIENCE | roi={curr_roiProfitSell}%")
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT PATIENCE EXIT (pnl={curr_pnlProfitSell} USDT)"
+                                soldDesc1_s = f"exit_price={futures_current_price} pnl={curr_pnlProfitSell} USDT"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=PATIENCE | pnl={curr_pnlProfitSell}")
+
+                            outcome_s = "PROFIT" if real_outcome_profit else "LOSS"
 
                             if not BLOCK_ORDER:
                                 # REAL: close short with BUY reduce-only
@@ -1247,11 +1277,10 @@ def process_kline_message(kline_ws, message):
                                 if order_close_sell:
                                     in_position_sell = False
                                     last_close_time_sell = aware_cetnow()
-                                    outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
-                                    logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
+                                    logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | pnl={curr_pnlProfitSell} USDT | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
                                     print_signals(False)
                                     SINAIS['ENTRY_POINT'] = ""
-                                    if curr_pnlProfitSell >= 0:
+                                    if real_outcome_profit:
                                         TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
                                         TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
                                         TOTALS['COUNT_PROFITS_SELL'] += 1
@@ -1269,11 +1298,10 @@ def process_kline_message(kline_ws, message):
                                 # SIMULATED close short
                                 in_position_sell = False
                                 last_close_time_sell = aware_cetnow()
-                                outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
-                                logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
+                                logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | pnl={curr_pnlProfitSell} USDT | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
                                 print_signals(False)
                                 SINAIS['ENTRY_POINT'] = ""
-                                if curr_pnlProfitSell >= 0:
+                                if real_outcome_profit:
                                     TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
                                     TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
                                     TOTALS['COUNT_PROFITS_SELL'] += 1
@@ -1301,10 +1329,13 @@ def process_kline_message(kline_ws, message):
 
                     # ── SHORT CLOSE at OVERSOLD ───────────────────────────────────────
                     if ACTION_SELL and in_position_sell:
-                        logger.info(f"[SIGNAL] | event=OVERSOLD_SHORT_CLOSE | rsi={last_rsi:.2f} | roi={curr_roiProfitSell}% | pnl={curr_pnlProfitSell}")
+                        logger.info(f"[SIGNAL] | event=OVERSOLD_SHORT_CLOSE | rsi={last_rsi:.2f} | pnl={curr_pnlProfitSell} | roi={curr_roiProfitSell}%")
                         soldDesc_s  = f"{TRADE_TYPE} SHORT CLOSE AT OVERSOLD RSI={last_rsi:.2f}"
-                        soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                        soldDesc1_s = f"exit_price={futures_current_price} pnl={curr_pnlProfitSell} USDT"
                         logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=RSI_OVERSOLD | rsi={last_rsi:.2f}")
+                        # FIX 3: SHORT profit = pnl > 0 (price fell), loss = pnl < 0 (price rose)
+                        real_outcome_profit_os = curr_pnlProfitSell >= 0
+                        outcome_s = "PROFIT" if real_outcome_profit_os else "LOSS"
                         if not BLOCK_ORDER:
                             order_close_sell = order_future_cancel_REDUCE_only('BUY', TRADE_SYMBOL, volume_sell, 'BOTH', 'MARKET')
                             order_future_cancel_all_open_order(TRADE_SYMBOL)
@@ -1312,11 +1343,10 @@ def process_kline_message(kline_ws, message):
                             if order_close_sell:
                                 in_position_sell = False
                                 last_close_time_sell = aware_cetnow()
-                                outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
-                                logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
+                                logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | pnl={curr_pnlProfitSell} USDT | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
                                 print_signals(False)
                                 SINAIS['ENTRY_POINT'] = ""
-                                if curr_pnlProfitSell >= 0:
+                                if real_outcome_profit_os:
                                     TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
                                     TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
                                     TOTALS['COUNT_PROFITS_SELL'] += 1
@@ -1333,11 +1363,10 @@ def process_kline_message(kline_ws, message):
                         else:  # SIMULATED
                             in_position_sell = False
                             last_close_time_sell = aware_cetnow()
-                            outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
-                            logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
+                            logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | pnl={curr_pnlProfitSell} USDT | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
                             print_signals(False)
                             SINAIS['ENTRY_POINT'] = ""
-                            if curr_pnlProfitSell >= 0:
+                            if real_outcome_profit_os:
                                 TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
                                 TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
                                 TOTALS['COUNT_PROFITS_SELL'] += 1
