@@ -158,7 +158,9 @@ should_stop = False
 initial_procces_date = aware_cetnow()
 # PROFIT_SELL = 1.0006
 # LOSS_SELL = 0.9995
-trail_percent = 2    # Trailing stop percentage (2% in this example)
+trail_percent = 10   # was 2 — trail stop at 10% below ROI peak
+# Example: ROI peaks at 0.54% → trail stop = 0.54 * 0.90 = 0.49%
+# Gives more room before exiting
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 55
 RSI_OVERSOLD = 30
@@ -180,15 +182,23 @@ QTY_BUY = 0.05 # USDT 0.005
 # QTY_BUY = 0.00014
 QTY_SELL = 1000 # It Forces to Sell 100%
 ONLY_BY_WHEN = 41180
+
 ByPass = True
 BLOCK_ORDER = True
-
 ACTION_BUY = True
+ACTION_SELL = True  
+USE_FUTURES_PRICE_FOR_DECISION = True   # ← ADD THIS
+# True  = use futures_current_price for PNL, trailing, exit (current behavior)
+# False = use spot_current_price for PNL, trailing, exit
+
+
 ATTEMPT_RATIO = 0.00005
 
 ROI_PROFIT = 0.15
-ROI_STOP_LOSS = -1.20
-TRADE_LEVERAGE = 75
+# Option A — Widen stop loss (accept more risk per trade)
+ROI_STOP_LOSS = -2.0   # was -1.20
+# Option B — Reduce leverage (same stop, less sensitivity)
+TRADE_LEVERAGE = 20    # was 75
 
 # PERCENTAGE AVARAGE BETWEEN TWO NUMBERS (MORE INTELIGENTTELY)
 ROI_PERC_GROWS = 200   # was 20 — require 3x growth before counting
@@ -212,13 +222,20 @@ sorted_last_profits_sell = RoiHistory(10)
 sorted_last_losses_sell = RoiHistory(10)
 
 # PRECISION_PROFIT_LOSS = 7 # CFXUSDT
-PRECISION_PROFIT_LOSS = 1 # BTCUSDT
+PRECISION_PROFIT_LOSS = 5 # BTCUSDT 1  / SAHARAUSDT  5 
 
-BUY_PROFIT_CALC = 1.005   # BTCUSDT
+# BTCUSDT
+BUY_PROFIT_CALC = 1.005   
 BUY_LOSS_CALC = 0.99913     # BTCUSDT
-
 SELL_PROFIT_CALC = 1.005   # BTCUSDT
 SELL_LOSS_CALC = 0.99913     # BTCUSDT
+
+# SAHARAUSDT
+# BUY_PROFIT_CALC = 1.008   # SAHARAUSDT
+# BUY_LOSS_CALC = 0.992     # SAHARAUSDT
+# SELL_PROFIT_CALC = 1.008   # SAHARAUSDT
+# SELL_LOSS_CALC = 0.992     # SAHARAUSDT
+
 
 PROFITS = {}
 PROFITS["WHEN_BUY"] = 0
@@ -248,17 +265,36 @@ roiProfitSell = 0
 pnlLossSell = 0
 roiLossSell = 0
 
-
 logger = logging.getLogger()
 loggin_setup("./logs/bot_A_{}_{}_mcda_rsi".format(TRADE_TYPE, TRADE_SYMBOL))
 
 closes = []
 in_position = False
+in_position_sell = False
+last_close_time = None
+COOLDOWN_SECONDS = 10  # don't re-enter for 30 seconds after close
 
 # futures_entry_price = 39570.01 
 futures_entry_price = 0
 spot_entry_price = 0
 # forceSell = 39800.94000000
+
+# ── SHORT SIDE GLOBALS ──────────────────────────────────────────────────────
+futures_entry_price_sell = 0
+volume_sell = QTY_BUY
+last_close_time_sell = None
+
+PROFITS_SELL = {}
+PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = ROI_PROFIT
+PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = ROI_PROFIT
+LOSSES_SELL = {}
+
+ROI_PERC_ATTEMPTS_SELL    = 0
+ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+
+sorted_roi_sell = RoiHistory(roi_stack_size)
+sorted_roi_sell.push(ROI_PROFIT)
+# ────────────────────────────────────────────────────────────────────────────
 
 SINAIS = {}
 SINAIS["BUY_HIST"] = 0 
@@ -376,7 +412,7 @@ def order_future_cancel_all_open_order(symbol):
         # logger.info("Cancel All open Orders / Closing All  {} ".format( symbol))
         # cleardualSidePosition='false', 
         order = client.futures_cancel_all_open_orders(symbol=symbol, 
-                                            timeInForce='GTC',  # GTC (Good 'Til Canceled)
+                                            # timeInForce='GTC',  # GTC (Good 'Til Canceled)
                                             recvWindow = 60000)
         # logger.info(order)
     except Exception as e:
@@ -683,7 +719,8 @@ def print_status_positive(current_price, curr_roiProfitBuy, curr_pnlProfitBuy, R
     )
 
 def process_kline_message(kline_ws, message):
-    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, spot_entry_price, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS, sorted_roi, sorted_last_profits_buy, sorted_last_losses_buy, sorted_last_profits_sell, sorted_last_losses_sell  
+    global closes, in_position, curr_roiProfitBuy, curr_pnlProfitBuy, curr_roiProfitSell, curr_pnlProfitSell, spot_entry_price, futures_entry_price, amountQty, volume, historical_data, previous_volume, PROFITS, LOSSES, ROI_PROFIT, ROI_STOP_LOSS, trail_percent, ROI_PERC_GROWS, ROI_PERC_ATTEMPTS, ROI_AVG_GROWS, ROI_AVG_GROWS_ATTEMPTS, sorted_roi, sorted_last_profits_buy, sorted_last_losses_buy, sorted_last_profits_sell, sorted_last_losses_sell, last_close_time, in_position_sell
+    global futures_entry_price_sell, volume_sell, last_close_time_sell, PROFITS_SELL, LOSSES_SELL, ROI_PERC_ATTEMPTS_SELL, ROI_AVG_GROWS_ATTEMPTS_SELL, sorted_roi_sell
     
     # df = pd.DataFrame(message, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
     # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -838,8 +875,10 @@ def process_kline_message(kline_ws, message):
                     # Stop Loss: 0.998 To near, We Don't get the Chance to have Profits
                     # logger.info("SPOT:   {} Buy Price {} Volume {} Qty {} Target Profit {}  Stop Loss {} Current Price {}  RSI: {}".format (TRADE_SYMBOL, float(futures_entry_price), volume, amountQty, float(futures_entry_price * PROFIT_SELL), float(spot_entry_price * 0.995), float(spot_current_price), float(last_rsi)))
                     if ACTION_BUY:
-                        curr_pnlProfitBuy = calculate_pnl_futures(futures_entry_price, futures_current_price, volume, True)
-                        curr_roiProfitBuy = mine_calculate_roi_with_imr(futures_entry_price, futures_current_price, volume, True, TRADE_LEVERAGE)
+                        decision_price = futures_current_price if USE_FUTURES_PRICE_FOR_DECISION else spot_current_price
+                        decision_entry = futures_entry_price   if USE_FUTURES_PRICE_FOR_DECISION else spot_entry_price
+                        curr_pnlProfitBuy = calculate_pnl_futures(decision_entry, decision_price, volume, True)
+                        curr_roiProfitBuy = mine_calculate_roi_with_imr(decision_entry, decision_price, volume, True, TRADE_LEVERAGE)
 
                         if (curr_roiProfitBuy < 0 or curr_pnlProfitBuy < 0):
                             print_status_negative(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
@@ -903,21 +942,30 @@ def process_kline_message(kline_ws, message):
 
                         # Stop Losses or Take Profits
                         # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
-                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):    
-                            soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                        # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):    
+                        _dp = futures_current_price if USE_FUTURES_PRICE_FOR_DECISION else spot_current_price
+                        if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) \
+                            or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) \
+                            or float(_dp) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) \
+                            or float(_dp) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) \
+                            or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) \
+                            or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) \
+                            or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):    
+                            
+                            soldDesc, soldDesc1 = print_decisions(_dp, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
                             if not BLOCK_ORDER:
                                 # order_spot = order_sell(SIDE_SELL, TRADE_SYMBOL.upper(), round(volume, VOLUME_DEC), ORDER_TYPE_MARKET, soldDesc, ATTEMPT_RATIO)
                                 # logger.info("SPOT Order Closed: {}".format(order_spot))
                                 
                                 # FUTURES CLOSE BY REDUCING 100% THE ORDER
-                                order_future = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
-                                order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
-                                logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | type={TRADE_TYPE} | orderId={order_future.get('orderId') if isinstance(order_future, dict) else order_future}")
+                                order_close = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                                order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | type={TRADE_TYPE} | orderId={order_close.get('orderId') if isinstance(order_close, dict) else order_close}")
                                 
-                                if order_future:
+                                if order_close:
                                     in_position = False
-                                    
+                                    last_close_time = aware_cetnow()  # ← ADD THIS LINE
                                     print_logger_results("REAL TRADE", soldDesc, soldDesc1, curr_roiProfitBuy)
                                     SINAIS['ENTRY_POINT'] = ""
                                     
@@ -934,14 +982,14 @@ def process_kline_message(kline_ws, message):
                                         
                                     curr_roiProfitBuy = 0
                                     curr_pnlProfitBuy = 0
-                                    ROI_PERC_ATTEMPTS = 1
-                                    ROI_AVG_GROWS_ATTEMPTS = 1
+                                    ROI_PERC_ATTEMPTS = 0
+                                    ROI_AVG_GROWS_ATTEMPTS = 0
                                 
                                 
                             else:
                                 
                                 in_position = False
-                                
+                                last_close_time = aware_cetnow()  # ← ADD THIS LINE
                                 print_logger_results("SIMULATED", soldDesc, soldDesc1, curr_roiProfitBuy)
                                 SINAIS['ENTRY_POINT'] = ""
                                 
@@ -958,8 +1006,8 @@ def process_kline_message(kline_ws, message):
                                     
                                 curr_roiProfitBuy = 0
                                 curr_pnlProfitBuy = 0
-                                ROI_PERC_ATTEMPTS = 1
-                                ROI_AVG_GROWS_ATTEMPTS = 1
+                                ROI_PERC_ATTEMPTS = 0
+                                ROI_AVG_GROWS_ATTEMPTS = 0
                                 # logger.info("-------- SLEEP TIME  CLOSED POSITION {} seconds------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
                                 # time.sleep(SLEEP_CLOSED)
                                 # logger.info("-----------------------------------------------------------------------------------------------------------------------------|".format(SLEEP_CLOSED))    
@@ -985,8 +1033,18 @@ def process_kline_message(kline_ws, message):
                         
                         if ACTION_BUY:
                             # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0):
-                            if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):                            
-                                soldDesc, soldDesc1 = print_decisions(futures_current_price, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
+                            # if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) or float(futures_current_price) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) or float(futures_current_price) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):                            
+                            # Line 1012 — add _dp before the if:
+                            _dp_ob = futures_current_price if USE_FUTURES_PRICE_FOR_DECISION else spot_current_price
+                            if (curr_roiProfitBuy <= float(ROI_STOP_LOSS)) \
+                                or (curr_roiProfitBuy > float(PROFITS["TRAIL_LAST_ROI_BUY"])) \
+                                or float(_dp_ob) <= float(round(LOSSES["WHEN_BUY"], DECIMAL_CALC)) \
+                                or float(_dp_ob) >= float(round(PROFITS["WHEN_BUY"], DECIMAL_CALC)) \
+                                or ((ROI_PERC_ATTEMPTS > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) \
+                                or ((ROI_AVG_GROWS_ATTEMPTS > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitBuy > 0) \
+                                or (curr_roiProfitBuy < float(PROFITS["TRAIL_STOP_ROI_BUY"]) and float(PROFITS["TRAIL_STOP_ROI_BUY"]) > ROI_PROFIT):
+                            
+                                soldDesc, soldDesc1 = print_decisions(_dp_ob, curr_roiProfitBuy, curr_pnlProfitBuy, ROI_PROFIT, ROI_STOP_LOSS, PROFITS, LOSSES)
 
                                 if not BLOCK_ORDER:  
                                     logger.info(f"[TRADE] | event=OVERBOUGHT_SELL | mode=REAL | rsi={last_rsi:.2f} | futures={futures_current_price:.2f}")
@@ -995,9 +1053,9 @@ def process_kline_message(kline_ws, message):
                                     # order_spot = order_sell(SIDE_SELL, TRADE_SYMBOL.upper(), round(volume, VOLUME_DEC), ORDER_TYPE_MARKET, soldDesc, ATTEMPT_RATIO)
                                     # logger.info("SPOT Order Closed: {}".format(order_spot))
                                     
-                                    order_future = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
-                                    order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
-                                    logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | type={TRADE_TYPE} | orderId={order_future.get('orderId') if isinstance(order_future, dict) else order_future}")
+                                    order_close = order_future_cancel_REDUCE_only('SELL', TRADE_SYMBOL, volume, 'BOTH', 'MARKET')
+                                    order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                    logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | type={TRADE_TYPE} | orderId={order_close.get('orderId') if isinstance(order_close, dict) else order_close}")
                                     
                                     
                                     # FUTURES CLOSE BY REDUCING 100% THE ORDER
@@ -1005,9 +1063,9 @@ def process_kline_message(kline_ws, message):
                                     # orderFuture = order_future_cancel_all_open_order(TRADE_SYMBOL)
                                     # logger.info(orderFuture)
                                     
-                                    if order_future:
+                                    if order_close:
                                         in_position = False
-                                        
+                                        last_close_time = aware_cetnow()  # ← ADD THIS LINE
                                         print_logger_results("REAL TRADE",soldDesc, soldDesc1, curr_roiProfitBuy)
                                         SINAIS['ENTRY_POINT'] = ""
 
@@ -1024,15 +1082,15 @@ def process_kline_message(kline_ws, message):
                                             
                                         curr_roiProfitBuy = 0
                                         curr_pnlProfitBuy = 0
-                                        ROI_PERC_ATTEMPTS = 1
-                                        ROI_AVG_GROWS_ATTEMPTS = 1
+                                        ROI_PERC_ATTEMPTS = 0
+                                        ROI_AVG_GROWS_ATTEMPTS = 0
                                         
                                     
                                 else:
                                     logger.info(f"[TRADE] | event=OVERBOUGHT_SELL | mode=SIMULATED | rsi={last_rsi:.2f} | futures={futures_current_price:.2f}")
                                     
                                     in_position = False
-                                    
+                                    last_close_time = aware_cetnow()  # ← ADD THIS LINE
                                     print_logger_results("SIMULATED", soldDesc, soldDesc1, curr_roiProfitBuy)
                                     SINAIS['ENTRY_POINT'] = ""
                                     
@@ -1049,23 +1107,255 @@ def process_kline_message(kline_ws, message):
                                     
                                     curr_roiProfitBuy = 0
                                     curr_pnlProfitBuy = 0
-                                    ROI_PERC_ATTEMPTS = 1
-                                    ROI_AVG_GROWS_ATTEMPTS = 1
-                                        
-                                        
-                                
-                    else:
-                        logger.debug(f"[SIGNAL] | event=OVERBOUGHT_SKIP | rsi={last_rsi:.2f} | in_position=False")
+                                    ROI_PERC_ATTEMPTS = 0
+                                    ROI_AVG_GROWS_ATTEMPTS = 0
+                    # ── SHORT ENTRY: open short when RSI overbought ──────────────────────
+                    if ACTION_SELL and not in_position_sell:
+                        if float(futures_current_price) > 0:
+                            logger.info(f"[SIGNAL] | event=OVERBOUGHT_SHORT_ENTRY | rsi={last_rsi:.2f} | futures={futures_current_price:.4f}")
+                            if not BLOCK_ORDER:
+                                # REAL: cancel stale orders, then open short
+                                order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                order_result_sell = order_future_create_order(SIDE_SELL, TRADE_SYMBOL, QTY_BUY, 'BOTH', ORDER_TYPE_MARKET)
+                                if order_result_sell:
+                                    # Fetch actual fill from position info (short = negative positionAmt)
+                                    positions = client.futures_position_information(symbol=TRADE_SYMBOL, recvWindow=60000)
+                                    for position in positions:
+                                        if float(position['positionAmt']) < 0:
+                                            futures_entry_price_sell = float(position['entryPrice'])
+                                            volume_sell = abs(float(position['positionAmt']))
+                                            break
+                                    if futures_entry_price_sell <= 0:
+                                        futures_entry_price_sell = float(futures_current_price)
+                                    volume_sell = volume_sell if volume_sell > 0 else QTY_BUY
+
+                                    in_position_sell = True
+                                    sorted_roi_sell.restart()
+                                    sorted_roi_sell.push(ROI_PROFIT)
+                                    PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = ROI_PROFIT
+                                    PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = ROI_PROFIT
+                                    ROI_PERC_ATTEMPTS_SELL    = 0
+                                    ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+
+                                    # Targets for SHORT: profit = price drops, loss = price rises
+                                    PROFITS_SELL["WHEN_SELL"] = round(futures_entry_price_sell / BUY_PROFIT_CALC, PRECISION_PROFIT_LOSS)
+                                    LOSSES_SELL["WHEN_SELL"]  = round(futures_entry_price_sell / BUY_LOSS_CALC,   PRECISION_PROFIT_LOSS)
+
+                                    pnl_tp = calculate_pnl_futures(futures_entry_price_sell, PROFITS_SELL["WHEN_SELL"], volume_sell, False)
+                                    roi_tp = mine_calculate_roi_with_imr(PROFITS_SELL["WHEN_SELL"], futures_entry_price_sell, volume_sell, False, TRADE_LEVERAGE)
+                                    pnl_sl = calculate_pnl_futures(futures_entry_price_sell, LOSSES_SELL["WHEN_SELL"], volume_sell, False)
+                                    roi_sl = mine_calculate_roi_with_imr(LOSSES_SELL["WHEN_SELL"], futures_entry_price_sell, volume_sell, False, TRADE_LEVERAGE)
+
+                                    logger.info(f"[TRADE] | event=OPEN | mode=REAL | side=SHORT | symbol={TRADE_SYMBOL} | futures_entry={futures_entry_price_sell:.4f} | qty={volume_sell} | notional={round(futures_entry_price_sell * volume_sell, 2)} USDT")
+                                    logger.info(f"[TRADE] | event=TARGETS | side=SHORT | take_profit={PROFITS_SELL['WHEN_SELL']} (roi={roi_tp}% pnl={pnl_tp}) | stop_loss={LOSSES_SELL['WHEN_SELL']} (roi={roi_sl}% pnl={pnl_sl}) | trail_stop_roi={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%")
+                                    logger.info(f"[TRAIL] | event=INIT | side=SHORT | history={sorted_roi_sell.get_values()} | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+                                    print_signals(True)
+
+                            else:  # SIMULATED SHORT
+                                futures_entry_price_sell = float(futures_current_price)
+                                volume_sell = QTY_BUY
+                                in_position_sell = True
+                                sorted_roi_sell.restart()
+                                sorted_roi_sell.push(ROI_PROFIT)
+                                PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = ROI_PROFIT
+                                PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = ROI_PROFIT
+                                ROI_PERC_ATTEMPTS_SELL    = 0
+                                ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+
+                                PROFITS_SELL["WHEN_SELL"] = round(futures_entry_price_sell / BUY_PROFIT_CALC, PRECISION_PROFIT_LOSS)
+                                LOSSES_SELL["WHEN_SELL"]  = round(futures_entry_price_sell / BUY_LOSS_CALC,   PRECISION_PROFIT_LOSS)
+
+                                pnl_tp = calculate_pnl_futures(futures_entry_price_sell, PROFITS_SELL["WHEN_SELL"], volume_sell, False)
+                                roi_tp = mine_calculate_roi_with_imr(PROFITS_SELL["WHEN_SELL"], futures_entry_price_sell, volume_sell, False, TRADE_LEVERAGE)
+                                pnl_sl = calculate_pnl_futures(futures_entry_price_sell, LOSSES_SELL["WHEN_SELL"], volume_sell, False)
+                                roi_sl = mine_calculate_roi_with_imr(LOSSES_SELL["WHEN_SELL"], futures_entry_price_sell, volume_sell, False, TRADE_LEVERAGE)
+
+                                logger.info(f"[TRADE] | event=OPEN | mode=SIMULATED | side=SHORT | symbol={TRADE_SYMBOL} | futures_entry={futures_entry_price_sell:.4f} | qty={volume_sell} | notional={round(futures_entry_price_sell * volume_sell, 2)} USDT")
+                                logger.info(f"[TRADE] | event=TARGETS | side=SHORT | take_profit={PROFITS_SELL['WHEN_SELL']} (roi={roi_tp}% pnl={pnl_tp}) | stop_loss={LOSSES_SELL['WHEN_SELL']} (roi={roi_sl}% pnl={pnl_sl}) | trail_stop_roi={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%")
+                                logger.info(f"[TRAIL] | event=INIT | side=SHORT | history={sorted_roi_sell.get_values()} | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+                                print_signals(True)
+                    # ── END SHORT ENTRY ──────────────────────────────────────────────────
+
+                    # ── SHORT MANAGEMENT: monitor open short position ─────────────────
+                    if ACTION_SELL and in_position_sell:
+                        curr_pnlProfitSell = calculate_pnl_futures(futures_entry_price_sell, futures_current_price, volume_sell, False)
+                        curr_roiProfitSell = mine_calculate_roi_with_imr(futures_entry_price_sell, futures_current_price, volume_sell, False, TRADE_LEVERAGE)
+
+                        if curr_roiProfitSell < 0 or curr_pnlProfitSell < 0:
+                            logger.debug(f"[STATUS] | direction=NEGATIVE | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | stop_loss_roi={ROI_STOP_LOSS}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+                            # Reset trail when short goes negative
+                            sorted_roi_sell.restart()
+                            sorted_roi_sell.push(ROI_PROFIT)
+                            PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = ROI_PROFIT
+                            PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = ROI_PROFIT
+                            logger.info(f"[TRAIL] | event=RESET | side=SHORT | reason=negative_roi | roi={curr_roiProfitSell}% | history={sorted_roi_sell.get_values()}")
+                        else:
+                            logger.debug(f"[STATUS] | direction=POSITIVE | side=SHORT | futures={futures_current_price:.4f} | roi={curr_roiProfitSell:.2f}% | pnl={curr_pnlProfitSell:.2f} USDT | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}%")
+
+                        # Trailing stop for SHORT (mirrors BUY logic)
+                        if curr_roiProfitSell > float(sorted_roi_sell.peak()) and sorted_roi_sell.get_size() < roi_stack_size:
+                            PROFITS_SELL["TRAIL_STOP_ROI_SELL"] = round(max(sorted_roi_sell.peak(), curr_roiProfitSell * (1 - trail_percent / 100)), DECIMAL_CALC)
+                            sorted_roi_sell.push(curr_roiProfitSell)
+                            PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = sorted_roi_sell.peak()
+                            logger.info(f"[TRAIL] | event=NEW_HIGH | side=SHORT | curr_roi={curr_roiProfitSell}% | new_trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}% | new_trail_last={PROFITS_SELL['TRAIL_LAST_ROI_SELL']}% | history={sorted_roi_sell.get_values()}")
+                        else:
+                            PROFITS_SELL["TRAIL_LAST_ROI_SELL"] = sorted_roi_sell.peak()
+
+                        ROIS_GROWS_CALC_SELL = calculate_percentage_change(sorted_roi_sell.baseline(), sorted_roi_sell.peak())
+                        if ROIS_GROWS_CALC_SELL > ROI_PERC_GROWS:
+                            ROI_PERC_ATTEMPTS_SELL += 1
+                            logger.info(f"[TRAIL] | event=PERC_TRIGGER | side=SHORT | curr_roi={curr_roiProfitSell}% | grows_calc={ROIS_GROWS_CALC_SELL}% | attempts={ROI_PERC_ATTEMPTS_SELL}/{ROI_PERC_MAX_ATTEMPTS}")
+                        if sorted_roi_sell.get_size() > 1 and sorted_roi_sell.average_percentage_growth() > ROI_AVG_GROWS:
+                            ROI_AVG_GROWS_ATTEMPTS_SELL += 1
+                            logger.info(f"[TRAIL] | event=AVG_TRIGGER | side=SHORT | avg_growth={sorted_roi_sell.average_percentage_growth()}% | attempts={ROI_AVG_GROWS_ATTEMPTS_SELL}/{ROI_AVG_MAX_ATTEMPTS}")
+
+                        # ── SHORT EXIT CONDITIONS ─────────────────────────────────────────
+                        should_close_short = (
+                            curr_roiProfitSell <= float(ROI_STOP_LOSS)                                                                     # stop loss
+                            or curr_roiProfitSell > float(PROFITS_SELL["TRAIL_LAST_ROI_SELL"])                                              # new peak (take profit at trail)
+                            or float(futures_current_price) >= float(round(LOSSES_SELL["WHEN_SELL"], DECIMAL_CALC))                         # price rose to stop level
+                            or float(futures_current_price) <= float(round(PROFITS_SELL["WHEN_SELL"], DECIMAL_CALC))                        # price fell to take profit
+                            or ((ROI_PERC_ATTEMPTS_SELL > ROI_PERC_MAX_ATTEMPTS) and curr_pnlProfitSell > 0)                                # patience exhausted with profit
+                            or ((ROI_AVG_GROWS_ATTEMPTS_SELL > ROI_AVG_MAX_ATTEMPTS) and curr_pnlProfitSell > 0)                            # avg growth patience exhausted
+                            or (curr_roiProfitSell < float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) and float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) > ROI_PROFIT)  # trail stop hit
+                        )
+
+                        if should_close_short:
+                            # Determine exit reason
+                            if curr_roiProfitSell <= float(ROI_STOP_LOSS):
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT STOP LOSS (roi={curr_roiProfitSell}% <= stop={ROI_STOP_LOSS}%)"
+                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=STOP_LOSS | roi={curr_roiProfitSell}% | threshold={ROI_STOP_LOSS}%")
+                            elif curr_roiProfitSell < float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) and float(PROFITS_SELL["TRAIL_STOP_ROI_SELL"]) > ROI_PROFIT:
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT TRAIL STOP HIT (roi={curr_roiProfitSell}% < trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%)"
+                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=TRAIL_STOP | curr_roi={curr_roiProfitSell}% | trail_stop={PROFITS_SELL['TRAIL_STOP_ROI_SELL']}%")
+                            elif float(futures_current_price) <= float(round(PROFITS_SELL["WHEN_SELL"], DECIMAL_CALC)):
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT TAKE PROFIT (price={futures_current_price} <= target={PROFITS_SELL['WHEN_SELL']})"
+                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=TAKE_PROFIT | price={futures_current_price} | target={PROFITS_SELL['WHEN_SELL']}")
+                            else:
+                                soldDesc_s  = f"{TRADE_TYPE} SHORT PROFIT (roi={curr_roiProfitSell}%)"
+                                soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                                logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=PATIENCE | roi={curr_roiProfitSell}%")
+
+                            if not BLOCK_ORDER:
+                                # REAL: close short with BUY reduce-only
+                                order_close_sell = order_future_cancel_REDUCE_only('BUY', TRADE_SYMBOL, volume_sell, 'BOTH', 'MARKET')
+                                order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | side=SHORT_CLOSE | orderId={order_close_sell.get('orderId') if isinstance(order_close_sell, dict) else order_close_sell}")
+                                if order_close_sell:
+                                    in_position_sell = False
+                                    last_close_time_sell = aware_cetnow()
+                                    outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
+                                    logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
+                                    print_signals(False)
+                                    SINAIS['ENTRY_POINT'] = ""
+                                    if curr_pnlProfitSell >= 0:
+                                        TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
+                                        TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
+                                        TOTALS['COUNT_PROFITS_SELL'] += 1
+                                        sorted_last_profits_sell.push(curr_pnlProfitSell)
+                                    else:
+                                        TOTALS['TOTAL_LOSSES_SELL'] -= abs(curr_pnlProfitSell)
+                                        TOTALS['TOTAL_LOSSES_SELL'] = round(TOTALS['TOTAL_LOSSES_SELL'], DECIMAL_CALC)
+                                        TOTALS['COUNT_LOSSES_SELL'] += 1
+                                        sorted_last_losses_sell.push(curr_pnlProfitSell)
+                                    curr_roiProfitSell = 0
+                                    curr_pnlProfitSell = 0
+                                    ROI_PERC_ATTEMPTS_SELL    = 0
+                                    ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+                            else:
+                                # SIMULATED close short
+                                in_position_sell = False
+                                last_close_time_sell = aware_cetnow()
+                                outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
+                                logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s} | detail={soldDesc1_s}")
+                                print_signals(False)
+                                SINAIS['ENTRY_POINT'] = ""
+                                if curr_pnlProfitSell >= 0:
+                                    TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
+                                    TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
+                                    TOTALS['COUNT_PROFITS_SELL'] += 1
+                                    sorted_last_profits_sell.push(curr_pnlProfitSell)
+                                else:
+                                    TOTALS['TOTAL_LOSSES_SELL'] -= abs(curr_pnlProfitSell)
+                                    TOTALS['TOTAL_LOSSES_SELL'] = round(TOTALS['TOTAL_LOSSES_SELL'], DECIMAL_CALC)
+                                    TOTALS['COUNT_LOSSES_SELL'] += 1
+                                    sorted_last_losses_sell.push(curr_pnlProfitSell)
+                                curr_roiProfitSell = 0
+                                curr_pnlProfitSell = 0
+                                ROI_PERC_ATTEMPTS_SELL    = 0
+                                ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+                    # ── END SHORT MANAGEMENT ─────────────────────────────────────────────
                 
                 # if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] == "BUY IMBALANCE" and SINAIS["MSG_1"] == "BUY  SIGNAL":             
-                if last_rsi < RSI_OVERSOLD:             
+                # if last_rsi < RSI_OVERSOLD:             
+                if last_rsi < RSI_OVERSOLD and SINAIS["MSG_3"] != "SELL IMBALANCE":
                     if in_position:
                         logger.debug(f"[SIGNAL] | event=OVERSOLD_SKIP | rsi={last_rsi:.2f} | in_position=True")
+                    elif last_close_time is not None and (aware_cetnow() - last_close_time).total_seconds() < COOLDOWN_SECONDS:
+                        # ↑ ADD THIS elif BLOCK
+                        elapsed = (aware_cetnow() - last_close_time).total_seconds()
+                        logger.debug(f"[COOLDOWN] | event=ENTRY_BLOCKED | elapsed={elapsed:.1f}s | required={COOLDOWN_SECONDS}s")
+
+                    # ── SHORT CLOSE at OVERSOLD ───────────────────────────────────────
+                    if ACTION_SELL and in_position_sell:
+                        logger.info(f"[SIGNAL] | event=OVERSOLD_SHORT_CLOSE | rsi={last_rsi:.2f} | roi={curr_roiProfitSell}% | pnl={curr_pnlProfitSell}")
+                        soldDesc_s  = f"{TRADE_TYPE} SHORT CLOSE AT OVERSOLD RSI={last_rsi:.2f}"
+                        soldDesc1_s = f"exit_price={futures_current_price} roi={curr_roiProfitSell}% pnl={curr_pnlProfitSell}"
+                        logger.info(f"[TRADE] | event=EXIT_TRIGGER | side=SHORT | reason=RSI_OVERSOLD | rsi={last_rsi:.2f}")
+                        if not BLOCK_ORDER:
+                            order_close_sell = order_future_cancel_REDUCE_only('BUY', TRADE_SYMBOL, volume_sell, 'BOTH', 'MARKET')
+                            order_future_cancel_all_open_order(TRADE_SYMBOL)
+                            logger.info(f"[TRADE] | event=ORDER_CONFIRMED | mode=REAL | side=SHORT_CLOSE | orderId={order_close_sell.get('orderId') if isinstance(order_close_sell, dict) else order_close_sell}")
+                            if order_close_sell:
+                                in_position_sell = False
+                                last_close_time_sell = aware_cetnow()
+                                outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
+                                logger.info(f"[TRADE] | event=CLOSE | mode=REAL | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
+                                print_signals(False)
+                                SINAIS['ENTRY_POINT'] = ""
+                                if curr_pnlProfitSell >= 0:
+                                    TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
+                                    TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
+                                    TOTALS['COUNT_PROFITS_SELL'] += 1
+                                    sorted_last_profits_sell.push(curr_pnlProfitSell)
+                                else:
+                                    TOTALS['TOTAL_LOSSES_SELL'] -= abs(curr_pnlProfitSell)
+                                    TOTALS['TOTAL_LOSSES_SELL'] = round(TOTALS['TOTAL_LOSSES_SELL'], DECIMAL_CALC)
+                                    TOTALS['COUNT_LOSSES_SELL'] += 1
+                                    sorted_last_losses_sell.push(curr_pnlProfitSell)
+                                curr_roiProfitSell = 0
+                                curr_pnlProfitSell = 0
+                                ROI_PERC_ATTEMPTS_SELL    = 0
+                                ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+                        else:  # SIMULATED
+                            in_position_sell = False
+                            last_close_time_sell = aware_cetnow()
+                            outcome_s = "PROFIT" if curr_roiProfitSell >= 0 else "LOSS"
+                            logger.info(f"[TRADE] | event=CLOSE | mode=SIMULATED | side=SHORT | outcome={outcome_s} | roi={curr_roiProfitSell}% | reason={soldDesc_s}")
+                            print_signals(False)
+                            SINAIS['ENTRY_POINT'] = ""
+                            if curr_pnlProfitSell >= 0:
+                                TOTALS['TOTAL_PROFITS_SELL'] += curr_pnlProfitSell
+                                TOTALS['TOTAL_PROFITS_SELL'] = round(TOTALS['TOTAL_PROFITS_SELL'], DECIMAL_CALC)
+                                TOTALS['COUNT_PROFITS_SELL'] += 1
+                                sorted_last_profits_sell.push(curr_pnlProfitSell)
+                            else:
+                                TOTALS['TOTAL_LOSSES_SELL'] -= abs(curr_pnlProfitSell)
+                                TOTALS['TOTAL_LOSSES_SELL'] = round(TOTALS['TOTAL_LOSSES_SELL'], DECIMAL_CALC)
+                                TOTALS['COUNT_LOSSES_SELL'] += 1
+                                sorted_last_losses_sell.push(curr_pnlProfitSell)
+                            curr_roiProfitSell = 0
+                            curr_pnlProfitSell = 0
+                            ROI_PERC_ATTEMPTS_SELL    = 0
+                            ROI_AVG_GROWS_ATTEMPTS_SELL = 0
+                    # ── END SHORT CLOSE ──────────────────────────────────────────────
+
                     else:
-                        
-                        # logger.info("Oversold! Buy! Buy! Buy! QTY: {} Futures Curr. Price: {}".format(round(QTY_BUY, VOLUME_DEC), futures_current_price))
-                        logger.info(f"[SIGNAL] | event=OVERSOLD_BUY | rsi={last_rsi:.2f} | qty={round(QTY_BUY, VOLUME_DEC)} | spot={spot_current_price:.2f} | futures={futures_current_price:.2f}")
-                        
+                        # logger.info(f"[SIGNAL] | event=OVERSOLD_BUY | rsi={last_rsi:.2f} | qty={round(QTY_BUY, VOLUME_DEC)} | spot={spot_current_price:.2f} | futures={futures_current_price:.2f}")
+                        logger.info(f"[SIGNAL] | event=OVERSOLD_BUY | rsi={last_rsi:.2f} | qty={round(QTY_BUY, VOLUME_DEC)} | futures={futures_current_price:.4f}")
                         # put binance buy order logic here
                         if float(futures_current_price) > 0:
                             if ACTION_BUY:  
@@ -1079,13 +1369,13 @@ def process_kline_message(kline_ws, message):
                                     volume = QTY_BUY
                                     
                                     # SPOT CREATE ORDER
-                                    order_result = order_spot(SIDE_BUY, TRADE_SYMBOL.upper(), volume, ORDER_TYPE_MARKET)
+                                    # order_result = order_spot(SIDE_BUY, TRADE_SYMBOL.upper(), volume, ORDER_TYPE_MARKET)
                                     
                                     # FUTURES CANCEL ALL ORDER 
-                                    # order_future = order_future_cancel_all_open_order(TRADE_SYMBOL)
+                                    order_future_cancel_all_open_order(TRADE_SYMBOL)
                                     
                                     # FUTURE CREATE ORDER
-                                    # order_future = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
+                                    order_result = order_future_create_order(SIDE_BUY, TRADE_SYMBOL, volume, 'BOTH', ORDER_TYPE_MARKET)
                                     
                                     
                                     # if order_future:
@@ -1110,23 +1400,51 @@ def process_kline_message(kline_ws, message):
                                     #     amountQty = origQty
                                     #     volume = origQty
                                         
+                                    # SPOT
+                                    # if order_result:
+                                    #     spot_entry_price = float(order_result['fills'][0]['price'])
+                                    #     amountQty = float(order_result['fills'][0]['qty'])
+                                    #     volume = amountQty
+                                            
+                                    #     in_position = True
+                                            
+                                    #     sorted_roi.restart()
+                                    #     sorted_roi.push(ROI_PROFIT)
+                                    #     logger.info(f"[TRAIL] | event=INIT | history={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%")
+                                    #     PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
+                                    #     PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
+                                    #     ROI_PERC_ATTEMPTS = 0
+                                    #     ROI_AVG_GROWS_ATTEMPTS = 0
+                                    #     profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
+                                    #     # print_signals(futures_current_price, spot_current_price, True)
+                                    
+                                    # FUTURES:
                                     if order_result:
-                                        spot_entry_price = float(order_result['fills'][0]['price'])
-                                        amountQty = float(order_result['fills'][0]['qty'])
-                                        volume = amountQty
-                                            
+                                        # Fetch actual fill price from futures position
+                                        positions = client.futures_position_information(symbol=TRADE_SYMBOL, recvWindow=60000)
+                                        for position in positions:
+                                            if float(position['positionAmt']) != 0:
+                                                futures_entry_price = float(position['entryPrice'])
+                                                volume = abs(float(position['positionAmt']))
+                                                amountQty = volume
+                                                break
+                                        
+                                        # Fallback if position fetch fails
+                                        if futures_entry_price <= 0:
+                                            futures_entry_price = float(futures_current_price)
+                                        
+                                        spot_entry_price = futures_entry_price  # align both references
+
                                         in_position = True
-                                            
+
                                         sorted_roi.restart()
                                         sorted_roi.push(ROI_PROFIT)
                                         logger.info(f"[TRAIL] | event=INIT | history={sorted_roi.get_values()} | trail_stop={PROFITS['TRAIL_STOP_ROI_BUY']}% | trail_last={PROFITS['TRAIL_LAST_ROI_BUY']}%")
-                                        PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT     
+                                        PROFITS["TRAIL_STOP_ROI_BUY"] = ROI_PROFIT
                                         PROFITS["TRAIL_LAST_ROI_BUY"] = ROI_PROFIT
                                         ROI_PERC_ATTEMPTS = 0
                                         ROI_AVG_GROWS_ATTEMPTS = 0
-                                        profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))
-                                        # print_signals(futures_current_price, spot_current_price, True)
-                                        
+                                        profit_calculus("REAL TRADE", ACTION_BUY, float(spot_entry_price), float(futures_entry_price), float(volume))    
                                         
                                 else:  # SIMULATED
                                     
